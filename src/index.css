@@ -1,1 +1,65 @@
 @import "tailwindcss";
+
+@theme {
+  /* Charte graphique */
+  --color-dark-nigth-blue: rgba(13, 25, 44, 1);
+  --color-dark-nigth-blue_05: rgba(13, 25, 44, 0.9);
+  --color-orange: rgba(242, 140, 51, 1);
+  --color-white: rgba(224, 230, 237, 1);
+  --color-white_05: rgba(224, 230, 237, 0.5);
+  --color-white_01: rgba(224, 230, 237, 0.1);
+  --color-slate-grey: rgba(74, 85, 104, 1);
+  --color-slate-grey_08: rgba(74, 85, 104, 0.8);
+  --color-slate-grey_06: rgba(74, 85, 104, 0.6);
+  --color-slate-grey_top: rgba(74, 85, 104, 1);
+  /* animations */
+  --animate-slideup: slide-up 1s ease-in-out;
+  --animate-slideup2: slide-up 0.5s ease-in-out;
+
+  @keyframes slide-up{
+    0% {
+      transform: translateY(25%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+.title-h1{
+  @apply text-white text-3xl sm:text-4xl font-bold mb-6 tracking-tight
+}
+
+.main-button{
+  @apply w-full bg-orange-400 hover:bg-slate-grey_top text-black font-bold py-3.5 rounded-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
+}
+
+.link-sidebar {
+  @apply w-full flex p-3 items-center justify-start font-medium text-sm text-white hover:bg-orange hover:text-white transition duration-500
+}
+
+.active, .active svg {
+  @apply text-orange text-base ms-1
+}
+
+.active:hover, .active:hover svg {
+  @apply text-white duration-500
+}
+
+/* barre de scroll  */
+::-webkit-scrollbar {
+  width: 10px;
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-grey_top;
+  border-radius: 5px;
+}
+
+/* collapse transition */
+.ReactCollapse--collapse {
+  transition: height 1000ms;
+}

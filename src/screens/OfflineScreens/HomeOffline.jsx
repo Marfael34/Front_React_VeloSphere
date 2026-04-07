@@ -1,14 +1,11 @@
 import React from 'react'
-import { Outlet } from 'react-router-dom'
 
 const HomeOffline = () => {
   return (
-    <>
-        <div>HomeOffline</div>
-        <Outlet/>
-    </>
+    <div className="flex flex-col w-screen h-screen items-center px-4 bg-dark-nigth-blue bg-opacity-50 bg-center bg-contain">
+    </div>
     
   )
 }
 
-export default HomeOffline
+export default HomeOffline;

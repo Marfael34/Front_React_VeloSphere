@@ -1,0 +1,30 @@
+import { AiOutlineHome, AiOutlineUserAdd } from "react-icons/ai";
+import { IMAGE_URL } from "./apiConstant";
+import { MdDirectionsBike, MdOutlinePedalBike } from "react-icons/md";
+import { BiLogIn } from "react-icons/bi";
+
+
+// ===========================
+// CLE DU LOCAL STORAGE
+// ===========================
+
+// Logo de l'application
+export const IMG_LOGO = `${IMAGE_URL}/logo.png`
+
+
+// ===========================
+// CONFIGURATION DE LA SIDEBAR
+// ===========================
+
+// Navigation principale 
+export const dataNav = [
+    {title: "Acceuil", path: "/", icon: AiOutlineHome},
+    {title: "Market", path: "/market", icon: MdOutlinePedalBike},
+
+]
+
+// Navigation utilisateur (compte et playlists)
+export const OfflinedataUserNav = [
+  {title: "Login", path: "/login", icon: BiLogIn},
+  {title: "Resgister", path: "/register", icon: AiOutlineUserAdd},
+]
