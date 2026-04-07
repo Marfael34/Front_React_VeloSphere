@@ -28,3 +28,9 @@ export const OfflinedataUserNav = [
   {title: "Login", path: "/login", icon: BiLogIn},
   {title: "Resgister", path: "/register", icon: AiOutlineUserAdd},
 ]
+
+//STYLES POUR LES ICONES
+
+export const styleIcon = {width:'25px', height: '25px'};
+
+export const tableIcon = {width:'20px', height: '20px'};
