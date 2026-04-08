@@ -1,35 +1,27 @@
-import React, { useState } from "react";
+// src/App.jsx
+import React, { useContext } from "react";
 import { Outlet } from "react-router-dom";
-import SideBar from "./components/UI/SideBar"; // J'ai corrigé la majuscule si besoin
-import Topbar from "./components/UI/TopBar";
+import Navbar from "./components/UI/Navbar"; // L'import a changé !
+import { AuthContext } from "./contexts/AuthContext"; // (Si vous utilisez le contexte mis en place plus tôt)
 
 const App = () => {
-  // 1. LA MÉMOIRE GLOBALE : L'utilisateur (null par défaut)
-  const [user, setUser] = useState(null);
+  const { user, setUser } = useContext(AuthContext); // ou useState si vous n'avez pas mis le contexte
 
   return (
-    <div className="relative flex">
-      {/* SIDEBAR: On lui passe l'utilisateur et la fonction pour se déconnecter */}
-      <SideBar 
+    // Structure classique : en colonne, prend au minimum la taille de l'écran
+    <div className="flex flex-col min-h-screen bg-dark-nigth-blue">
+      
+      {/* 1. Notre barre de navigation en haut */}
+      <Navbar 
         user={user} 
         onLogout={() => setUser(null)} 
       />
 
-      <div className="flex-1 flex flex-col bg-linear-to-b from-black to-[rgb(18,18,18)]">
-        {/* Topbar : (Vous pourrez aussi lui passer {user} plus tard si besoin d'afficher son nom !) */}
-        <Topbar />
+      {/* 2. Le contenu de la page juste en dessous */}
+      <main className="flex-1 w-full text-white">
+        <Outlet context={{ user, setUser }} />
+      </main>
 
-        <div className="h-[calc(100vh-64px)] overflow-y-scroll hide-scrollbar flex xl:flex-row flex-col-reverse">
-          <div className="flex-1 h-fit pb-40 text-white">
-            
-            {/* 2. OUTLET : On injecte l'utilisateur ET la fonction de modification 
-                 à TOUTES les pages qui s'afficheront ici (dont le Login) */}
-            <Outlet context={{ user, setUser }} />
-
-          </div>
-        </div>
-      </div>
-    
     </div>
   );
 };

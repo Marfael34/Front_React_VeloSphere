@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import HomeOffline from "../screens/OfflineScreens/HomeOffline";
+import Home from "../screens/OfflineScreens/Home";
 import ErrorPages from "../screens/ErrorScreens/ErrorPages";
 import Login from "../screens/OfflineScreens/Login";
 import Register from "../screens/OfflineScreens/Register";
@@ -12,7 +12,7 @@ const OfflineRouter = createBrowserRouter([
         children: [
             {
                 path: "/", // chemin de la vue
-                element: <HomeOffline/>, // élément retourné
+                element: <Home/>, // élément retourné
             },
             {
                 path: "/register",
