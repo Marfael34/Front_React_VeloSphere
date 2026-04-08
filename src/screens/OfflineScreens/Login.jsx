@@ -31,45 +31,12 @@ const Login = () => {
     setIsLoading(true); // on passe isLoading a true pour afficher le loader
     setErrorMessage(""); // on vide les messages d'erreur
 
-    try {
-      //on verifie que les champs sont bien rempli
-      if (email == "" || password == "") {
-        setErrorMessage("Tous les champs doivent être remplis");
-        return;
-      }
-
-      // on execute la requete sur l'API
-      const response = await axios.post(`${API_ROOT}/login`, {
-        email,
-        password,
-      });
-
-      if (response.data.success === false) {
-        setErrorMessage(response.data.message);
-      } else {
-        //on reconstruit un objet user
-        const loggedInUser = {
-          userId: response.data.id,
-          email: response.data.email,
-          nickname: response.data.nickname,
-        };
-
-        // on appelle la méthode signIn de authContext pour enregistrer l'utilisateur
-        await signIn(loggedInUser);
-        setUser(loggedInUser);
-      }
-    } catch (error) {
-      console.log(`Erreur lors de la connexion: ${error}`);
-      setErrorMessage("Email et/ou mot de passe incorrect");
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
     <>
       <div className="flex flex-row items-center justify-center bg-dark-nigth-blue w-full min-h-[70vh] px-4 sm:px-6 py-8">
-        <div className="w-full animate-slideup2">
+        <div className="md:w-xl lg:w-1/2 animate-slideup2">
           <div className="text-center mb-8">
             <h1 className="title-h1">Connectez vous</h1>
             <p className="text-gray-300 mt-2 text-sm">
