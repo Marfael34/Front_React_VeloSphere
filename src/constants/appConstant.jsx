@@ -2,6 +2,7 @@ import { AiOutlineHome, AiOutlineUserAdd } from "react-icons/ai";
 import { IMAGE_URL } from "./apiConstant";
 import { MdDirectionsBike, MdOutlinePedalBike } from "react-icons/md";
 import { BiLogIn } from "react-icons/bi";
+import { FaRegUserCircle } from "react-icons/fa";
 
 
 // ===========================
@@ -28,6 +29,12 @@ export const OfflinedataUserNav = [
   {title: "Login", path: "/login", icon: BiLogIn},
   {title: "Resgister", path: "/register", icon: AiOutlineUserAdd},
 ]
+
+// Navigation utilisateur (compte et playlists)
+export const OnlinedataUserNav = [
+  {title: "Profile", path: "/profile", icon: FaRegUserCircle }
+]
+
 
 //STYLES POUR LES ICONES
 

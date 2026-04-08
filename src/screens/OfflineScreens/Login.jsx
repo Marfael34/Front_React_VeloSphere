@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import CustomInput from "../../components/UI/CustomInput";
 import ErrorMessage from "../../components/UI/ErrorMessage";
 import ButtonLoader from "../../components/Loader/ButtonLoader";
@@ -7,30 +7,44 @@ import axios from "axios";
 import { API_ROOT } from "../../constants/apiConstant";
 
 const Login = () => {
-  // on déclare nos state pour les valeurs du formulaire
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState(null);
-
-  // on recupère le hook de navigation
+  const {setUser} = useOutletContext();
+  
   const navigate = useNavigate();
 
-
-  useEffect(() => {
-    //si j'ai un utilisateur en session alors on le redirige sur "/" du router online
-    if (user) {
-      navigate("/");
-    }
-  }, [user, navigate]);
-
-  //méthode qui receptionne les données du formulaire
   const handleSubmit = async (event) => {
-    event.preventDefault(); // on empeche le comportement naturel du formulaire
-    setIsLoading(true); // on passe isLoading a true pour afficher le loader
-    setErrorMessage(""); // on vide les messages d'erreur
+    event.preventDefault();
+    setIsLoading(true);
+    setErrorMessage("");
 
+    // MOUCHARD N°1 : Vérifions si l'URL de votre API est correcte
+    console.log("Vérification API_ROOT :", API_ROOT);
+
+    try {
+      const response = await axios.post(`${API_ROOT}/api/login_check`, {
+        email: email,
+        password: password,
+      }, {
+        withCredentials: true
+      });
+
+      const token = response.data.token;
+      setUser({email: email, token: token})
+      navigate("/");
+      
+    } catch (error) {
+
+      if (error.response && error.response.status === 401) {
+        setErrorMessage("L'adresse email ou le mot de passe est incorrect.");
+      } else {
+        setErrorMessage("Erreur mystère : regardez la console F12 !");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -93,7 +107,6 @@ const Login = () => {
         </div>
       </div>
     </>
-    
   );
 };
 

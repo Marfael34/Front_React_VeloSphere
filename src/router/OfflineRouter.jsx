@@ -20,7 +20,11 @@ const OfflineRouter = createBrowserRouter([
             },
             {
                 path: "/login",
-                element: <Login/>
+                element: <Login onLoginSuccess={(token, email) => {
+                        console.log("LE TOKEN EST ARRIVÉ DANS LE PARENT :", token);
+                        console.log("EMAIL DE L'UTILISATEUR :", email);
+                        // Plus tard, c'est ici qu'on mettra à jour votre state global !
+                        }} />
             }
             
         ]

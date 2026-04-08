@@ -195,7 +195,7 @@ const Register = () => {
                 to={"/login"}
                 className="text-green font-semibold hover:text-green_top underline underline-offset-2 transition-colors"
               >
-                Créer un compte
+                Se connecter
               </Link>
             </p>
           </form>
