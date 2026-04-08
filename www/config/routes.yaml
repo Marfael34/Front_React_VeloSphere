@@ -15,3 +15,6 @@ api_login_check:
 
 api_refresh_token:
     path: /api/token/refresh
+
+api_logout:
+    path: /api/logout

@@ -1,10 +1,16 @@
 nelmio_cors:
     defaults:
         origin_regex: true
-        allow_origin: ['%env(CORS_ALLOW_ORIGIN)%']
+        allow_origin: ['^https?://localhost(:[0-9]+)?$'] # Autorise tous les ports localhost (React)
         allow_methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
         allow_headers: ['Content-Type', 'Authorization']
         expose_headers: ['Link']
         max_age: 3600
+        allow_credentials: true # <-- TRÈS IMPORTANT POUR LES COOKIES HTTPONLY
     paths:
-        '^/': null
+        '^/api':
+            allow_origin: ['^https?://localhost(:[0-9]+)?$']
+            allow_headers: ['Content-Type', 'Authorization']
+            allow_methods: ['POST', 'PUT', 'GET', 'DELETE']
+            allow_credentials: true # <-- TRÈS IMPORTANT ICI AUSSI
+            max_age: 3600

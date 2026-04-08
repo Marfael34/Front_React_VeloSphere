@@ -29,12 +29,17 @@ security:
             provider: app_user_provider
             refresh_jwt:
                 check_path: /api/token/refresh
+        
         api:
             pattern:   ^/api
             stateless: true
             provider: app_user_provider 
             jwt: ~
-
+            logout:
+                path: api_logout
+                # On demande à Symfony de détruire le cookie HttpOnly
+                delete_cookies:
+                    refresh_token: null
         dev:
             # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
