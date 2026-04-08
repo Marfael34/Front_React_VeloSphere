@@ -91,7 +91,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Adress>
      */
-    #[ORM\ManyToMany(targetEntity: Adress::class, inversedBy: 'users')]
+    #[ORM\OneToMany(targetEntity: Adress::class, cascade:['persist', 'remove'], inversedBy: 'users')]
     private Collection $adresses;
 
     public function __construct()
