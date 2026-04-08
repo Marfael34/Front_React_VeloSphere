@@ -437,6 +437,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->adresses->contains($adress)) {
             $this->adresses->add($adress);
+            $adress->addUser($this);
         }
 
         return $this;

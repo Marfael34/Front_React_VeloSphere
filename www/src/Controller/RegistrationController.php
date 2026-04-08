@@ -8,7 +8,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-// C'EST CETTE LIGNE QUI CHANGE TOUT :
 use Symfony\Component\Routing\Attribute\Route; 
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -26,6 +25,7 @@ class RegistrationController extends AbstractController
             return $this->json(['message' => 'L\'email et le mot de passe sont obligatoires'], 400);
         }
 
+        // 1. Création de l'utilisateur
         $user = new User();
         $user->setEmail($data['email']);
         $user->setLastName($data['lastName'] ?? null);
@@ -36,44 +36,43 @@ class RegistrationController extends AbstractController
             $user->setBirthday(new \DateTime($data['birthday']));
         }
 
-        $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
-        $user->setPassword($hashedPassword);
+        $user->setPassword($passwordHasher->hashPassword($user, $data['password']));
 
-        if (isset($data['address'])) {
+        // 2. Gestion de l'adresse
+        if (isset($data['address']) && is_array($data['address'])) {
             $addrData = $data['address'];
             $address = new Adress();
             
-            $address->setNumber($addrData['nbAdress'] ?? null);
-            $address->setType($addrData['typeVoie'] ?? null);
-            $address->setLabel($addrData['label'] ?? null);
+            // On s'assure que les données ne sont pas nulles pour les champs obligatoires
+            $address->setNumber((string)($addrData['nbAdress'] ?? '0'));
+            $address->setType((string)($addrData['typeVoie'] ?? 'Rue'));
+            $address->setLabel((string)($addrData['label'] ?? 'Non précisé'));
+            $address->setCity((string)($addrData['city'] ?? 'Non précisée'));
+            $address->setCp((int)($addrData['cp'] ?? 0));
             $address->setComplement($addrData['complement'] ?? null);
-            $address->setCity($addrData['city'] ?? null);
-            $address->setCp($addrData['cp'] ?? null);
 
-            $entityManager->persist($address);
+            // Liaison (le cascade persist de User s'occupe du reste)
             $user->addAdress($address); 
         }
+        // 3. Métadonnées obligatoires
+        $now = new \DateTime();
+        if (method_exists($user, 'setCreatedAt')) { $user->setCreatedAt($now); }
+        if (method_exists($user, 'setUpdatedAt')) { $user->setUpdatedAt($now); }
+        if (method_exists($user, 'setIsActive')) { $user->setIsActive(true); }
+        if (method_exists($user, 'setRoles')) { $user->setRoles(['ROLE_USER']); }
 
-        if (method_exists($user, 'setCreatedAt')) {
-            $user->setCreatedAt(new \DateTime());
-        }
-        
-        // Si vous avez aussi "updated_at" obligatoire (ce que montre votre log SQL)
-        if (method_exists($user, 'setUpdatedAt')) {
-            $user->setUpdatedAt(new \DateTime());
-        }
-
-        // Si vous avez "is_active" (pour dire que le compte n'est pas banni/désactivé)
-        if (method_exists($user, 'setIsActive')) {
-            $user->setIsActive(true); // true = 1 en SQL
-        }
-
-        if(method_exists($user, 'setRoles')){
-            $user->setRoles(['ROLE_USER']);
-        }
-
+        // 4. Persister l'utilisateur et Flush (Envoi en BDD)
         $entityManager->persist($user);
-        $entityManager->flush();
+        
+        try {
+            $entityManager->flush();
+        } catch (\Exception $e) {
+            // En cas d'erreur SQL (contrainte, table manquante), on renvoie le détail
+            return $this->json([
+                'error' => 'Erreur SQL lors de la sauvegarde',
+                'detail' => $e->getMessage()
+            ], 500);
+        }
 
         return $this->json(['message' => 'Compte créé avec succès !'], 201);
     }
