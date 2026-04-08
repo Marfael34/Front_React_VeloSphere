@@ -8,7 +8,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Route;
+// C'EST CETTE LIGNE QUI CHANGE TOUT :
+use Symfony\Component\Routing\Attribute\Route; 
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class RegistrationController extends AbstractController
@@ -19,31 +20,25 @@ class RegistrationController extends AbstractController
         UserPasswordHasherInterface $passwordHasher, 
         EntityManagerInterface $entityManager
     ): JsonResponse {
-        // 1. Récupérer le contenu JSON envoyé par React
         $data = json_decode($request->getContent(), true);
 
-        // Vérification basique (pour éviter les erreurs SQL)
         if (empty($data['email']) || empty($data['password'])) {
             return $this->json(['message' => 'L\'email et le mot de passe sont obligatoires'], 400);
         }
 
-        // 2. Création de l'entité User
         $user = new User();
         $user->setEmail($data['email']);
         $user->setLastName($data['lastName'] ?? null);
         $user->setFirstName($data['firstName'] ?? null);
         $user->setPseudo($data['pseudo'] ?? null);
         
-        // Conversion de la chaîne de date "YYYY-MM-DD" en objet DateTime pour Symfony
         if (!empty($data['birthday'])) {
             $user->setBirthday(new \DateTime($data['birthday']));
         }
 
-        // 3. Hachage du mot de passe
         $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
 
-        // 4. Création de l'entité Address (si les données sont présentes)
         if (isset($data['address'])) {
             $addrData = $data['address'];
             $address = new Adress();
@@ -51,27 +46,35 @@ class RegistrationController extends AbstractController
             $address->setNumber($addrData['nbAdress'] ?? null);
             $address->setType($addrData['typeVoie'] ?? null);
             $address->setLabel($addrData['label'] ?? null);
-            // On gère le complément (qui peut être null)
             $address->setComplement($addrData['complement'] ?? null);
             $address->setCity($addrData['city'] ?? null);
             $address->setCp($addrData['cp'] ?? null);
 
-            // On demande à Doctrine de préparer la sauvegarde de l'adresse
             $entityManager->persist($address);
-
-            // 5. On lie l'adresse à l'utilisateur ! (La magie opère ici)
-            $user->setAdress($address);
+            $user->addAdress($address); 
         }
 
-        // 6. On demande à Doctrine de préparer la sauvegarde de l'utilisateur
-        $entityManager->persist($user);
+        if (method_exists($user, 'setCreatedAt')) {
+            $user->setCreatedAt(new \DateTime());
+        }
+        
+        // Si vous avez aussi "updated_at" obligatoire (ce que montre votre log SQL)
+        if (method_exists($user, 'setUpdatedAt')) {
+            $user->setUpdatedAt(new \DateTime());
+        }
 
-        // 7. On exécute la requête SQL (INSERT)
+        // Si vous avez "is_active" (pour dire que le compte n'est pas banni/désactivé)
+        if (method_exists($user, 'setIsActive')) {
+            $user->setIsActive(true); // true = 1 en SQL
+        }
+
+        if(method_exists($user, 'setRoles')){
+            $user->setRoles(['ROLE_USER']);
+        }
+
+        $entityManager->persist($user);
         $entityManager->flush();
 
-        // 8. On renvoie une réponse de succès à React
-        return $this->json([
-            'message' => 'Compte créé avec succès !'
-        ], 201); // 201 = Created
+        return $this->json(['message' => 'Compte créé avec succès !'], 201);
     }
 }
