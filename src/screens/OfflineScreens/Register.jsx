@@ -11,8 +11,8 @@ import { API_ROOT } from "../../constants/apiConstant";
 import { AuthContext } from "../../contexts/AuthContext";
 
 const Register = () => {
-  const [lastName, setLastName] = useState("");
-  const [firstName, setFirstName] = useState("");
+  const [lastname, setLastName] = useState("");
+  const [firstname, setFirstName] = useState("");
   const [birthday, setBirthday] = useState("");
   const [pseudo, setPseudo] = useState("");
   const [nbAdress, setNbAdress] = useState("");
@@ -45,13 +45,13 @@ const Register = () => {
 
     //On structure les données : on groupe les champs de l'adresse dans un sous-objet
     const userData = {
-      lastName: lastName,
-      firstName: firstName,
+      lastName: lastname,
+      firstName: firstname,
       birthday: birthday, 
       pseudo: pseudo,
       email: email,
       password: password,
-      addresses: {
+      address: {
         nbAdress: nbAdress,
         typeVoie: typeVoie,
         label: label,
@@ -65,7 +65,7 @@ const Register = () => {
     try {
       // On envoie tout en une seule requête POST vers votre route de création d'utilisateur
       // Remplacez '/api/register' par la vraie route de votre API Symfony
-      await axios.post(`${API_ROOT}/api/users`, userData, {
+      await axios.post(`${API_ROOT}/api/register`, userData, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -113,7 +113,7 @@ const Register = () => {
                   label={"Saisir votre Nom"}
                   type={"text"}
                   placeholder="Martie" 
-                  state={lastName}
+                  state={lastname}
                   callable={(event) => setLastName(event.target.value)}
                 />
               </div>
@@ -122,7 +122,7 @@ const Register = () => {
                   label={"Saisir votre Prénom"}
                   type={"text"}
                   placeholder="Jean-Paul" 
-                  state={firstName}
+                  state={firstname}
                   callable={(event) => setFirstName(event.target.value)}
                 />
               </div>
