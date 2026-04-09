@@ -31,6 +31,7 @@ class RegistrationController extends AbstractController
         $user->setLastName($data['lastName'] ?? null);
         $user->setFirstName($data['firstName'] ?? null);
         $user->setPseudo($data['pseudo'] ?? null);
+        $user->setAvatar($data['avatar'] ?? null);
         
         if (!empty($data['birthday'])) {
             $user->setBirthday(new \DateTime($data['birthday']));
