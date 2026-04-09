@@ -1,23 +1,31 @@
+// src/contexts/AuthContext.jsx
 import React, { createContext, useState, useEffect } from "react";
+import Cookies from "js-cookie";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  //  Initialisation paresseuse (Lazy initialization)
-  // React va regarder dans le localStorage au premier chargement
+  // Initialisation paresseuse : on regarde dans le cookie au premier chargement
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
+    const savedUser = Cookies.get("user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
   // Synchronisation automatique
-  // À chaque fois que 'user' change (connexion ou déconnexion),
-  // on met à jour le localStorage automatiquement.
+  // À chaque fois que 'user' change, on met à jour le cookie
   useEffect(() => {
     if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
+      // On détecte si on est en développement (localhost)
+      const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
+      Cookies.set("user", JSON.stringify(user), { 
+        expires: 1, 
+        secure: !isLocalhost, // Faux en local, Vrai en production !
+        sameSite: 'strict' 
+      });
     } else {
-      localStorage.removeItem("user");
+      // Déconnexion : on supprime le cookie
+      Cookies.remove("user");
     }
   }, [user]);
 
