@@ -3,14 +3,29 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Repository\ProductsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+
 #[ORM\Entity(repositoryClass: ProductsRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(), // Lecture d'un produit (publique)
+        new GetCollection(), // Lecture de tous les produits (publique)
+        new Post(security: "is_granted('ROLE_ADMIN')"), // Création (protégée)
+        new Put(security: "is_granted('ROLE_ADMIN')"), // Modification (protégée)
+        new Delete(security: "is_granted('ROLE_ADMIN')") // Suppression (protégée)
+    ]
+)]
+
 class Products
 {
     #[ORM\Id]
