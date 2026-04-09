@@ -3,6 +3,7 @@ import { IMAGE_URL } from "./apiConstant";
 import { MdDirectionsBike, MdOutlinePedalBike } from "react-icons/md";
 import { BiLogIn } from "react-icons/bi";
 import { FaRegUserCircle } from "react-icons/fa";
+import { RiShoppingBasket2Line } from "react-icons/ri";
 
 
 // ===========================
@@ -32,7 +33,9 @@ export const OfflinedataUserNav = [
 
 // Navigation utilisateur (compte et playlists)
 export const OnlinedataUserNav = [
-  {title: "Profile", path: "/profile", icon: FaRegUserCircle }
+  {title: "Profile", path: "/profile", icon: FaRegUserCircle },
+  {title: "Panier", path: "/panier", icon: RiShoppingBasket2Line }
+
 ]
 
 

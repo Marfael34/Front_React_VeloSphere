@@ -78,6 +78,7 @@ const Navbar = ({ user, onLogout }) => {
 
             {/* Bouton Déconnexion */}
             {user && (
+            
               <button
                 onClick={handleLogout}
                 className="text-red-500 hover:text-red-400 font-bold text-sm transition-colors"

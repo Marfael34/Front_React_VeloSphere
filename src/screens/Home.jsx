@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { API_ROOT } from '../../constants/apiConstant';
-import ProductSuggestion from '../../components/Market/ProductSuggestion';
-import ButtonLoader from '../../components/Loader/ButtonLoader';
-import CustomButton from '../../components/UI/CustomButton';
-import { AuthContext } from '../../contexts/AuthContext';
+import { API_ROOT } from '../constants/apiConstant';
+import ProductSuggestion from '../components/Market/ProductSuggestion';
+import ButtonLoader from '../components/Loader/ButtonLoader';
+import CustomButton from '../components/UI/CustomButton';
+import { AuthContext } from '../contexts/AuthContext';
 import { AiOutlineUserAdd } from "react-icons/ai";
 import { FaRegUserCircle } from "react-icons/fa";
 

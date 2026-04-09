@@ -1,5 +1,5 @@
 import React from 'react'
-import ProductList from '../../components/Market/ProductList'
+import ProductList from '../components/Market/ProductList'
 
 const Market = () => {
   return (

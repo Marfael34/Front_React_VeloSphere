@@ -1,13 +1,13 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import CustomInput from "../../components/UI/CustomInput";
-import ErrorMessage from "../../components/UI/ErrorMessage";
-import ButtonLoader from "../../components/Loader/ButtonLoader";
+import CustomInput from "../components/UI/CustomInput";
+import ErrorMessage from "../components/UI/ErrorMessage";
+import ButtonLoader from "../components/Loader/ButtonLoader";
 import axios from "axios";
-import { API_ROOT } from "../../constants/apiConstant";
+import { API_ROOT } from "../constants/apiConstant";
 
 // 1. On importe le contexte
-import { AuthContext } from "../../contexts/AuthContext"; 
+import { AuthContext } from "../contexts/AuthContext"; 
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -34,9 +34,17 @@ const Login = () => {
       });
 
       const token = response.data.token;
+      const userId = response.data.id;
       
       // On met à jour l'utilisateur globalement
-      setUser({email: email, token: token});
+      setUser({
+        email: email, 
+        token: token, 
+        id: userId,
+        firstName: response.data.firstName, 
+        lastName: response.data.lastName 
+      });
+
       navigate("/");
       
     } catch (error) {

@@ -1,12 +1,14 @@
 import { createBrowserRouter } from "react-router-dom";
-import Home from "../screens/OfflineScreens/Home";
+import Home from "../screens/Home";
 import ErrorPages from "../screens/ErrorScreens/ErrorPages";
-import Login from "../screens/OfflineScreens/Login";
-import Register from "../screens/OfflineScreens/Register";
+import Login from "../screens/Login";
+import Register from "../screens/Register";
 import App from "../App";
-import Market from "../screens/OfflineScreens/Market";
+import Market from "../screens/Market";
+import Panier from "../screens/Panier";
+import Profile from "../screens/Profile";
 
-const OfflineRouter = createBrowserRouter([
+const Router = createBrowserRouter([
     {
         element: <App/>, // élément qui sera retourné sur toutes les vue
         errorElement: <ErrorPages/>, // élément retouné en cas d'erreur 
@@ -26,13 +28,22 @@ const OfflineRouter = createBrowserRouter([
                         console.log("EMAIL DE L'UTILISATEUR :", email);
                         // Plus tard, c'est ici qu'on mettra à jour votre state global !
                         }} />
-            },{
+            },
+            {
                 path: "/market",
                 element: <Market/>
+            },
+            {
+                path: "/panier",
+                element: <Panier/>
+            },
+            {
+                path: "/profile",
+                element: <Profile/>
             }
             
         ]
     }
 ]);
 
-export default OfflineRouter;
+export default Router;

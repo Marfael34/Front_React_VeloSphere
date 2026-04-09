@@ -1,14 +1,12 @@
 // src/screens/OfflineScreens/Register.jsx
 import React, { useEffect, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import CustomInput from "../../components/UI/CustomInput";
-import ErrorMessage from "../../components/UI/ErrorMessage";
-import ButtonLoader from "../../components/Loader/ButtonLoader";
+import CustomInput from "../components/UI/CustomInput";
+import ErrorMessage from "../components/UI/ErrorMessage";
 import axios from "axios";
-import { API_ROOT } from "../../constants/apiConstant";
-
-// 1. On importe le contexte
-import { AuthContext } from "../../contexts/AuthContext";
+import { AuthContext } from "../contexts/AuthContext";
+import { API_ROOT } from "../constants/apiConstant";
+import ButtonLoader from "../components/Loader/ButtonLoader";
 
 const Register = () => {
   const [lastname, setLastName] = useState("");
