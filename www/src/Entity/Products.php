@@ -13,10 +13,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ProductsRepository::class)]
 #[ApiResource(
+    normalizationContext: ['groups' => ['product:read']],
     operations: [
         new Get(), // Lecture d'un produit (publique)
         new GetCollection(), // Lecture de tous les produits (publique)
@@ -31,21 +32,27 @@ class Products
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['product:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 200)]
+    #[Groups(['product:read'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['product:read'])]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(['product:read'])]
     private ?float $price = null;
 
     #[ORM\Column(length: 150)]
+    #[Groups(['product:read'])]
     private ?string $brand = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['product:read'])]
     private ?string $imagePath = null;
 
     #[ORM\Column]
@@ -73,6 +80,7 @@ class Products
      * @var Collection<int, Characteristic>
      */
     #[ORM\ManyToMany(targetEntity: Characteristic::class, inversedBy: 'products')]
+    #[Groups(['product:read'])]
     private Collection $characteristics;
 
     public function __construct()

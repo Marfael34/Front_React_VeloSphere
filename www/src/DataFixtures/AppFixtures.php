@@ -21,9 +21,11 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
+        // ⚠️ ATTENTION : L'ordre est important. 
+        // On charge les caractéristiques AVANT les produits pour pouvoir les lier.
+        $this->loadCharacteristic($manager);
         $this->loadProduct($manager);
         $this->loadUser($manager);
-        $this->loadCharacteristic($manager);
         $this->loadAdress($manager);
         $this->loadCompetition($manager);
         $this->loadEtat($manager);
@@ -33,9 +35,48 @@ class AppFixtures extends Fixture
         $manager->flush();
     }
 
+    public function loadCharacteristic(ObjectManager $manager)
+    {
+        $arrayCharacteristic = [
+            // --- TYPES DE VÉLOS ---
+            ['type' => 'Catégorie vélo', 'description' => 'categorie_velo', 'value' => 'VTT'],
+            ['type' => 'Catégorie vélo', 'description' => 'categorie_velo', 'value' => 'Vélos ville'],
+            ['type' => 'Catégorie vélo', 'description' => 'categorie_velo', 'value' => 'Route et Gravel'],
+            ['type' => 'Catégorie vélo', 'description' => 'categorie_velo', 'value' => 'Vélos électriques'],
+            ['type' => 'Catégorie vélo', 'description' => 'categorie_velo', 'value' => 'Enfant et Pliable'],
+            
+            // --- TYPES DE PIÈCES DÉTACHÉES ---
+            ['type' => 'Pièce détachée', 'description' => 'categorie_piece', 'value' => 'Cadre'],
+            ['type' => 'Pièce détachée', 'description' => 'categorie_piece', 'value' => 'Roue et Pneu'],
+            ['type' => 'Pièce détachée', 'description' => 'categorie_piece', 'value' => 'Freinage'],
+            ['type' => 'Pièce détachée', 'description' => 'categorie_piece', 'value' => 'Transmission'],
+            ['type' => 'Pièce détachée', 'description' => 'categorie_piece', 'value' => 'Selle et Tige'],
+            ['type' => 'Pièce détachée', 'description' => 'categorie_piece', 'value' => 'Guidon et Potence'],
+
+            // --- COULEURS ---
+            ['type' => 'Couleur', 'description' => 'couleur', 'value' => 'Bleu'],
+            ['type' => 'Couleur', 'description' => 'couleur', 'value' => 'Noir'],
+            ['type' => 'Couleur', 'description' => 'couleur', 'value' => 'Rouge'],
+        ];
+
+        foreach ($arrayCharacteristic as $value) {
+            $characteristic = new Characteristic();
+            $characteristic->setType($value['type']);
+            $characteristic->setDescription($value['description']);
+            $characteristic->setValue($value['value']);
+
+            $manager->persist($characteristic);
+
+            // On ajoute une référence unique (ex: 'char_VTT', 'char_Vélos ville')
+            // Cela permettra de retrouver l'objet exact lors de la création du produit.
+            $this->addReference('char_' . $value['value'], $characteristic);
+        }
+    }
+
     public function loadProduct(ObjectManager $manager)
     {
         $arrayProducts = [
+            // VÉLOS VILLE
             [
                 'title' => "Elops Speed 920",
                 'description' => "Un vélo urbain ultra-dynamique, cadre alu, avec moyeu Alfine 8 vitesses et éclairage intégré par moyeu dynamo. Poids: 12kg. Tailles: M à XL. Non électrique.",
@@ -456,6 +497,18 @@ class AppFixtures extends Fixture
             $product->setCreatedAt(new DateTime());
             $product->setIsActive(true);
 
+            // ASSIGNATION DE LA CARACTÉRISTIQUE AU PRODUIT
+            // Remarque : Si ta relation Doctrine dans l'entité Products est une ManyToOne, 
+            // il se peut que la méthode générée s'appelle setCharacteristic() au lieu de addCharacteristic()
+            if (isset($value['category'])) {
+                $referenceName = 'char_' . $value['category'];
+                
+                // Le nom de la référence en premier, la classe en second.
+                if ($this->hasReference($referenceName, Characteristic::class)) {
+                    $product->addCharacteristic($this->getReference($referenceName, Characteristic::class));
+                }
+            }  
+
             $manager->persist($product);
         }
     }
@@ -498,51 +551,6 @@ class AppFixtures extends Fixture
             $manager->persist($user);
 
             $this->addReference('user_' . $key, $user);
-        }
-    }
-
-    public function loadCharacteristic(ObjectManager $manager)
-    {
-        $arrayCharacteristic = [
-            [
-                'type' => 'string',
-                'description' => 'categorie_velo',
-                'value' => 'VTT'
-            ],
-            [
-                'type' => 'string',
-                'description' => 'categorie_velo',
-                'value' => 'Vélos ville'
-            ],
-            [
-                'type' => 'string',
-                'description' => 'categorie_velo',
-                'value' => 'Vélos route'
-            ],
-            [
-                'type' => 'string',
-                'description' => 'categorie_velo',
-                'value' => 'Vélos Electroques'
-            ],
-            [
-                'type' => 'string',
-                'description' => 'coleur',
-                'value' => 'Bleu'
-            ],
-            [
-                'type' => 'string',
-                'description' => 'couleur',
-                'value' => 'Noir'
-            ],
-        ];
-
-        foreach ($arrayCharacteristic as $value) {
-            $characteristic = new Characteristic();
-            $characteristic->setType($value['type']);
-            $characteristic->setDescription($value['description']);
-            $characteristic->setValue($value['value']);
-
-            $manager->persist($characteristic);
         }
     }
 

@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CharacteristicRepository::class)]
 #[ApiResource]
@@ -19,9 +20,11 @@ class Characteristic
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['product:read'])]
     private ?string $type = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['product:read'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
@@ -31,6 +34,7 @@ class Characteristic
      * @var Collection<int, Products>
      */
     #[ORM\ManyToMany(targetEntity: Products::class, mappedBy: 'characteristics')]
+    
     private Collection $products;
 
     public function __construct()
