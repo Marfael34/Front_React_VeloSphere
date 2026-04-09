@@ -17,18 +17,11 @@ const Navbar = ({ user, onLogout }) => {
   const navigate = useNavigate();
 
   // --- Fonction de déconnexion ---
-  const handleLogout = async () => {
-    try {
-      await axios.post(`${API_ROOT}/api/logout`, {}, {
-        withCredentials: true 
-      });
-    } catch (error) {
-      console.error("Erreur lors de la déconnexion serveur :", error);
-    } finally {
-      if (onLogout) onLogout(); 
+ const handleLogout = async () => {
+      // Plus d'appel Axios inutile qui cause le 404 !
+      if (onLogout) onLogout(); // Ça va mettre 'user' à null et le AuthContext supprimera le cookie
       setMobileMenu(false);
       navigate("/login");
-    }
   };
 
   // On détermine quel menu profil afficher

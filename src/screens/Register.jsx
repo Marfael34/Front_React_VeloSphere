@@ -41,7 +41,15 @@ const Register = () => {
     setIsLoading(true);
     setErrorMessage("");
 
-    //On structure les données : on groupe les champs de l'adresse dans un sous-objet
+    // Génération de l'avatar aléatoire ---
+    // Math.random() génère un nombre entre 0 et 0.99
+    // 5 donne un nombre entre 0 et 4.99
+    // Math.floor arrondit à l'entier inférieur (0 à 4)
+    // + 1 décale le tout pour avoir un nombre entre 1 et 5
+    const randomAvatarNumber = Math.floor(Math.random() * 5) + 1;
+    const randomAvatarPath = `/images/avatar/default/default-avatar-${randomAvatarNumber}.png`;
+
+    // On structure les données : on groupe les champs de l'adresse dans un sous-objet
     const userData = {
       lastName: lastname,
       firstName: firstname,
@@ -49,6 +57,7 @@ const Register = () => {
       pseudo: pseudo,
       email: email,
       password: password,
+      avatar: randomAvatarPath, // <-- Ajout du chemin de l'avatar aléatoire ici
       address: {
         nbAdress: nbAdress,
         typeVoie: typeVoie,
@@ -62,15 +71,13 @@ const Register = () => {
 
     try {
       // On envoie tout en une seule requête POST vers votre route de création d'utilisateur
-      // Remplacez '/api/register' par la vraie route de votre API Symfony
       await axios.post(`${API_ROOT}/api/register`, userData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
 
-      // Si succès, on redirige l'utilisateur vers le login avec un petit délai
-      // Vous pourriez aussi utiliser un toast/alerte pour lui dire "Compte créé avec succès"
+      // Si succès, on redirige l'utilisateur vers le login
       navigate("/login");
 
     } catch (error) {
@@ -87,7 +94,7 @@ const Register = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-[calc(100vh-4rem)] px-4 sm:px-6 py-8 bg-transparent">
+    <div className="flex flex-col items-center justify-center w-full min-h-[calc(100vh-4rem)] px-4 sm:px-6 py-8 bg-dark-nigth-blue">
       
       {/* J'ai mis lg:w-[700px] pour laisser de la place aux champs côte à côte */}
       <div className="w-full md:w-2xl lg:w-175 animate-slideup2">
@@ -101,7 +108,7 @@ const Register = () => {
         {/* formulaire */}
         <form
           onSubmit={handleSubmit}
-          className="w-full rounded-2xl bg-slate-grey_08 backdrop-blur-xl border border-white/10 p-8 sm:p-10 shadow-2xl shadow-black_05"
+          className="w-full rounded-2xl bg-black/60 backdrop-blur-xl border border-white/10 p-8 sm:p-10 shadow-2xl shadow-black_05"
         >
           <div className="space-y-1">
             <h2 className="flex justify-center pb-2 text-3xl font-bold underline mb-4">Profil</h2>
@@ -232,7 +239,6 @@ const Register = () => {
 
           <p className="mt-6 text-center text-gray-300 text-sm">
             Déjà un compte ?{" "}
-            {/* 4. Adaptation de la couleur au thème (Orange) */}
             <Link
               to={"/login"}
               className="text-orange hover:text-orange/80 font-semibold underline underline-offset-2 transition-colors"

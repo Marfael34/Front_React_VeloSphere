@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
-import { API_ROOT } from '../constants/apiConstant';
+import { API_ROOT, IMAGE_URL } from '../constants/apiConstant';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import ButtonLoader from '../components/Loader/ButtonLoader';
@@ -18,20 +18,17 @@ const Profile = () => {
         const fetchProfileData = async () => {
             // 1. Vérification du token
             if (!user?.token || !user?.id) {
-                console.log("PROFIL: Pas d'utilisateur ou de token trouvé dans le contexte.");
                 setIsLoading(false);
                 return;
             }
 
             try {
-                console.log("PROFIL: Récupération des données pour l'ID :", user.id);
                 const authConfig = {
                     headers: { Authorization: `Bearer ${user.token}` }
                 };
 
                 // 2. Appel API User
                 const userRes = await axios.get(`${API_ROOT}/api/users/${user.id}`, authConfig);
-                console.log("PROFIL: Données User reçues :", userRes.data);
                 setFullUser(userRes.data);
 
                 // 3. Appel API Panier (Etat 1 = en cours)
@@ -112,19 +109,21 @@ const Profile = () => {
                     <div className="bg-black/40 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-xl h-fit">
                         
                         <div className="flex flex-col items-center mb-8">
-                            <div className="relative w-32 h-32 mb-4">
-                                {fullUser?.avatar ? (
-                                    <img 
-                                        src={`${API_ROOT}${fullUser.avatar}`} 
-                                        alt="Avatar" 
-                                        className="w-full h-full object-cover rounded-full border-4 border-orange shadow-lg"
-                                        onError={(e) => { e.target.src = "https://via.placeholder.com/150"; }}
-                                    />
-                                ) : (
-                                    <div className="w-full h-full bg-slate-grey_08 rounded-full flex items-center justify-center border-4 border-white/10">
-                                        <FaUser size={50} className="text-white/50" />
-                                    </div>
-                                )}
+                           <div className="relative w-32 h-32 mb-4">
+                                <img 
+                                    src={
+                                        fullUser?.avatar 
+                                            ? `${API_ROOT}${fullUser.avatar.startsWith('/') ? '' : '/'}${fullUser.avatar}` 
+                                            : `${IMAGE_URL}/avatar/default/default-avatar-1.png` // Remplace par le nom exact de ton fichier
+                                    } 
+                                    alt="Avatar" 
+                                    className="w-full h-full object-cover rounded-full border-4 border-orange shadow-lg"
+                                    onError={(e) => { 
+                                        // Si l'image de l'utilisateur n'existe pas physiquement sur le serveur (404)
+                                        e.target.onerror = null; 
+                                        e.target.src = `${IMAGE_URL}/avatar/default/default-avatar-1.png`; 
+                                    }}
+                                />
                             </div>
                             <h2 className="text-2xl font-bold">
                                 {fullUser?.firstname || fullUser?.firstName || "Prénom"} {fullUser?.lastname || fullUser?.lastName || "Nom"}
@@ -146,21 +145,41 @@ const Profile = () => {
                                 </div>
                             </div>
 
+                            {/* Dans src/screens/Profile.jsx */}
+
                             <div className="pt-2">
                                 <div className="flex items-center gap-3 mb-3">
                                     <FaMapMarkerAlt className="text-orange" size={18} />
-                                    <p className="text-gray-400 text-sm">Mes Adresses</p>
+                                    <p className="text-gray-400 text-sm">Mon Adresse</p>
                                 </div>
                                 
                                 {fullUser?.adresses && fullUser.adresses.length > 0 ? (
                                     <div className="space-y-3">
-                                        {fullUser.adresses.map((adr, index) => (
-                                            <div key={index} className="bg-white/5 p-3 rounded-lg border border-white/5 text-sm">
-                                                <p>{adr.nbAdress} {adr.typeVoie} {adr.label}</p>
-                                                {adr.complement && <p className="text-gray-400 italic">{adr.complement}</p>}
-                                                <p className="font-bold text-orange">{adr.cp} {adr.city}</p>
-                                            </div>
-                                        ))}
+                                        {fullUser.adresses.map((adr, index) => {
+                                            // Si l'API renvoie encore une chaîne (IRI), on affiche une alerte de debug
+                                            if (typeof adr === 'string') {
+                                                return (
+                                                    <p key={index} className="text-xs text-red-400 italic">
+                                                        Problème lors du chargement des données : {adr}
+                                                    </p>
+                                                );
+                                            }
+
+                                            return (
+                                                <div key={index} className="bg-white/5 p-3 rounded-lg border border-white/5 text-sm">
+                                                    <p className="font-medium">
+                                                        {/* Utilisation des nouveaux noms de champs de votre entité Adress */}
+                                                        {adr.number} {adr.type} {adr.label}
+                                                    </p>
+                                                    {adr.complement && (
+                                                        <p className="text-gray-400 italic text-xs">{adr.complement}</p>
+                                                    )}
+                                                    <p className="font-bold text-orange mt-1">
+                                                        {adr.cp} {adr.city}
+                                                    </p>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 ) : (
                                     <p className="text-gray-500 italic text-sm ml-7">Aucune adresse enregistrée</p>

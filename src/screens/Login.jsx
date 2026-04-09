@@ -61,7 +61,7 @@ const Login = () => {
   return (
     // 3. Ajustement du CSS pour prendre toute la hauteur disponible sous la Navbar
     // min-h-[calc(100vh-4rem)] permet de centrer parfaitement sans scroll inutile
-    <div className="flex flex-col items-center justify-center w-full min-h-[calc(100vh-4rem)] px-4 sm:px-6 py-8 bg-transparent">
+    <div className="flex flex-col items-center justify-center w-full min-h-[calc(100vh-4rem)] px-4 sm:px-6 py-8 bg-dark-nigth-blue">
       
       <div className="w-full md:w-xl lg:w-125 animate-slideup2">
         <div className="text-center mb-8">
