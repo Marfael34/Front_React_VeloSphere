@@ -33,8 +33,8 @@ const Home = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center min-h-screen px-4 md:px-6 pt-5 bg-opacity-50">
-        <div className="flex flex-col gap-5 justify-center items-center p-5 w-full max-w-7xl bg-dark-nigth-blue border border-slate-grey rounded-xl">
+      <div className="flex flex-col items-center min-h-screen bg-opacity-50">
+        <div className="flex flex-col gap-5 justify-center items-center p-5 w-full bg-dark-nigth-blue">
           
             <h2 className="text-xl md:text-5xl lg:text-6xl text-white font-bold text-center ">
               Bienvenue sur LaRoueLibre
@@ -63,19 +63,21 @@ const Home = () => {
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-5 justify-center items-center p-5 w-full max-w-7xl bg-dark-nigth-blue_05 border border-slate-grey rounded-xl mt-5 ">
+          <div className="flex flex-col gap-5 justify-center items-center p-5 w-full  bg-dark-nigth-blue_09">
 
           <h2 className="text-xl md:text-5xl lg:text-6xl text-white font-bold text-center">
             Market Place - Nouveautés
           </h2>
+          <div className="flex flex-col gap-5 justify-center items-center p-5 w-380">
+            {isLoading ? (
+              <div className="flex justify-center py-10">
+                <ButtonLoader size={60} />
+              </div>
+            ) : (
+              <ProductSuggestion Product={products} />
+            )}
+          </div>
           
-          {isLoading ? (
-            <div className="flex justify-center w-full py-10">
-              <ButtonLoader size={60} />
-            </div>
-          ) : (
-            <ProductSuggestion Product={products} />
-          )}
         </div>
       </div>
     </>

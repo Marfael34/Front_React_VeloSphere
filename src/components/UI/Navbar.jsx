@@ -41,7 +41,7 @@ const Navbar = ({ user, onLogout }) => {
       : "text-white hover:text-orange transition-colors flex items-center gap-2";
 
   return (
-    <nav className="w-full bg-dark-nigth-blue_05 shadow-lg sticky top-0 z-50 backdrop-blur-md">
+    <nav className="w-full bg-dark-nigth-blue shadow-xl shadow-black/40 sticky top-0 z-50 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           

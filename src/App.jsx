@@ -9,7 +9,7 @@ const App = () => {
 
   return (
     // Structure classique : en colonne, prend au minimum la taille de l'écran
-    <div className="flex flex-col min-h-screen bg-white_05">
+    <div className="flex flex-col min-h-screen bg-white">
       
       {/* 1. Notre barre de navigation en haut */}
       <Navbar 
