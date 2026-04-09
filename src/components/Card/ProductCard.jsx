@@ -1,29 +1,26 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { IMAGE_URL } from '../../constants/apiConstant';
+import { API_ROOT, IMAGE_URL } from '../../constants/apiConstant';
 
 const ProductCard = ({ product }) => {
     
-    // 1. On utilise les VRAIS noms de vos propriétés Symfony
     const productId = product?.id ?? 0;
-    const productTitle = product?.title ?? "Produit inconnu"; // Modifié : title au lieu de name
+    const productTitle = product?.title ?? "Produit inconnu";
     const productPrice = product?.price ? `${product?.price} €` : "Prix non renseigné";
-    const productBrand = product?.brand ?? "Marque inconnue"; // Modifié : on utilise brand
+    const productBrand = product?.brand ?? "Marque inconnue"; 
     
-    // 2. L'image utilise la constante IMAGE_URL (http://localhost:8087/images)
+    // L'image utilise la constante IMAGE_URL (http://localhost:8087/images)
     // Assurez-vous que vos images soient dans le dossier public/images/ de Symfony
-    const imgProduct = product?.imagePath 
-        ? `${IMAGE_URL}/${product.imagePath}` 
-        : 'https://via.placeholder.com/200'; // Image par défaut de secours
+    const imageUrl = `${API_ROOT}${product.imagePath}`;
 
   return (
-    <div className='flex flex-col items-center w-65.5 p-4 bg-dark-nigth-blue hover:bg-dark-nigth-blue_05 transition-all ease-in-out duration-500 animate-slideup rounded-lg cursor-pointer group'>
+    <div className='flex flex-col items-center w-65.5 p-4 bg-nigth-blue hover:bg-dark-nigth-blue_09 transition-all ease-in-out duration-500 animate-slideup rounded-lg cursor-pointer group'>
         <div className="relative w-full flex flex-col">
             
             {/* Image du produit cliquable */}
             <Link to={`/product/${productId}`} >
                 <img 
-                    src={imgProduct}
+                    src={imageUrl}
                     alt={`Image du produit ${productTitle}`} 
                     className="mx-auto rounded-lg object-cover h-52 w-52 bg-white/10" 
                 />

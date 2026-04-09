@@ -4,6 +4,7 @@ import ErrorPages from "../screens/ErrorScreens/ErrorPages";
 import Login from "../screens/OfflineScreens/Login";
 import Register from "../screens/OfflineScreens/Register";
 import App from "../App";
+import Market from "../screens/OfflineScreens/Market";
 
 const OfflineRouter = createBrowserRouter([
     {
@@ -25,6 +26,9 @@ const OfflineRouter = createBrowserRouter([
                         console.log("EMAIL DE L'UTILISATEUR :", email);
                         // Plus tard, c'est ici qu'on mettra à jour votre state global !
                         }} />
+            },{
+                path: "/market",
+                element: <Market/>
             }
             
         ]
