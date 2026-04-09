@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -13,6 +14,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[ApiResource]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
