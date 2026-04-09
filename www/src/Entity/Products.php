@@ -32,27 +32,27 @@ class Products
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['product:read'])]
+    #[Groups(['product:read', 'panier:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 200)]
-    #[Groups(['product:read'])]
+    #[Groups(['product:read', 'panier:read'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['product:read'])]
+    #[Groups(['product:read', 'panier:read'])]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['product:read'])]
+    #[Groups(['product:read', 'panier:read'])]
     private ?float $price = null;
 
     #[ORM\Column(length: 150)]
-    #[Groups(['product:read'])]
+    #[Groups(['product:read', 'panier:read'])]
     private ?string $brand = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['product:read'])]
+    #[Groups(['product:read', 'panier:read'])]
     private ?string $imagePath = null;
 
     #[ORM\Column]
