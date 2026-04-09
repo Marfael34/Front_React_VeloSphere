@@ -28,6 +28,7 @@ class Characteristic
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['product:read'])]
     private ?string $value = null;
 
     /**
