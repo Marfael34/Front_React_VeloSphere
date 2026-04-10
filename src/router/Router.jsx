@@ -8,6 +8,8 @@ import Market from "../screens/Market";
 import Panier from "../screens/Panier";
 import Profile from "../screens/Profile";
 import Location from "../screens/Location";
+import ProductDetail from "../screens/ProductDetail";
+import EditProduct from "../screens/EditProduct";
 
 const Router = createBrowserRouter([
     {
@@ -45,6 +47,14 @@ const Router = createBrowserRouter([
             {
                 path: "/location",
                 element: <Location/>
+            },
+            {
+                path: "/product/:id",
+                element: <ProductDetail/>
+            },
+            {
+                path: "/product/edit/:id",
+                element: <EditProduct/>
             }
             
         ]

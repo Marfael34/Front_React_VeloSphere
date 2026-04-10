@@ -31,23 +31,40 @@ const Profile = () => {
                 const userRes = await axios.get(`${API_ROOT}/api/users/${user.id}`, authConfig);
                 setFullUser(userRes.data);
 
-                // 3. Appel API Panier (Etat 1 = en cours)
-                try {
-                    const cartRes = await axios.get(
-                        `${API_ROOT}/api/paniers?user=/api/users/${user.id}&etat=/api/etats/1`,
-                        authConfig
-                    );
-                    setCart(cartRes.data['hydra:member']?.[0] || null);
-                } catch (e) { console.error("Erreur panier:", e); }
+                // =================================================================
+                // ÉTAPE DYNAMIQUE : Récupérer l'ID de l'état "En attentes de paiement"
+                // =================================================================
+                const etatsRes = await axios.get(`${API_ROOT}/api/etats`, authConfig);
+                const etats = etatsRes.data['hydra:member'] || [];
+                const etatEnCours = etats.find(e => e.label === "En attentes de paiement");
 
-                // 4. Appel API Commandes (Etat différent de 1)
-                try {
-                    const ordersRes = await axios.get(
-                        `${API_ROOT}/api/paniers?user=/api/users/${user.id}&etat[not]=1`,
-                        authConfig
-                    );
-                    setOrders(ordersRes.data['hydra:member'] || []);
-                } catch (e) { console.error("Erreur commandes:", e); }
+                if (!etatEnCours) {
+                    console.error("État 'En attentes de paiement' non trouvé en base de données.");
+                } else {
+                    const etatIri = etatEnCours['@id'];
+
+                    // 3. Appel API Panier avec l'IRI dynamique
+                    try {
+                        const cartRes = await axios.get(
+                            `${API_ROOT}/api/paniers?user=/api/users/${user.id}&etat=${etatIri}`,
+                            authConfig
+                        );
+                        setCart(cartRes.data['hydra:member']?.[0] || null);
+                    } catch (e) { 
+                        console.error("Erreur panier:", e); 
+                    }
+
+                    // 4. Appel API Commandes (Etat différent de "En attentes de paiement")
+                    try {
+                        const ordersRes = await axios.get(
+                            `${API_ROOT}/api/paniers?user=/api/users/${user.id}&etat[not]=${etatIri}`,
+                            authConfig
+                        );
+                        setOrders(ordersRes.data['hydra:member'] || []);
+                    } catch (e) { 
+                        console.error("Erreur commandes:", e); 
+                    }
+                }
 
             } catch (error) {
                 console.error("PROFIL: Erreur globale lors du chargement :", error);
@@ -114,12 +131,11 @@ const Profile = () => {
                                     src={
                                         fullUser?.avatar 
                                             ? `${API_ROOT}${fullUser.avatar.startsWith('/') ? '' : '/'}${fullUser.avatar}` 
-                                            : `${IMAGE_URL}/default/avatar/default-avatar-1.png` // Remplace par le nom exact de ton fichier
+                                            : `${IMAGE_URL}/default/avatar/default-avatar-1.png` 
                                     } 
                                     alt="Avatar" 
                                     className="w-full h-full object-cover rounded-full border-4 border-orange shadow-lg"
                                     onError={(e) => { 
-                                        // Si l'image de l'utilisateur n'existe pas physiquement sur le serveur (404)
                                         e.target.onerror = null; 
                                         e.target.src = `${IMAGE_URL}/default/avatar/default-avatar-1.png`; 
                                     }}
@@ -145,8 +161,6 @@ const Profile = () => {
                                 </div>
                             </div>
 
-                            {/* Dans src/screens/Profile.jsx */}
-
                             <div className="pt-2">
                                 <div className="flex items-center gap-3 mb-3">
                                     <FaMapMarkerAlt className="text-orange" size={18} />
@@ -156,7 +170,6 @@ const Profile = () => {
                                 {fullUser?.adresses && fullUser.adresses.length > 0 ? (
                                     <div className="space-y-3">
                                         {fullUser.adresses.map((adr, index) => {
-                                            // Si l'API renvoie encore une chaîne (IRI), on affiche une alerte de debug
                                             if (typeof adr === 'string') {
                                                 return (
                                                     <p key={index} className="text-xs text-red-400 italic">
@@ -168,7 +181,6 @@ const Profile = () => {
                                             return (
                                                 <div key={index} className="bg-white/5 p-3 rounded-lg border border-white/5 text-sm">
                                                     <p className="font-medium">
-                                                        {/* Utilisation des nouveaux noms de champs de votre entité Adress */}
                                                         {adr.number} {adr.type} {adr.label}
                                                     </p>
                                                     {adr.complement && (
@@ -190,7 +202,7 @@ const Profile = () => {
 
                     {/* COLONNE DROITE : PANIER & COMMANDES */}
                     <div className="lg:col-span-2 space-y-8">
-                        {/* Panier (Simplifié pour test) */}
+                        {/* Panier en cours */}
                         <div className="bg-nigth-blue p-6 rounded-2xl shadow-lg border border-white/5">
                             <h2 className="text-xl font-bold flex items-center gap-3 mb-6">
                                 <FaShoppingBag className="text-orange" /> Panier en cours
@@ -200,7 +212,7 @@ const Profile = () => {
                             ) : <p className="text-gray-400 italic">Votre panier est vide.</p>}
                         </div>
 
-                        {/* Commandes (Simplifié pour test) */}
+                        {/* Historique des commandes */}
                         <div className="bg-black/20 p-6 rounded-2xl border border-white/10">
                             <h2 className="text-xl font-bold flex items-center gap-3 mb-6">
                                 <FaHistory className="text-orange" /> Historique

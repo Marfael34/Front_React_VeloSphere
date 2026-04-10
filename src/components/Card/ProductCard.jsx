@@ -22,7 +22,8 @@ const ProductCard = ({ product }) => {
                 <img 
                     src={imageUrl}
                     alt={`Image du produit ${productTitle}`} 
-                    className="mx-auto rounded-lg object-cover h-52 w-52 bg-white/10" 
+                    className="mx-auto rounded-lg object-cover h-52 w-52 bg-white/10"
+                    onError={(e) => { e.target.src = `${IMAGE_URL}/default/default_product.png`; }}
                 />
             </Link>
 
