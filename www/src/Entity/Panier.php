@@ -15,7 +15,8 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: PanierRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['panier:read']], // <-- Ajout ici
+    normalizationContext: ['groups' => ['panier:read']],
+    denormalizationContext: ['groups' => ['panier:write']],
     operations: [
         new Get(),
         new GetCollection(),
@@ -28,22 +29,22 @@ class Panier
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['panier:read'])]
+    #[Groups(['panier:read','panier:write'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'paniers')]
-    #[Groups(['panier:read'])]
+    #[Groups(['panier:read','panier:write'])]
     private ?Etat $etat = null;
 
     #[ORM\ManyToOne(inversedBy: 'paniers')]
-    #[Groups(['panier:read'])]
+    #[Groups(['panier:read','panier:write'])]
     private ?User $user = null;
 
     /**
      * @var Collection<int, Products>
      */
     #[ORM\ManyToMany(targetEntity: Products::class, inversedBy: 'paniers')]
-    #[Groups(['panier:read'])]
+    #[Groups(['panier:read','panier:write'])]
     private Collection $products;
 
     public function __construct()
