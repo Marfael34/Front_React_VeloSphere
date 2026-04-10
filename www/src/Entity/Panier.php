@@ -2,7 +2,10 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
@@ -21,9 +24,11 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Get(),
         new GetCollection(),
         new Post(),
-        new Patch() // Requis pour ajouter/supprimer des articles
+        new Patch(),
+        new Delete(),
     ]
 )]
+#[ApiFilter(SearchFilter::class, properties: ['user' => 'exact', 'etat' => 'exact'])]
 class Panier
 {
     #[ORM\Id]

@@ -17,14 +17,12 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[ApiResource(
-    security: "is_granted('ROLE_ADMIN')",
-    securityMessage: "Désolé, mais vous devez être administrateur pour voir les utilisateurs.",
+    security: "is_granted('ROLE_ADMIN') or object == user", 
+    securityMessage: "Vous ne pouvez accéder qu'à votre propre compte.",
     operations: [
-        
         new Get(normalizationContext: ['groups' => ['user:read']]),
         new GetCollection(normalizationContext: ['groups' => ['user:read']])
     ]
-   
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
