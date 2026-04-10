@@ -114,14 +114,14 @@ const Profile = () => {
                                     src={
                                         fullUser?.avatar 
                                             ? `${API_ROOT}${fullUser.avatar.startsWith('/') ? '' : '/'}${fullUser.avatar}` 
-                                            : `${IMAGE_URL}/avatar/default/default-avatar-1.png` // Remplace par le nom exact de ton fichier
+                                            : `${IMAGE_URL}/default/avatar/default-avatar-1.png` // Remplace par le nom exact de ton fichier
                                     } 
                                     alt="Avatar" 
                                     className="w-full h-full object-cover rounded-full border-4 border-orange shadow-lg"
                                     onError={(e) => { 
                                         // Si l'image de l'utilisateur n'existe pas physiquement sur le serveur (404)
                                         e.target.onerror = null; 
-                                        e.target.src = `${IMAGE_URL}/avatar/default/default-avatar-1.png`; 
+                                        e.target.src = `${IMAGE_URL}/default/avatar/default-avatar-1.png`; 
                                     }}
                                 />
                             </div>

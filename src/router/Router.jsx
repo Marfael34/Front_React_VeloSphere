@@ -7,6 +7,7 @@ import App from "../App";
 import Market from "../screens/Market";
 import Panier from "../screens/Panier";
 import Profile from "../screens/Profile";
+import Location from "../screens/Location";
 
 const Router = createBrowserRouter([
     {
@@ -40,6 +41,10 @@ const Router = createBrowserRouter([
             {
                 path: "/profile",
                 element: <Profile/>
+            },
+            {
+                path: "/location",
+                element: <Location/>
             }
             
         ]

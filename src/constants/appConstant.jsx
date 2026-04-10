@@ -4,6 +4,7 @@ import { MdDirectionsBike, MdOutlinePedalBike } from "react-icons/md";
 import { BiLogIn } from "react-icons/bi";
 import { FaRegUserCircle } from "react-icons/fa";
 import { RiShoppingBasket2Line } from "react-icons/ri";
+import { LuMapPin } from "react-icons/lu";
 
 
 // ===========================
@@ -22,6 +23,7 @@ export const IMG_LOGO = `${IMAGE_URL}/logo.png`
 export const dataNav = [
     {title: "Acceuil", path: "/", icon: AiOutlineHome},
     {title: "Market", path: "/market", icon: MdOutlinePedalBike},
+    {title: "Lieux", path: "/location", icon: LuMapPin},
 
 ]
 
@@ -29,6 +31,7 @@ export const dataNav = [
 export const OfflinedataUserNav = [
   {title: "Login", path: "/login", icon: BiLogIn},
   {title: "Resgister", path: "/register", icon: AiOutlineUserAdd},
+  
 ]
 
 // Navigation utilisateur (compte et playlists)
