@@ -35,7 +35,7 @@ const Profile = () => {
                 const etats = etatsRes.data.member || etatsRes.data['hydra:member'] || [];
                 
                 // RECHERCHE STRICTE de l'état exact
-                const etatEnCours = etats.find(e => e.label === "En attentes de paiment");
+                const etatEnCours = etats.find(e => e.label === "En attentes de paiement");
 
                 if (etatEnCours) {
                     // On récupère l'ID sous forme d'IRI, et s'il n'y a pas le @id, on le recrée
