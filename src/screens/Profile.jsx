@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { API_ROOT, IMAGE_URL } from '../constants/apiConstant';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; 
 import ButtonLoader from '../components/Loader/ButtonLoader';
 import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake, FaBoxOpen } from 'react-icons/fa';
 
@@ -13,11 +13,13 @@ const Profile = () => {
     const [cart, setCart] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    
+    const navigate = useNavigate(); 
 
     useEffect(() => {
         const fetchProfileData = async () => {
             if (!user?.token || !user?.id) {
-                setIsLoading(false);
+                navigate('/login'); 
                 return;
             }
 
@@ -28,14 +30,16 @@ const Profile = () => {
                 const userRes = await axios.get(`${API_ROOT}/api/users/${user.id}`, authConfig);
                 setFullUser(userRes.data);
 
-                // 2. Récupérer les états
+                // 2. Récupérer les états (en s'adaptant au format de l'API comme dans ton Panier.jsx)
                 const etatsRes = await axios.get(`${API_ROOT}/api/etats`, authConfig);
-                const etats = etatsRes.data['hydra:member'] || [];
+                const etats = etatsRes.data.member || etatsRes.data['hydra:member'] || [];
                 
-                const etatEnCours = etats.find(e => e.label === "En attente de paiement");
+                // RECHERCHE STRICTE de l'état exact
+                const etatEnCours = etats.find(e => e.label === "En attentes de paiment");
 
                 if (etatEnCours) {
-                    const etatIri = etatEnCours['@id'];
+                    // On récupère l'ID sous forme d'IRI, et s'il n'y a pas le @id, on le recrée
+                    const etatIri = etatEnCours['@id'] || `/api/etats/${etatEnCours.id}`;
 
                     // 3. Appel API Panier
                     try {
@@ -43,22 +47,26 @@ const Profile = () => {
                             `${API_ROOT}/api/paniers?user=/api/users/${user.id}&etat=${etatIri}`,
                             authConfig
                         );
-                        setCart(cartRes.data['hydra:member']?.[0] || null);
+                        // Récupération sécurisée du tableau
+                        const cartData = cartRes.data.member || cartRes.data['hydra:member'] || [];
+                        setCart(cartData[0] || null);
                     } catch (cartErr) { 
-                        console.error("Panier vide ou erreur:", cartErr); 
-                    }
-
-                    // 4. Appel API Commandes
-                    try {
-                        const ordersRes = await axios.get(
-                            `${API_ROOT}/api/orders?user=/api/users/${user.id}`,
-                            authConfig
-                        );
-                        setOrders(ordersRes.data['hydra:member'] || []);
-                    } catch (orderErr) { 
-                        console.error("Erreur commandes:", orderErr); 
+                        console.error("Erreur récupération du panier:", cartErr); 
                     }
                 }
+
+                // 4. Appel API Commandes (SORTI DU BLOC "etatEnCours" : On veut toujours afficher l'historique !)
+                try {
+                    const ordersRes = await axios.get(
+                        `${API_ROOT}/api/orders?user=/api/users/${user.id}`,
+                        authConfig
+                    );
+                    const ordersData = ordersRes.data.member || ordersRes.data['hydra:member'] || [];
+                    setOrders(ordersData);
+                } catch (orderErr) { 
+                    console.error("Erreur récupération des commandes:", orderErr); 
+                }
+
             } catch (err) {
                 console.error("PROFIL: Erreur globale lors du chargement :", err);
                 setError("Impossible de charger les données du profil.");
@@ -68,15 +76,10 @@ const Profile = () => {
         };
 
         fetchProfileData();
-    }, [user]);
+    }, [user, navigate]);
 
     if (!user) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center text-white bg-dark-nigth-blue">
-                <p className="mb-4">Veuillez vous connecter pour accéder à votre profil.</p>
-                <Link to="/login" className="main-button w-auto px-6">Se connecter</Link>
-            </div>
-        );
+        return null; 
     }
 
     if (isLoading) {
@@ -104,10 +107,9 @@ const Profile = () => {
         } catch (err) { return "Date invalide"; }
     };
 
-    // Calcul du total du panier
     const calculateCartTotal = () => {
         if (!cart || !cart.products) return 0;
-        return cart.products.reduce((total, product) => total + (product.price || 0), 0).toFixed(2);
+        return cart.products.reduce((total, product) => total + (parseFloat(product.price) || 0), 0).toFixed(2);
     };
 
     return (
@@ -196,9 +198,12 @@ const Profile = () => {
                                         {cart.products.map((product, idx) => (
                                             <div key={idx} className="flex justify-between items-center bg-black/20 p-3 rounded-xl border border-white/5 hover:border-orange/30 transition">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center text-gray-400">
-                                                        <FaBoxOpen size={20} />
-                                                    </div>
+                                                    <img 
+                                                        src={product.imagePath ? `${API_ROOT}${product.imagePath}` : `${IMAGE_URL}/default/default_product.png`} 
+                                                        alt={product.title} 
+                                                        className="w-12 h-12 object-contain rounded-lg bg-white/10"
+                                                        onError={(e) => { e.target.onerror = null; e.target.src = `${IMAGE_URL}/default/default_product.png`; }}
+                                                    />
                                                     <div>
                                                         <p className="font-bold text-sm text-white">{product.title || "Produit"}</p>
                                                         <p className="text-xs text-gray-400">{product.brand || "Marque inconnue"}</p>
@@ -211,12 +216,12 @@ const Profile = () => {
                                         ))}
                                     </div>
 
-                                    <div className="flex items-center justify-between bg-black/40 p-4 rounded-xl border border-white/10">
-                                        <div>
-                                            <p className="text-gray-400 text-sm">Total à régler</p>
+                                    <div className="bg-black/40 p-5 rounded-xl border border-white/10">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <p className="text-gray-400 text-sm font-medium">Total à régler</p>
                                             <p className="text-2xl font-black text-orange">{calculateCartTotal()} €</p>
                                         </div>
-                                        <Link to="/panier" className="main-button !m-0 !py-2 !px-6 text-sm">
+                                        <Link to="/panier" className="main-button block text-center w-full !m-0 !py-3 text-sm">
                                             Finaliser l'achat
                                         </Link>
                                     </div>

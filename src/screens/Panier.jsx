@@ -3,26 +3,27 @@ import axios from 'axios';
 import { API_ROOT, IMAGE_URL } from '../constants/apiConstant';
 import { AuthContext } from '../contexts/AuthContext';
 import ButtonLoader from '../components/Loader/ButtonLoader';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; 
 
 const Panier = () => {
   const [cart, setCart] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(AuthContext);
+  
+  const navigate = useNavigate(); 
 
   useEffect(() => {
-    const fetchCart = async () => {
-      if (!user?.id || !user?.token) {
-        setIsLoading(false);
-        return;
-      }
+    if (!user?.id || !user?.token) {
+      navigate('/login');
+      return; 
+    }
 
+    const fetchCart = async () => {
       try {
         const authConfig = {
           headers: { Authorization: `Bearer ${user.token}` }
         };
 
-        // Récupération de l'état "en attente"
         const etatsRes = await axios.get(`${API_ROOT}/api/etats`, authConfig);
         const etats = etatsRes.data.member || etatsRes.data['hydra:member'] || [];
 
@@ -35,7 +36,6 @@ const Panier = () => {
           return;
         }
 
-        // Récupération du panier de l'utilisateur avec cet état
         const response = await axios.get(
           `${API_ROOT}/api/paniers?user=/api/users/${user.id}&etat=${etatCible['@id']}`,
           authConfig
@@ -55,7 +55,23 @@ const Panier = () => {
     };
 
     fetchCart();
-  }, [user]);
+  }, [user, navigate]);
+
+  // Regrouper les produits pour calculer les QUANTITÉS
+  const getGroupedProducts = () => {
+    if (!cart?.products) return [];
+    const grouped = {};
+    cart.products.forEach(p => {
+      if (!grouped[p.id]) {
+        grouped[p.id] = { ...p, quantity: 1 };
+      } else {
+        grouped[p.id].quantity += 1;
+      }
+    });
+    return Object.values(grouped);
+  };
+
+  const groupedProducts = getGroupedProducts();
 
   const calculateTotal = () => {
     if (!cart?.products) return "0.00";
@@ -64,17 +80,16 @@ const Panier = () => {
 
   const handleRemoveProduct = async (productId) => {
     try {
+      // On retire TOUTES les occurrences de ce produit
       const updatedProductsList = cart.products.filter(p => p.id !== productId);
       const updatedProductIris = updatedProductsList.map(p => `/api/products/${p.id}`);
 
       if (updatedProductIris.length === 0) {
-        // Suppression complète si le panier est vide
         await axios.delete(`${API_ROOT}/api/paniers/${cart.id}`, {
           headers: { 'Authorization': `Bearer ${user.token}` }
         });
         setCart(null); 
       } else {
-        // Mise à jour via Patch
         await axios.patch(`${API_ROOT}/api/paniers/${cart.id}`, {
           products: updatedProductIris
         }, {
@@ -105,7 +120,6 @@ const Panier = () => {
           Mon Panier
         </h1>
 
-        {/* CONDITION DU PANIER VIDE */}
         {!cart || !cart.products || cart.products.length === 0 ? (
           <div className="text-center py-16 bg-gray-800 rounded-lg shadow-lg border border-gray-700">
             <div className="text-6xl mb-4">🛒</div>
@@ -119,10 +133,10 @@ const Panier = () => {
             </Link>
           </div>
         ) : (
-          /* AFFICHAGE DU PANIER REMPLI */
           <div className="flex flex-col md:flex-row gap-8">
             <div className="flex-1 space-y-4">
-              {cart.products.map((product) => (
+              {/* ON BOUCLE SUR LES PRODUITS GROUPÉS */}
+              {groupedProducts.map((product) => (
                 <div key={product.id} className="flex items-center bg-gray-800 p-4 rounded-lg shadow">
                   <img 
                     src={`${API_ROOT}${product.imagePath}`} 
@@ -131,8 +145,17 @@ const Panier = () => {
                     className="w-24 h-24 object-contain rounded-md mr-4 bg-white/5"
                   />
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold">{product.title}</h3>
-                    <p className="text-blue-400 font-semibold mt-1">{product.price} €</p>
+                    <h3 className="text-lg font-bold">
+                      {product.title} 
+                      {/* Affichage de la quantité */}
+                      <span className="ml-3 px-2 py-1 bg-blue-600/20 text-blue-400 text-sm rounded-md font-bold">
+                        x{product.quantity}
+                      </span>
+                    </h3>
+                    {/* Le prix total pour cette ligne (prix unitaire * quantité) */}
+                    <p className="text-blue-400 font-semibold mt-1">
+                      {(parseFloat(product.price) * product.quantity).toFixed(2)} €
+                    </p>
                   </div>
                   <button 
                     onClick={() => handleRemoveProduct(product.id)}
@@ -144,10 +167,10 @@ const Panier = () => {
               ))}
             </div>
 
-            {/* RÉSUMÉ DE LA COMMANDE */}
             <div className="w-full md:w-1/3 bg-gray-800 p-6 rounded-lg h-fit shadow-lg">
               <h2 className="text-2xl font-bold mb-4">Résumé</h2>
               <div className="flex justify-between border-b border-gray-600 pb-2 mb-4 text-gray-300">
+                {/* On affiche le nombre total d'articles (pas seulement les articles uniques) */}
                 <span>Articles ({cart.products.length})</span>
                 <span>{calculateTotal()} €</span>
               </div>
@@ -156,8 +179,8 @@ const Panier = () => {
                 <span>{calculateTotal()} €</span>
               </div>
               <Link to="/checkout">
-                <button className="main-button">
-                  Valider la commande et Payer
+                <button className="main-button w-full">
+                  Valider et Payer
                 </button>
               </Link>
             </div>

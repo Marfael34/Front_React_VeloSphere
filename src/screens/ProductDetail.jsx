@@ -56,73 +56,79 @@ const ProductDetail = () => {
         fetchData();
     }, [id, user]);
 
-    // 👉 4. LOGIQUE D'AJOUT AU PANIER OPTIMISÉE
+    // LOGIQUE D'AJOUT AU PANIER
     const handleAddToCart = async () => {
-        if (!user) {
-            navigate('/login');
+    if (!user || !user.token) {
+        navigate('/login');
+        return;
+    }
+
+    try {
+        const authConfig = { headers: { Authorization: `Bearer ${user.token}` } };
+
+        // 1. On cherche l'état exact (Comme dans ton Profile)
+        const etatsRes = await axios.get(`${API_ROOT}/api/etats`, authConfig);
+        const etats = etatsRes.data.member || etatsRes.data['hydra:member'] || [];
+        const etatEnAttente = etats.find(e => e.label === "En attentes de paiment");
+
+        if (!etatEnAttente) {
+            console.error("État 'En attentes de paiment' introuvable");
             return;
         }
 
-        try {
-            const productIri = `/api/products/${product.id}`;
+        const etatIri = etatEnAttente['@id'] || `/api/etats/${etatEnAttente.id}`;
+        const newProductIri = `/api/products/${product.id}`; // Le produit qu'on veut ajouter
 
-            if (cart) {
-                // ---> UN PANIER EXISTE DÉJÀ : ON FAIT UN PATCH <---
-                const authConfigPatch = {
-                    headers: { 'Content-Type': 'application/merge-patch+json', Authorization: `Bearer ${user.token}` }
-                };
+        // 2. On cherche si un panier en attente existe déjà pour cet utilisateur
+        const panierRes = await axios.get(
+            `${API_ROOT}/api/paniers?user=/api/users/${user.id}&etat=${etatIri}`,
+            authConfig
+        );
+        const paniersExistants = panierRes.data.member || panierRes.data['hydra:member'] || [];
 
-                const currentProductIris = (cart.products || []).map(p => `/api/products/${p.id}`);
-                
-                // Sécurité : éviter les doublons
-                if (currentProductIris.includes(productIri)) {
-                    alert("Ce produit est déjà dans votre panier !");
-                    return;
+        if (paniersExistants.length > 0) {
+            // ---> CAS 1 : LE PANIER EXISTE DÉJÀ <---
+            const panierActuel = paniersExistants[0];
+            
+            // On récupère TOUS les IRI des produits déjà présents dans le panier !
+            const produitsActuelsIris = panierActuel.products.map(p => `/api/products/${p.id}`);
+            
+            // On AJOUTE le nouveau produit à la liste existante
+            const nouveauxProduits = [...produitsActuelsIris, newProductIri];
+
+            // On fait un PATCH avec la NOUVELLE LISTE COMPLÈTE
+            await axios.patch(`${API_ROOT}/api/paniers/${panierActuel.id}`, {
+                products: nouveauxProduits // <-- C'est ici que ton code plantait avant !
+            }, {
+                headers: { 
+                    'Content-Type': 'application/merge-patch+json',
+                    'Authorization': `Bearer ${user.token}` 
                 }
+            });
 
-                currentProductIris.push(productIri);
+            alert("Produit ajouté à votre panier existant !");
 
-                await axios.patch(`${API_ROOT}/api/paniers/${cart.id}`, { products: currentProductIris }, authConfigPatch);
-                
-                alert(`${product.title} a été ajouté à votre panier !`);
-                
-                // On met à jour le state local sans avoir besoin de recharger la page
-                setCart({ ...cart, products: [...cart.products, product] });
-                
-            } else {
-                // ---> AUCUN PANIER ACTIF : ON LE CRÉE AVEC POST <---
-                const authConfigPost = {
-                    headers: { 'Content-Type': 'application/ld+json', Authorization: `Bearer ${user.token}` }
-                };
-
-                const etatsRes = await axios.get(`${API_ROOT}/api/etats`, authConfigPost);
-                const etats = etatsRes.data.member || etatsRes.data['hydra:member'] || [];
-                const etatCible = etats.find(e => e.label.replace(/\s+/g, ' ').trim().toLowerCase().includes("attente"));
-
-                if (!etatCible) {
-                    alert("Configuration manquante : Aucun état valide trouvé.");
-                    return;
+        } else {
+            // ---> CAS 2 : AUCUN PANIER N'EXISTE, ON LE CRÉE <---
+            await axios.post(`${API_ROOT}/api/paniers`, {
+                user: `/api/users/${user.id}`,
+                etat: etatIri,
+                products: [newProductIri] // On met juste le premier produit
+            }, {
+                headers: { 
+                    'Content-Type': 'application/ld+json',
+                    'Authorization': `Bearer ${user.token}` 
                 }
+            });
 
-                const newCartRes = await axios.post(
-                    `${API_ROOT}/api/paniers`,
-                    {
-                        user: `/api/users/${user.id}`,
-                        etat: etatCible['@id'],
-                        products: [productIri] 
-                    },
-                    authConfigPost
-                );
-                
-                alert(`Nouveau panier créé et ${product.title} ajouté !`);
-                setCart(newCartRes.data);
-            }
-
-        } catch (error) {
-            console.error("Erreur lors de l'ajout au panier :", error);
-            alert("Une erreur de connexion est survenue.");
+            alert("Nouveau panier créé avec votre produit !");
         }
-    };
+
+    } catch (error) {
+        console.error("Erreur lors de l'ajout au panier :", error);
+        alert("Erreur lors de l'ajout au panier.");
+    }
+};
 
     // Gestion du rôle Admin
     const getRolesFromToken = (token) => {
