@@ -4,7 +4,7 @@ import { API_ROOT, IMAGE_URL } from '../constants/apiConstant';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import ButtonLoader from '../components/Loader/ButtonLoader';
-import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake } from 'react-icons/fa';
+import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake, FaBoxOpen } from 'react-icons/fa';
 
 const Profile = () => {
     const { user } = useContext(AuthContext);
@@ -16,58 +16,51 @@ const Profile = () => {
 
     useEffect(() => {
         const fetchProfileData = async () => {
-            // 1. Vérification du token
             if (!user?.token || !user?.id) {
                 setIsLoading(false);
                 return;
             }
 
             try {
-                const authConfig = {
-                    headers: { Authorization: `Bearer ${user.token}` }
-                };
+                const authConfig = { headers: { Authorization: `Bearer ${user.token}` } };
 
-                // 2. Appel API User
+                // 1. Appel API User
                 const userRes = await axios.get(`${API_ROOT}/api/users/${user.id}`, authConfig);
                 setFullUser(userRes.data);
 
-                // =================================================================
-                // ÉTAPE DYNAMIQUE : Récupérer l'ID de l'état "En attentes de paiement"
-                // =================================================================
+                // 2. Récupérer les états
                 const etatsRes = await axios.get(`${API_ROOT}/api/etats`, authConfig);
                 const etats = etatsRes.data['hydra:member'] || [];
-                const etatEnCours = etats.find(e => e.label === "En attentes de paiement");
+                
+                const etatEnCours = etats.find(e => e.label === "En attente de paiement");
 
-                if (!etatEnCours) {
-                    console.error("État 'En attentes de paiement' non trouvé en base de données.");
-                } else {
+                if (etatEnCours) {
                     const etatIri = etatEnCours['@id'];
 
-                    // 3. Appel API Panier avec l'IRI dynamique
+                    // 3. Appel API Panier
                     try {
                         const cartRes = await axios.get(
                             `${API_ROOT}/api/paniers?user=/api/users/${user.id}&etat=${etatIri}`,
                             authConfig
                         );
                         setCart(cartRes.data['hydra:member']?.[0] || null);
-                    } catch (e) { 
-                        console.error("Erreur panier:", e); 
+                    } catch (cartErr) { 
+                        console.error("Panier vide ou erreur:", cartErr); 
                     }
 
-                    // 4. Appel API Commandes (Etat différent de "En attentes de paiement")
+                    // 4. Appel API Commandes
                     try {
                         const ordersRes = await axios.get(
-                            `${API_ROOT}/api/paniers?user=/api/users/${user.id}&etat[not]=${etatIri}`,
+                            `${API_ROOT}/api/orders?user=/api/users/${user.id}`,
                             authConfig
                         );
                         setOrders(ordersRes.data['hydra:member'] || []);
-                    } catch (e) { 
-                        console.error("Erreur commandes:", e); 
+                    } catch (orderErr) { 
+                        console.error("Erreur commandes:", orderErr); 
                     }
                 }
-
-            } catch (error) {
-                console.error("PROFIL: Erreur globale lors du chargement :", error);
+            } catch (err) {
+                console.error("PROFIL: Erreur globale lors du chargement :", err);
                 setError("Impossible de charger les données du profil.");
             } finally {
                 setIsLoading(false);
@@ -77,7 +70,6 @@ const Profile = () => {
         fetchProfileData();
     }, [user]);
 
-    // Cas 1 : Utilisateur non connecté
     if (!user) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center text-white bg-dark-nigth-blue">
@@ -87,7 +79,6 @@ const Profile = () => {
         );
     }
 
-    // Cas 2 : Chargement en cours
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-dark-nigth-blue">
@@ -96,7 +87,6 @@ const Profile = () => {
         );
     }
 
-    // Cas 3 : Erreur API
     if (error) {
         return (
             <div className="min-h-screen flex items-center justify-center text-red-500 bg-dark-nigth-blue">
@@ -105,14 +95,19 @@ const Profile = () => {
         );
     }
 
-    // Fonction de formatage date sécurisée
     const formatDate = (dateString) => {
         if (!dateString) return "Non renseignée";
         try {
             return new Date(dateString).toLocaleDateString('fr-FR', {
                 year: 'numeric', month: 'long', day: 'numeric'
             });
-        } catch (error) { return "Date invalide"; }
+        } catch (err) { return "Date invalide"; }
+    };
+
+    // Calcul du total du panier
+    const calculateCartTotal = () => {
+        if (!cart || !cart.products) return 0;
+        return cart.products.reduce((total, product) => total + (product.price || 0), 0).toFixed(2);
     };
 
     return (
@@ -124,7 +119,6 @@ const Profile = () => {
                     
                     {/* COLONNE GAUCHE : INFOS & AVATAR */}
                     <div className="bg-black/40 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-xl h-fit">
-                        
                         <div className="flex flex-col items-center mb-8">
                            <div className="relative w-32 h-32 mb-4">
                                 <img 
@@ -170,25 +164,12 @@ const Profile = () => {
                                 {fullUser?.adresses && fullUser.adresses.length > 0 ? (
                                     <div className="space-y-3">
                                         {fullUser.adresses.map((adr, index) => {
-                                            if (typeof adr === 'string') {
-                                                return (
-                                                    <p key={index} className="text-xs text-red-400 italic">
-                                                        Problème lors du chargement des données : {adr}
-                                                    </p>
-                                                );
-                                            }
-
+                                            if (typeof adr === 'string') return null;
                                             return (
                                                 <div key={index} className="bg-white/5 p-3 rounded-lg border border-white/5 text-sm">
-                                                    <p className="font-medium">
-                                                        {adr.number} {adr.type} {adr.label}
-                                                    </p>
-                                                    {adr.complement && (
-                                                        <p className="text-gray-400 italic text-xs">{adr.complement}</p>
-                                                    )}
-                                                    <p className="font-bold text-orange mt-1">
-                                                        {adr.cp} {adr.city}
-                                                    </p>
+                                                    <p className="font-medium">{adr.number} {adr.type} {adr.label}</p>
+                                                    {adr.complement && <p className="text-gray-400 italic text-xs">{adr.complement}</p>}
+                                                    <p className="font-bold text-orange mt-1">{adr.cp} {adr.city}</p>
                                                 </div>
                                             );
                                         })}
@@ -202,24 +183,83 @@ const Profile = () => {
 
                     {/* COLONNE DROITE : PANIER & COMMANDES */}
                     <div className="lg:col-span-2 space-y-8">
-                        {/* Panier en cours */}
+                        
+                        {/* --- SECTION PANIER DÉTAILLÉ --- */}
                         <div className="bg-nigth-blue p-6 rounded-2xl shadow-lg border border-white/5">
-                            <h2 className="text-xl font-bold flex items-center gap-3 mb-6">
-                                <FaShoppingBag className="text-orange" /> Panier en cours
+                            <h2 className="text-xl font-bold flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+                                <FaShoppingBag className="text-orange" /> Mon Panier en cours
                             </h2>
+                            
                             {cart?.products?.length > 0 ? (
-                                <p>{cart.products.length} produit(s) dans le panier.</p>
-                            ) : <p className="text-gray-400 italic">Votre panier est vide.</p>}
+                                <div>
+                                    <div className="space-y-3 mb-6 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                                        {cart.products.map((product, idx) => (
+                                            <div key={idx} className="flex justify-between items-center bg-black/20 p-3 rounded-xl border border-white/5 hover:border-orange/30 transition">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center text-gray-400">
+                                                        <FaBoxOpen size={20} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-sm text-white">{product.title || "Produit"}</p>
+                                                        <p className="text-xs text-gray-400">{product.brand || "Marque inconnue"}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="font-bold text-orange whitespace-nowrap">
+                                                    {product.price} €
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="flex items-center justify-between bg-black/40 p-4 rounded-xl border border-white/10">
+                                        <div>
+                                            <p className="text-gray-400 text-sm">Total à régler</p>
+                                            <p className="text-2xl font-black text-orange">{calculateCartTotal()} €</p>
+                                        </div>
+                                        <Link to="/panier" className="main-button !m-0 !py-2 !px-6 text-sm">
+                                            Finaliser l'achat
+                                        </Link>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className="text-gray-400 italic text-center py-6 bg-black/20 rounded-xl">
+                                    Votre panier est actuellement vide.
+                                </p>
+                            )}
                         </div>
 
-                        {/* Historique des commandes */}
+                        {/* --- SECTION HISTORIQUE DES COMMANDES --- */}
                         <div className="bg-black/20 p-6 rounded-2xl border border-white/10">
-                            <h2 className="text-xl font-bold flex items-center gap-3 mb-6">
-                                <FaHistory className="text-orange" /> Historique
+                            <h2 className="text-xl font-bold flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+                                <FaHistory className="text-orange" /> Historique & Factures
                             </h2>
                             {orders.length > 0 ? (
-                                <p>{orders.length} commande(s) passée(s).</p>
-                            ) : <p className="text-gray-400 italic">Aucune commande.</p>}
+                                <div className="space-y-4">
+                                    {orders.map((order) => (
+                                        <div key={order.id} className="bg-white/5 p-4 rounded-xl flex justify-between items-center border border-white/5 hover:border-orange/30 transition">
+                                            <div>
+                                                <p className="font-bold text-lg">Commande #{order.id}</p>
+                                                <p className="text-sm text-gray-400 flex items-center gap-2">
+                                                    <FaBoxOpen className="text-gray-500" /> {order.products?.length || 0} article(s)
+                                                </p>
+                                                <span className="inline-block mt-2 px-2 py-1 text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/30 rounded-md">
+                                                    Statut : Payée
+                                                </span>
+                                            </div>
+                                            <Link 
+                                                to={`/invoice/${order.id}`} 
+                                                className="bg-white/10 hover:bg-orange text-white hover:text-black font-bold px-4 py-2 rounded-lg text-sm transition duration-300 shadow-md"
+                                            >
+                                                Voir la facture
+                                            </Link>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-gray-400 italic text-center py-6 bg-white/5 rounded-xl border border-white/5">
+                                    Vous n'avez pas encore passé de commande.
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>

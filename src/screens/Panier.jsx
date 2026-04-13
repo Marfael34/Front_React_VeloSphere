@@ -155,9 +155,11 @@ const Panier = () => {
                 <span>Total</span>
                 <span>{calculateTotal()} €</span>
               </div>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition">
-                Valider la commande
-              </button>
+              <Link to="/checkout">
+                <button className="main-button">
+                  Valider la commande et Payer
+                </button>
+              </Link>
             </div>
           </div>
         )}

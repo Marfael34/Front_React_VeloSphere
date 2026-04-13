@@ -10,8 +10,6 @@ const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
-    
-    // 👉 1. IL MANQUAIT L'ÉTAT "CART" ICI !
     const [cart, setCart] = useState(null);
     const [product, setProduct] = useState(null);
     const [isLoading, setIsLoading] = useState(true);

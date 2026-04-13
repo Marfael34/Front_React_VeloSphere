@@ -3,7 +3,8 @@ import axios from 'axios';
 import { API_ROOT } from '../../constants/apiConstant';
 import ProductCard from '../Card/ProductCard';
 import ButtonLoader from '../Loader/ButtonLoader';
-import SearchBar from '../Services/Searchbar';
+import SearchBar from '../Servicies/Searchbar';
+
 
 
 const ITEMS_PER_PAGE = 20;
@@ -157,7 +158,7 @@ const ProductList = () => {
           </div>
           
           <div className="w-full md:w-auto mt-4 md:mt-0">
-            <SearchBar 
+            <SearchBar
               searchTerm={searchTerm} 
               onSearchChange={handleSearchChange} 
               placeholder="Chercher un modèle, marque..." 

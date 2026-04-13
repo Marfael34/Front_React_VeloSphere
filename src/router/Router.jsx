@@ -10,6 +10,8 @@ import Profile from "../screens/Profile";
 import Location from "../screens/Location";
 import ProductDetail from "../screens/ProductDetail";
 import EditProduct from "../screens/EditProduct";
+import Checkout from "../screens/Checkout";
+import Invoice from "../screens/InVoice";
 
 const Router = createBrowserRouter([
     {
@@ -55,6 +57,14 @@ const Router = createBrowserRouter([
             {
                 path: "/product/edit/:id",
                 element: <EditProduct/>
+            },
+            { 
+                path: "/checkout", 
+                element: <Checkout/> 
+            },
+            { 
+                path: "/invoice/:id", 
+                element: <Invoice/> 
             }
             
         ]
