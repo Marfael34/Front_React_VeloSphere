@@ -62,6 +62,8 @@ security:
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/products, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/etats, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/characteristics, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/place, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
 

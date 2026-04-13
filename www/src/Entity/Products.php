@@ -24,7 +24,11 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Post(security: "is_granted('ROLE_ADMIN')"), // Création (protégée)
         new Put(security: "is_granted('ROLE_ADMIN')"), // Modification (protégée)
         new Delete(security: "is_granted('ROLE_ADMIN')") // Suppression (protégée)
-    ]
+    ],
+    // Cette ligne permet à React de dire "donne moi tout" avec ?pagination=false
+    paginationClientEnabled: true, 
+    // Optionnel : tu peux aussi augmenter la limite par défaut ici
+    paginationItemsPerPage: 100
 )]
 
 class Products
