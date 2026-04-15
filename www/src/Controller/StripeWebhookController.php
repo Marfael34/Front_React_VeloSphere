@@ -16,13 +16,11 @@ class StripeWebhookController extends AbstractController
     #[Route('/api/stripe/webhook', name: 'api_stripe_webhook', methods: ['POST'])]
     public function handleWebhook(Request $request, EntityManagerInterface $em, LoggerInterface $logger): Response
     {
-        // 1. On signale que le webhook a été touché !
         $logger->info('=== WEBHOOK STRIPE REÇU ===');
 
         $payload = $request->getContent();
         $event = json_decode($payload);
 
-        // Si le paiement est validé
         if ($event && $event->type === 'payment_intent.succeeded') {
             $paymentIntent = $event->data->object;
             $panierId = $paymentIntent->metadata->panier_id ?? null;
@@ -33,7 +31,6 @@ class StripeWebhookController extends AbstractController
                 $panier = $em->getRepository(Panier::class)->find($panierId);
                 
                 if ($panier) {
-                    // Recherche de l'état (avec sécurité LIKE pour éviter les erreurs d'orthographe de la BDD)
                     $etatPaye = $em->getRepository(Etat::class)
                         ->createQueryBuilder('e')
                         ->where('e.label LIKE :motCle')
@@ -48,20 +45,25 @@ class StripeWebhookController extends AbstractController
                         $order->setUser($panier->getUser());
                         $order->setEtat($etatPaye);
                         
-                        // On boucle sur les produits
+                        // 2. TRANSFERER ET DÉCRÉMENTER LE STOCK
                         foreach ($panier->getProducts() as $product) {
                             $order->addProduct($product);       // Ajout à la facture
-                            $panier->removeProduct($product);   // VIDAGE DU PANIER INITIAL
+                            $panier->removeProduct($product);   // Vidage du panier
+                            
+                            // ---- DÉDUCTION DU STOCK ----
+                            $currentQuantity = $product->getQuantity();
+                            // On retire 1, en s'assurant mathématiquement de ne jamais passer en négatif
+                            $newQuantity = max(0, $currentQuantity - 1); 
+                            $product->setQuantity($newQuantity);
                         }
 
-                        // 2. CHANGER L'ÉTAT DU PANIER
+                        // 3. CHANGER L'ÉTAT DU PANIER
                         $panier->setEtat($etatPaye);
 
-                        // On sauvegarde en base de données
                         $em->persist($order);
-                        $em->flush();
+                        $em->flush(); // Sauvegarde la facture, le panier vide ET les nouveaux stocks !
 
-                        $logger->info("SUCCÈS : Commande créée, panier vidé et mis à jour en 'Payées'.");
+                        $logger->info("SUCCÈS : Commande créée, panier vidé et stocks mis à jour.");
                     } else {
                         $logger->error("ERREUR : État 'Payées' introuvable en base de données.");
                     }

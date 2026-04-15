@@ -22,9 +22,9 @@ class StripeController extends AbstractController
         if (!$user instanceof \App\Entity\User) {
             return new JsonResponse(['error' => 'Utilisateur non connecté ou token invalide'], 401);
         }
-        // 2. Trouver l'état "En attente de paiement" (Nom exact d'après tes Fixtures)
+        // 2. Trouver l'état "En attentes de paiement" (Nom exact d'après tes Fixtures)
        // On remet la recherche exacte avec l'orthographe exacte de la base de données
-        $etatEnAttente = $em->getRepository(Etat::class)->findOneBy(['label' => 'En attentes de paiment']);
+        $etatEnAttente = $em->getRepository(Etat::class)->findOneBy(['label' => 'En attentes de paiement']);
         
         if (!$etatEnAttente) {
             return new JsonResponse(['error' => 'Erreur de configuration des états'], 500);

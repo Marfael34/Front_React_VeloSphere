@@ -26,7 +26,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Delete(security: "is_granted('ROLE_ADMIN')") // Suppression (protégée)
     ],
     // Cette ligne permet à React de dire "donne moi tout" avec ?pagination=false
-    paginationClientEnabled: true, 
+    paginationClientEnabled: true,
     // Optionnel : tu peux aussi augmenter la limite par défaut ici
     paginationItemsPerPage: 100
 )]
@@ -86,6 +86,10 @@ class Products
     #[ORM\ManyToMany(targetEntity: Characteristic::class, inversedBy: 'products')]
     #[Groups(['product:read'])]
     private Collection $characteristics;
+
+    #[ORM\Column]
+    #[Groups(['product:read'])]
+    private ?int $quantity = null;
 
     public function __construct()
     {
@@ -269,6 +273,18 @@ class Products
     public function removeCharacteristic(Characteristic $characteristic): static
     {
         $this->characteristics->removeElement($characteristic);
+
+        return $this;
+    }
+
+    public function getQuantity(): ?int
+    {
+        return $this->quantity;
+    }
+
+    public function setQuantity(int $quantity): static
+    {
+        $this->quantity = $quantity;
 
         return $this;
     }

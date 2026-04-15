@@ -22,11 +22,10 @@ class AppFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         // ⚠️ ATTENTION : L'ordre est important. 
-        // On charge les caractéristiques AVANT les produits pour pouvoir les lier.
         $this->loadCharacteristic($manager);
         $this->loadProduct($manager);
+        $this->loadAdress($manager); // <-- DÉPLACÉ ICI : On charge les adresses AVANT les utilisateurs
         $this->loadUser($manager);
-        $this->loadAdress($manager);
         $this->loadCompetition($manager);
         $this->loadEtat($manager);
         $this->loadPlaces($manager);
@@ -67,8 +66,6 @@ class AppFixtures extends Fixture
 
             $manager->persist($characteristic);
 
-            // On ajoute une référence unique (ex: 'char_VTT', 'char_Vélos ville')
-            // Cela permettra de retrouver l'objet exact lors de la création du produit.
             $this->addReference('char_' . $value['value'], $characteristic);
         }
     }
@@ -83,7 +80,8 @@ class AppFixtures extends Fixture
                 'price' => "650",
                 'brand' => "Decathlon",
                 'image' => "",
-                'category' => "Vélos ville"
+                'category' => "Vélos ville",
+                'quantity' => 15
             ],
             [
                 'title' => "Loft 7i",
@@ -91,7 +89,8 @@ class AppFixtures extends Fixture
                 'price' => "899",
                 'brand' => "Electra",
                 'image' => "",
-                'category' => "Vélos ville"
+                'category' => "Vélos ville",
+                'quantity' => 10
             ],
             [
                 'title' => "Roadlite 5",
@@ -99,7 +98,8 @@ class AppFixtures extends Fixture
                 'price' => "949",
                 'brand' => "Canyon",
                 'image' => "",
-                'category' => "Vélos ville"
+                'category' => "Vélos ville",
+                'quantity' => 12
             ],
             [
                 'title' => "Bad Boy 3",
@@ -107,7 +107,8 @@ class AppFixtures extends Fixture
                 'price' => "1099",
                 'brand' => "Cannondale",
                 'image' => "",
-                'category' => "Vélos ville"
+                'category' => "Vélos ville",
+                'quantity' => 8
             ],
             [
                 'title' => "Sirrus 2.0",
@@ -115,7 +116,8 @@ class AppFixtures extends Fixture
                 'price' => "750",
                 'brand' => "Specialized",
                 'image' => "",
-                'category' => "Vélos ville"
+                'category' => "Vélos ville",
+                'quantity' => 20
             ],
             [
                 'title' => "District 4",
@@ -123,7 +125,8 @@ class AppFixtures extends Fixture
                 'price' => "1649",
                 'brand' => "Trek",
                 'image' => "",
-                'category' => "Vélos ville"
+                'category' => "Vélos ville",
+                'quantity' => 5
             ],
             [
                 'title' => "Hyde Pro",
@@ -131,7 +134,8 @@ class AppFixtures extends Fixture
                 'price' => "1149",
                 'brand' => "Cube",
                 'image' => "",
-                'category' => "Vélos ville"
+                'category' => "Vélos ville",
+                'quantity' => 7
             ],
             [
                 'title' => "Presidio 2",
@@ -139,7 +143,8 @@ class AppFixtures extends Fixture
                 'price' => "850",
                 'brand' => "Marin",
                 'image' => "",
-                'category' => "Vélos ville"
+                'category' => "Vélos ville",
+                'quantity' => 10
             ],
             [
                 'title' => "Avenue",
@@ -147,7 +152,8 @@ class AppFixtures extends Fixture
                 'price' => "699",
                 'brand' => "MBK",
                 'image' => "",
-                'category' => "Vélos ville"
+                'category' => "Vélos ville",
+                'quantity' => 14
             ],
             [
                 'title' => "Brooklyn Cruiser",
@@ -155,7 +161,8 @@ class AppFixtures extends Fixture
                 'price' => "780",
                 'brand' => "Brooklyn",
                 'image' => "",
-                'category' => "Vélos ville"
+                'category' => "Vélos ville",
+                'quantity' => 6
             ],
 
             // VÉLOS ÉLECTRIQUES
@@ -165,7 +172,8 @@ class AppFixtures extends Fixture
                 'price' => "3299",
                 'brand' => "Moustache",
                 'image' => "",
-                'category' => "Vélos électriques"
+                'category' => "Vélos électriques",
+                'quantity' => 8
             ],
             [
                 'title' => "Cowboy Cruiser",
@@ -173,7 +181,8 @@ class AppFixtures extends Fixture
                 'price' => "2990",
                 'brand' => "Cowboy",
                 'image' => "",
-                'category' => "Vélos électriques"
+                'category' => "Vélos électriques",
+                'quantity' => 10
             ],
             [
                 'title' => "VanMoof S5",
@@ -181,7 +190,8 @@ class AppFixtures extends Fixture
                 'price' => "3498",
                 'brand' => "VanMoof",
                 'image' => "",
-                'category' => "Vélos électriques"
+                'category' => "Vélos électriques",
+                'quantity' => 5
             ],
             [
                 'title' => "Turbo Vado 4.0",
@@ -189,7 +199,8 @@ class AppFixtures extends Fixture
                 'price' => "4000",
                 'brand' => "Specialized",
                 'image' => "",
-                'category' => "Vélos électriques"
+                'category' => "Vélos électriques",
+                'quantity' => 4
             ],
             [
                 'title' => "Endeavour 5.B",
@@ -197,7 +208,8 @@ class AppFixtures extends Fixture
                 'price' => "3199",
                 'brand' => "Kalkhoff",
                 'image' => "",
-                'category' => "Vélos électriques"
+                'category' => "Vélos électriques",
+                'quantity' => 6
             ],
             [
                 'title' => "GSD S10",
@@ -205,7 +217,8 @@ class AppFixtures extends Fixture
                 'price' => "5499",
                 'brand' => "Tern",
                 'image' => "",
-                'category' => "Vélos électriques"
+                'category' => "Vélos électriques",
+                'quantity' => 3
             ],
             [
                 'title' => "RadRunner 3 Plus",
@@ -213,7 +226,8 @@ class AppFixtures extends Fixture
                 'price' => "2199",
                 'brand' => "Rad Power",
                 'image' => "",
-                'category' => "Vélos électriques"
+                'category' => "Vélos électriques",
+                'quantity' => 12
             ],
             [
                 'title' => "Nevo 4",
@@ -221,7 +235,8 @@ class AppFixtures extends Fixture
                 'price' => "5200",
                 'brand' => "Riese & Müller",
                 'image' => "",
-                'category' => "Vélos électriques"
+                'category' => "Vélos électriques",
+                'quantity' => 2
             ],
             [
                 'title' => "Angell S/Rapide",
@@ -229,7 +244,8 @@ class AppFixtures extends Fixture
                 'price' => "2850",
                 'brand' => "Angell",
                 'image' => "",
-                'category' => "Vélos électriques"
+                'category' => "Vélos électriques",
+                'quantity' => 7
             ],
             [
                 'title' => "C20",
@@ -237,7 +253,8 @@ class AppFixtures extends Fixture
                 'price' => "899",
                 'brand' => "Xiaomi",
                 'image' => "",
-                'category' => "Vélos électriques"
+                'category' => "Vélos électriques",
+                'quantity' => 25
             ],
 
             // VTT
@@ -247,7 +264,8 @@ class AppFixtures extends Fixture
                 'price' => "1299",
                 'brand' => "Decathlon",
                 'image' => "",
-                'category' => "VTT"
+                'category' => "VTT",
+                'quantity' => 18
             ],
             [
                 'title' => "Fuel EX 8",
@@ -255,7 +273,8 @@ class AppFixtures extends Fixture
                 'price' => "3999",
                 'brand' => "Trek",
                 'image' => "",
-                'category' => "VTT"
+                'category' => "VTT",
+                'quantity' => 5
             ],
             [
                 'title' => "Nomad 6",
@@ -263,7 +282,8 @@ class AppFixtures extends Fixture
                 'price' => "6500",
                 'brand' => "Santa Cruz",
                 'image' => "",
-                'category' => "VTT"
+                'category' => "VTT",
+                'quantity' => 2
             ],
             [
                 'title' => "Grand Canyon 7",
@@ -271,7 +291,8 @@ class AppFixtures extends Fixture
                 'price' => "1249",
                 'brand' => "Canyon",
                 'image' => "",
-                'category' => "VTT"
+                'category' => "VTT",
+                'quantity' => 15
             ],
             [
                 'title' => "Spark RC",
@@ -279,7 +300,8 @@ class AppFixtures extends Fixture
                 'price' => "5800",
                 'brand' => "Scott",
                 'image' => "",
-                'category' => "VTT"
+                'category' => "VTT",
+                'quantity' => 3
             ],
             [
                 'title' => "Alma M50",
@@ -287,7 +309,8 @@ class AppFixtures extends Fixture
                 'price' => "1899",
                 'brand' => "Orbea",
                 'image' => "",
-                'category' => "VTT"
+                'category' => "VTT",
+                'quantity' => 8
             ],
             [
                 'title' => "Epic World Cup",
@@ -295,7 +318,8 @@ class AppFixtures extends Fixture
                 'price' => "4500",
                 'brand' => "Specialized",
                 'image' => "",
-                'category' => "VTT"
+                'category' => "VTT",
+                'quantity' => 4
             ],
             [
                 'title' => "Meta HT AM",
@@ -303,7 +327,8 @@ class AppFixtures extends Fixture
                 'price' => "1600",
                 'brand' => "Commencal",
                 'image' => "",
-                'category' => "VTT"
+                'category' => "VTT",
+                'quantity' => 10
             ],
             [
                 'title' => "SB160",
@@ -311,7 +336,8 @@ class AppFixtures extends Fixture
                 'price' => "8200",
                 'brand' => "Yeti",
                 'image' => "",
-                'category' => "VTT"
+                'category' => "VTT",
+                'quantity' => 1
             ],
             [
                 'title' => "Trance X 29 1",
@@ -319,7 +345,8 @@ class AppFixtures extends Fixture
                 'price' => "2700",
                 'brand' => "Giant",
                 'image' => "",
-                'category' => "VTT"
+                'category' => "VTT",
+                'quantity' => 7
             ],
 
             // ROUTE & GRAVEL
@@ -329,7 +356,8 @@ class AppFixtures extends Fixture
                 'price' => "1800",
                 'brand' => "Van Rysel",
                 'image' => "",
-                'category' => "Route et Gravel"
+                'category' => "Route et Gravel",
+                'quantity' => 12
             ],
             [
                 'title' => "Madone SLR 9",
@@ -337,7 +365,8 @@ class AppFixtures extends Fixture
                 'price' => "12500",
                 'brand' => "Trek",
                 'image' => "",
-                'category' => "Route et Gravel"
+                'category' => "Route et Gravel",
+                'quantity' => 1
             ],
             [
                 'title' => "Grizl CF SL 8",
@@ -345,7 +374,8 @@ class AppFixtures extends Fixture
                 'price' => "2499",
                 'brand' => "Canyon",
                 'image' => "",
-                'category' => "Route et Gravel"
+                'category' => "Route et Gravel",
+                'quantity' => 9
             ],
             [
                 'title' => "Oltre RC",
@@ -353,7 +383,8 @@ class AppFixtures extends Fixture
                 'price' => "13800",
                 'brand' => "Bianchi",
                 'image' => "",
-                'category' => "Route et Gravel"
+                'category' => "Route et Gravel",
+                'quantity' => 2
             ],
             [
                 'title' => "Domane AL 2",
@@ -361,7 +392,8 @@ class AppFixtures extends Fixture
                 'price' => "999",
                 'brand' => "Trek",
                 'image' => "",
-                'category' => "Route et Gravel"
+                'category' => "Route et Gravel",
+                'quantity' => 14
             ],
             [
                 'title' => "Dogma F",
@@ -369,7 +401,8 @@ class AppFixtures extends Fixture
                 'price' => "14500",
                 'brand' => "Pinarello",
                 'image' => "",
-                'category' => "Route et Gravel"
+                'category' => "Route et Gravel",
+                'quantity' => 1
             ],
             [
                 'title' => "Diverge STR",
@@ -377,7 +410,8 @@ class AppFixtures extends Fixture
                 'price' => "3200",
                 'brand' => "Specialized",
                 'image' => "",
-                'category' => "Route et Gravel"
+                'category' => "Route et Gravel",
+                'quantity' => 4
             ],
             [
                 'title' => "S5 Ultegra Di2",
@@ -385,7 +419,8 @@ class AppFixtures extends Fixture
                 'price' => "9000",
                 'brand' => "Cervélo",
                 'image' => "",
-                'category' => "Route et Gravel"
+                'category' => "Route et Gravel",
+                'quantity' => 2
             ],
             [
                 'title' => "Reveal 04",
@@ -393,7 +428,8 @@ class AppFixtures extends Fixture
                 'price' => "2600",
                 'brand' => "Rose",
                 'image' => "",
-                'category' => "Route et Gravel"
+                'category' => "Route et Gravel",
+                'quantity' => 6
             ],
             [
                 'title' => "Filante SLR",
@@ -401,7 +437,8 @@ class AppFixtures extends Fixture
                 'price' => "8500",
                 'brand' => "Wilier",
                 'image' => "",
-                'category' => "Route et Gravel"
+                'category' => "Route et Gravel",
+                'quantity' => 3
             ],
 
             // ENFANT & PLIABLES
@@ -411,7 +448,8 @@ class AppFixtures extends Fixture
                 'price' => "1750",
                 'brand' => "Brompton",
                 'image' => "",
-                'category' => "Enfant et Pliable"
+                'category' => "Enfant et Pliable",
+                'quantity' => 8
             ],
             [
                 'title' => "Woom 3",
@@ -419,7 +457,8 @@ class AppFixtures extends Fixture
                 'price' => "449",
                 'brand' => "Woom",
                 'image' => "",
-                'category' => "Enfant et Pliable"
+                'category' => "Enfant et Pliable",
+                'quantity' => 22
             ],
             [
                 'title' => "Runride 500",
@@ -427,7 +466,8 @@ class AppFixtures extends Fixture
                 'price' => "60",
                 'brand' => "Btwin",
                 'image' => "",
-                'category' => "Enfant et Pliable"
+                'category' => "Enfant et Pliable",
+                'quantity' => 30
             ],
             [
                 'title' => "Frog 55",
@@ -435,7 +475,8 @@ class AppFixtures extends Fixture
                 'price' => "530",
                 'brand' => "Frog Bikes",
                 'image' => "",
-                'category' => "Enfant et Pliable"
+                'category' => "Enfant et Pliable",
+                'quantity' => 14
             ],
             [
                 'title' => "Mariner D8",
@@ -443,7 +484,8 @@ class AppFixtures extends Fixture
                 'price' => "850",
                 'brand' => "Dahon",
                 'image' => "",
-                'category' => "Enfant et Pliable"
+                'category' => "Enfant et Pliable",
+                'quantity' => 11
             ],
             [
                 'title' => "Belter 16",
@@ -451,7 +493,8 @@ class AppFixtures extends Fixture
                 'price' => "500",
                 'brand' => "Early Rider",
                 'image' => "",
-                'category' => "Enfant et Pliable"
+                'category' => "Enfant et Pliable",
+                'quantity' => 6
             ],
             [
                 'title' => "Node D8",
@@ -459,7 +502,8 @@ class AppFixtures extends Fixture
                 'price' => "950",
                 'brand' => "Tern",
                 'image' => "",
-                'category' => "Enfant et Pliable"
+                'category' => "Enfant et Pliable",
+                'quantity' => 5
             ],
             [
                 'title' => "Cyke 20-7",
@@ -467,7 +511,8 @@ class AppFixtures extends Fixture
                 'price' => "380",
                 'brand' => "Puky",
                 'image' => "",
-                'category' => "Enfant et Pliable"
+                'category' => "Enfant et Pliable",
+                'quantity' => 16
             ],
             [
                 'title' => "Tilt 500 E",
@@ -475,7 +520,8 @@ class AppFixtures extends Fixture
                 'price' => "850",
                 'brand' => "Decathlon",
                 'image' => "",
-                'category' => "Enfant et Pliable"
+                'category' => "Enfant et Pliable",
+                'quantity' => 20
             ],
             [
                 'title' => "Ramones 16",
@@ -483,7 +529,8 @@ class AppFixtures extends Fixture
                 'price' => "450",
                 'brand' => "Commencal",
                 'image' => "",
-                'category' => "Enfant et Pliable"
+                'category' => "Enfant et Pliable",
+                'quantity' => 12
             ],
         ];
 
@@ -496,61 +543,17 @@ class AppFixtures extends Fixture
             $product->setImagePath($value['image']);
             $product->setCreatedAt(new DateTime());
             $product->setIsActive(true);
+            $product->setQuantity($value['quantity']);
 
-            // ASSIGNATION DE LA CARACTÉRISTIQUE AU PRODUIT
-            // Remarque : Si ta relation Doctrine dans l'entité Products est une ManyToOne, 
-            // il se peut que la méthode générée s'appelle setCharacteristic() au lieu de addCharacteristic()
             if (isset($value['category'])) {
                 $referenceName = 'char_' . $value['category'];
                 
-                // Le nom de la référence en premier, la classe en second.
                 if ($this->hasReference($referenceName, Characteristic::class)) {
                     $product->addCharacteristic($this->getReference($referenceName, Characteristic::class));
                 }
             }  
 
             $manager->persist($product);
-        }
-    }
-
-    public function loadUser(ObjectManager $manager)
-    {
-        $admin = new User();
-        $admin->setEmail('admin@admin.com');
-        $admin->setFirstname("Admin");
-        $admin->setLastname("Admin");
-        $admin->setPseudo('Admin');
-        $admin->setPassword($this->passwordHasher->hashPassword($admin, 'admin'));
-        $admin->setRoles(['ROLE_ADMIN', 'ROLE_USER']);
-        $admin->setBirthday(new \DateTime('2026-03-20'));
-        $admin->setCreatedAt(new DateTime());
-        $admin->setUpdatedAt(new DateTime());
-        $admin->setIsActive(true);
-
-        $manager->persist($admin);
-
-        // création d'utilisateur
-        $arrayUser = [
-            ['prenom' => 'Léna', 'nom' => 'Bertrand', 'email' => 'l.bertrand.crea@gmail.com', 'pseudo' => 'PixelArtiste_92', 'birthday' => '1992-05-14'],
-            ['prenom' => 'Julien', 'nom' => 'Masson', 'email' => 'j-masson-85@gmail.com', 'pseudo' => 'JulesLeRandonneur', 'birthday' => '1985-11-03'],
-            ['prenom' => 'Inès', 'nom' => 'Belkacem', 'email' => 'belkacem.ines@gmail.com', 'pseudo' => 'CyberInes_XP', 'birthday' => '2001-08-22']
-        ];
-
-        foreach ($arrayUser as $key => $value) {
-            $user = new User();
-            $user->setFirstname($value['prenom']);
-            $user->setLastname($value['nom']);
-            $user->setEmail($value['email']);
-            $user->setPseudo($value['pseudo']);
-            $user->setBirthday(new \DateTime($value['birthday']));
-            $user->setPassword($this->passwordHasher->hashPassword($user, 'user'));
-            $user->setRoles(['ROLE_USER']);
-            $user->setCreatedAt(new DateTime());
-            $user->setIsActive(true);
-
-            $manager->persist($user);
-
-            $this->addReference('user_' . $key, $user);
         }
     }
 
@@ -582,7 +585,8 @@ class AppFixtures extends Fixture
                 'cp' => 93100
             ]
         ];
-        foreach ($arrayAdress as $value) {
+
+        foreach ($arrayAdress as $key => $value) {
             $adress = new Adress();
             $adress->setNumber($value['number']);
             $adress->setType($value['type']);
@@ -592,6 +596,61 @@ class AppFixtures extends Fixture
             $adress->setCp($value['cp']);
 
             $manager->persist($adress);
+            
+            // <-- AJOUT DE LA RÉFÉRENCE ICI
+            $this->addReference('adress_' . $key, $adress);
+        }
+    }
+
+    public function loadUser(ObjectManager $manager)
+    {
+        $admin = new User();
+        $admin->setEmail('admin@admin.com');
+        $admin->setFirstname("Admin");
+        $admin->setLastname("Admin");
+        $admin->setPseudo('Admin');
+        $admin->setPassword($this->passwordHasher->hashPassword($admin, 'admin'));
+        $admin->setRoles(['ROLE_ADMIN', 'ROLE_USER']);
+        $admin->setBirthday(new \DateTime('2026-03-20'));
+        $admin->setCreatedAt(new DateTime());
+        $admin->setUpdatedAt(new DateTime());
+        $admin->setIsActive(true);
+
+        // <-- LIAISON ADRESSE ADMIN (on lui donne la première adresse : adress_0)
+        if ($this->hasReference('adress_0', Adress::class)) {
+            $admin->addAdress($this->getReference('adress_0', Adress::class));
+        }
+
+        $manager->persist($admin);
+
+        // création d'utilisateur
+        $arrayUser = [
+            ['prenom' => 'Léna', 'nom' => 'Bertrand', 'email' => 'l.bertrand.crea@gmail.com', 'pseudo' => 'PixelArtiste_92', 'birthday' => '1992-05-14'],
+            ['prenom' => 'Julien', 'nom' => 'Masson', 'email' => 'j-masson-85@gmail.com', 'pseudo' => 'JulesLeRandonneur', 'birthday' => '1985-11-03'],
+            ['prenom' => 'Inès', 'nom' => 'Belkacem', 'email' => 'belkacem.ines@gmail.com', 'pseudo' => 'CyberInes_XP', 'birthday' => '2001-08-22']
+        ];
+
+        foreach ($arrayUser as $key => $value) {
+            $user = new User();
+            $user->setFirstname($value['prenom']);
+            $user->setLastname($value['nom']);
+            $user->setEmail($value['email']);
+            $user->setPseudo($value['pseudo']);
+            $user->setBirthday(new \DateTime($value['birthday']));
+            $user->setPassword($this->passwordHasher->hashPassword($user, 'user'));
+            $user->setRoles(['ROLE_USER']);
+            $user->setCreatedAt(new DateTime());
+            $user->setIsActive(true);
+
+            // <-- LIAISON ADRESSE UTILISATEURS
+            // $key correspond à 0, 1 et 2 dans la boucle arrayUser
+            if ($this->hasReference('adress_' . $key, Adress::class)) {
+                $user->addAdress($this->getReference('adress_' . $key, Adress::class));
+            }
+
+            $manager->persist($user);
+
+            $this->addReference('user_' . $key, $user);
         }
     }
 
@@ -637,7 +696,7 @@ class AppFixtures extends Fixture
 
     public function loadEtat(ObjectManager $manager)
     {
-        $arrayEtat = ['En attente de paiement', 'Payées', 'En cours de livraison'];
+        $arrayEtat = ['En attentes de paiement', 'Payées', 'En cours de livraison'];
 
         foreach ($arrayEtat as $value) {
             $etat = new Etat();

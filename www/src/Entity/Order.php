@@ -33,6 +33,12 @@ class Order
     #[ORM\ManyToMany(targetEntity: Products::class, inversedBy: 'orders')]
     private Collection $products;
 
+    #[ORM\Column]
+    private ?\DateTime $created_at = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $path = null;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
@@ -87,6 +93,30 @@ class Order
     public function removeProduct(Products $product): static
     {
         $this->products->removeElement($product);
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTime
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTime $created_at): static
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getPath(): ?string
+    {
+        return $this->path;
+    }
+
+    public function setPath(string $path): static
+    {
+        $this->path = $path;
 
         return $this;
     }
