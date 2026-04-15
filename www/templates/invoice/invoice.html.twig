@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Facture #{{ order.id }}</title>
+    <style>
+        body { font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; color: #333; }
+        .invoice-box { max-width: 800px; margin: auto; padding: 30px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); }
+        .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+        .header h1 { color: #f97316; margin: 0; }
+        .details { display: table; width: 100%; margin-bottom: 20px; }
+        .details-col { display: table-cell; width: 50%; }
+        table { width: 100%; line-height: inherit; text-align: left; border-collapse: collapse; }
+        table th, table td { padding: 10px; border-bottom: 1px solid #eee; }
+        table th { background: #f8f8f8; font-weight: bold; }
+        .total { text-align: right; font-size: 1.2em; font-weight: bold; margin-top: 20px; color: #f97316; }
+    </style>
+</head>
+<body>
+    <div class="invoice-box">
+        <div class="header">
+            <div>
+                <h1>LA ROUE LIBRE</h1>
+                <p>123 Rue du Vélo, 34000 Montpellier<br>contact@larouelibre.fr<br>SIRET : 123 456 789 00012</p>
+            </div>
+        </div>
+
+        <div class="details">
+            <div class="details-col">
+                <strong>Facturé à :</strong><br>
+                {{ user.firstname }} {{ user.lastname }}<br>
+                {{ user.email }}
+            </div>
+            <div class="details-col" style="text-align: right;">
+                <strong>Facture n° :</strong> FAC-{{ date|date('Y') }}-{{ random(1000, 9999) }}<br>
+                <strong>Date :</strong> {{ date|date('d/m/Y') }}
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Article</th>
+                    <th>Quantité</th>
+                    <th style="text-align: right;">Prix unitaire TTC</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.title }}</td>
+                    <td>1</td>
+                    <td style="text-align: right;">{{ product.price }} €</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="total">
+            Total TTC : {{ total }} €
+        </div>
+    </div>
+</body>
+</html>

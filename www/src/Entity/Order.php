@@ -9,34 +9,43 @@ use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['order:read']]
+)]
 #[ApiFilter(SearchFilter::class, properties: ['user' => 'exact'])]
 class Order
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['order:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
+    #[Groups(['order:read'])]
     private ?Etat $etat = null;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
+    #[Groups(['order:read'])]
     private ?User $user = null;
 
     /**
      * @var Collection<int, Products>
      */
     #[ORM\ManyToMany(targetEntity: Products::class, inversedBy: 'orders')]
+    #[Groups(['order:read'])]
     private Collection $products;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
+    #[Groups(['order:read'])]
     private ?\DateTime $created_at = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['order:read'])]
     private ?string $path = null;
 
     public function __construct()
@@ -102,7 +111,8 @@ class Order
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTime $created_at): static
+    // Le '?' est OBLIGATOIRE ici pour éviter l'erreur 500
+    public function setCreatedAt(?\DateTime $created_at): static
     {
         $this->created_at = $created_at;
 
@@ -114,7 +124,8 @@ class Order
         return $this->path;
     }
 
-    public function setPath(string $path): static
+    // Le '?' est OBLIGATOIRE ici pour éviter l'erreur 500
+    public function setPath(?string $path): static
     {
         $this->path = $path;
 
