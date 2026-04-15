@@ -247,16 +247,27 @@ const Profile = () => {
                                                 <p className="text-sm text-gray-400 flex items-center gap-2">
                                                     <FaBoxOpen className="text-gray-500" /> {order.products?.length || 0} article(s)
                                                 </p>
+                                                <p className="text-xs text-gray-400 mt-1">
+                                                    Passée le : {order.created_at ? new Date(order.created_at).toLocaleDateString('fr-FR') : "Date inconnue"}
+                                                </p>
                                                 <span className="inline-block mt-2 px-2 py-1 text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/30 rounded-md">
                                                     Statut : Payée
                                                 </span>
                                             </div>
-                                            <Link 
-                                                to={`/invoice/${order.id}`} 
-                                                className="bg-white/10 hover:bg-orange text-white hover:text-black font-bold px-4 py-2 rounded-lg text-sm transition duration-300 shadow-md"
-                                            >
-                                                Voir la facture
-                                            </Link>
+                                            
+                                            {/* LE LIEN POINTE DIRECTEMENT VERS LE PDF GÉNÉRÉ */}
+                                            {order.path ? (
+                                                <a 
+                                                    href={`${API_ROOT}${order.path}`} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="bg-white/10 hover:bg-orange text-white hover:text-black font-bold px-4 py-2 rounded-lg text-sm transition duration-300 shadow-md"
+                                                >
+                                                    Voir la facture
+                                                </a>
+                                            ) : (
+                                                <span className="text-gray-500 text-sm italic">Facture indisponible</span>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

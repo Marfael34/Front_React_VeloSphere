@@ -18,16 +18,17 @@ const ProductDetail = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                // Récupération du produit
                 const productRes = await axios.get(`${API_ROOT}/api/products/${id}`);
                 setProduct(productRes.data);
 
+                // Récupération du panier en cours si l'utilisateur est connecté
                 if (user?.token && user?.id) {
                     const authConfig = { headers: { Authorization: `Bearer ${user.token}` } };
                     const etatsRes = await axios.get(`${API_ROOT}/api/etats`, authConfig);
                     const etats = etatsRes.data.member || etatsRes.data['hydra:member'] || [];
 
-                    // On utilise l'orthographe EXACTE de tes fixtures
-                    const etatCible = etats.find(e => e.label === "En attente de paiement");
+                    const etatCible = etats.find(e => e.label.toLowerCase().includes("attente"));
 
                     if (etatCible) {
                         const cartRes = await axios.get(
@@ -57,76 +58,98 @@ const ProductDetail = () => {
         return;
     }
 
-    // Sécurité : Vérification du stock avant même de tenter l'ajout
     if (product.quantity <= 0) {
         alert("Désolé, ce produit est en rupture de stock.");
         return;
     }
 
     try {
-        const authConfig = { headers: { Authorization: `Bearer ${user.token}` } };
+        const authConfig = { 
+            headers: { 
+                Authorization: `Bearer ${user.token}`,
+                'Content-Type': 'application/ld+json' 
+            } 
+        };
 
-        // 1. Récupération des états avec une recherche plus souple
+        // 1. On récupère l'état exact pour être sûr de la recherche
         const etatsRes = await axios.get(`${API_ROOT}/api/etats`, authConfig);
         const etats = etatsRes.data.member || etatsRes.data['hydra:member'] || [];
         
-        // On cherche l'état qui contient "attente" pour éviter les erreurs de frappe strictes
+        // On cherche le label "En attentes de paiement" (orthographe exacte de votre profil)
         const etatEnAttente = etats.find(e => 
+            e.label === "En attentes de paiement" || 
             e.label.toLowerCase().includes("attente")
         );
 
         if (!etatEnAttente) {
-            alert("Erreur : l'état 'En attente de paiement' est introuvable dans la base de données. Avez-vous chargé les fixtures ?");
+            alert("Erreur : État de panier introuvable.");
             return;
         }
 
         const etatIri = etatEnAttente['@id'];
         const productIri = product['@id'] || `/api/products/${product.id}`;
 
-        // 2. Recherche du panier
-        const panierRes = await axios.get(
-            `${API_ROOT}/api/paniers?user=/api/users/${user.id}&etat=${etatIri}`,
-            authConfig
-        );
-        const paniersExistants = panierRes.data.member || panierRes.data['hydra:member'] || [];
+        // 2. LOGIQUE DE VÉRIFICATION DU PANIER
+        let currentCart = cart;
 
-        if (paniersExistants.length > 0) {
-            const panierActuel = paniersExistants[0];
-            const produitsActuelsIris = panierActuel.products.map(p => 
-                typeof p === 'string' ? p : (p['@id'] || `/api/products/${p.id}`)
+        // Si le state 'cart' est vide, on force une vérification en base de données
+        // pour éviter de recréer un panier si l'utilisateur a rafraîchi la page
+        if (!currentCart) {
+            const panierRes = await axios.get(
+                `${API_ROOT}/api/paniers?user=/api/users/${user.id}&etat=${etatIri}`,
+                authConfig
             );
+            const paniersExistants = panierRes.data.member || panierRes.data['hydra:member'] || [];
             
-            const nouveauxProduits = [...produitsActuelsIris, productIri];
-
-            await axios.patch(`${API_ROOT}/api/paniers/${panierActuel.id}`, 
-                { products: nouveauxProduits }, 
-                {
-                    headers: { 
-                        'Content-Type': 'application/merge-patch+json',
-                        'Authorization': `Bearer ${user.token}` 
-                    }
-                }
-            );
-            alert("Produit ajouté !");
-        } else {
-            await axios.post(`${API_ROOT}/api/paniers`, 
-                {
-                    user: `/api/users/${user.id}`,
-                    etat: etatIri,
-                    products: [productIri]
-                }, 
-                {
-                    headers: { 
-                        'Content-Type': 'application/ld+json',
-                        'Authorization': `Bearer ${user.token}` 
-                    }
-                }
-            );
-            alert("Nouveau panier créé !");
+            if (paniersExistants.length > 0) {
+                currentCart = paniersExistants[0];
+            } else {
+                // SEULEMENT SI rien n'existe en base, on crée un nouveau panier
+                const newPanierRes = await axios.post(`${API_ROOT}/api/paniers`, 
+                    { user: `/api/users/${user.id}`, etat: etatIri }, 
+                    authConfig
+                );
+                currentCart = newPanierRes.data;
+            }
+            setCart(currentCart);
         }
+
+        // 3. AJOUT OU MISE À JOUR DE L'ITEM
+        // On cherche si le produit est déjà dans ce panier spécifique
+        const existingItem = currentCart.items?.find(item => {
+            const itemProdIri = item.product['@id'] || `/api/products/${item.product.id}`;
+            return itemProdIri === productIri;
+        });
+
+        if (existingItem) {
+            // Augmenter la quantité d'un item existant
+            await axios.patch(`${API_ROOT}/api/panier_items/${existingItem.id}`, 
+                { quantity: existingItem.quantity + 1 },
+                { headers: { ...authConfig.headers, 'Content-Type': 'application/merge-patch+json' } }
+            );
+            alert("Quantité mise à jour !");
+        } else {
+            // Créer une nouvelle ligne (PanierItem) dans le panier existant
+            await axios.post(`${API_ROOT}/api/panier_items`, 
+                {
+                    panier: `/api/paniers/${currentCart.id}`,
+                    product: productIri,
+                    quantity: 1
+                },
+                authConfig
+            );
+            alert("Produit ajouté au panier !");
+        }
+
+        // 4. Mise à jour de l'état local pour refléter les changements immédiatement
+        const updatedCartRes = await axios.get(`${API_ROOT}/api/paniers/${currentCart.id}`, {
+            headers: { Authorization: `Bearer ${user.token}` }
+        });
+        setCart(updatedCartRes.data);
+
     } catch (error) {
-        console.error("Erreur détaillée :", error.response?.data);
-        alert("Erreur lors de l'ajout au panier.");
+        console.error("Erreur lors de l'ajout :", error.response?.data || error);
+        alert("Une erreur est survenue lors de l'ajout au panier.");
     }
 };
 
@@ -176,7 +199,6 @@ const ProductDetail = () => {
                         
                         <p className="text-3xl font-bold text-orange mb-2">{product.price} €</p>
                         
-                        {/* AFFICHAGE DU STOCK */}
                         <div className={`mb-6 font-bold ${product.quantity > 0 ? 'text-green-400' : 'text-red-500'}`}>
                             {product.quantity > 0 ? `En stock : ${product.quantity} unité(s)` : 'Rupture de stock'}
                         </div>
