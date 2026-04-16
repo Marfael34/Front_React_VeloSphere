@@ -18,54 +18,51 @@ class StripeController extends AbstractController
         // 1. Récupérer l'utilisateur
         $user = $this->getUser();
 
-        // 2. VÉRIFICATION CRUCIALE : On s'assure que c'est bien NOTRE entité User
+        // 2. Vérification que c'est bien NOTRE entité User
         if (!$user instanceof \App\Entity\User) {
             return new JsonResponse(['error' => 'Utilisateur non connecté ou token invalide'], 401);
         }
-        // 2. Trouver l'état "En attentes de paiement" (Nom exact d'après tes Fixtures)
-       // On remet la recherche exacte avec l'orthographe exacte de la base de données
+
+        // Trouver l'état "En attentes de paiement"
         $etatEnAttente = $em->getRepository(Etat::class)->findOneBy(['label' => 'En attentes de paiement']);
         
         if (!$etatEnAttente) {
             return new JsonResponse(['error' => 'Erreur de configuration des états'], 500);
         }
 
-        // 3. Récupérer le panier actif de cet utilisateur précis
+        // 3. Récupérer le panier actif
         $panier = $em->getRepository(Panier::class)->findOneBy([
             'user' => $user,
             'etat' => $etatEnAttente
         ]);
 
-        if (!$panier || $panier->getProducts()->isEmpty()) {
+        // MODIFICATION ICI : On utilise getItems() au lieu de getProducts()
+        if (!$panier || $panier->getItems()->isEmpty()) {
             return new JsonResponse(['error' => 'Votre panier est vide'], 400);
         }
 
-        // 4. Calculer le montant total du panier de façon sécurisée (côté serveur !)
+        // 4. Calculer le montant total avec les quantités
         $totalPrice = 0;
-        foreach ($panier->getProducts() as $product) {
-            $totalPrice += $product->getPrice();
+        foreach ($panier->getItems() as $item) {
+            $product = $item->getProduct();
+            if ($product) {
+                // On multiplie le prix unitaire par la quantité de l'item
+                $totalPrice += ($product->getPrice() * $item->getQuantity());
+            }
         }
 
-        // Stripe attend un montant en CENTIMES et entier (ex: 154.50€ devient 15450)
+        // Stripe attend un montant en CENTIMES et entier
         $amountInCents = (int) round($totalPrice * 100);
 
-        // 5. Initialiser Stripe avec ta clé secrète (depuis le .env)
+        // 5. Initialiser Stripe avec ta clé secrète
         Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
 
         try {
-            // 6. Créer l'intention de paiement avec le vrai montant
+            // 6. Créer l'intention de paiement
             $paymentIntent = PaymentIntent::create([
                 'amount' => $amountInCents, 
                 'currency' => 'eur',
-                // ligne pour tout les méthode de paiment
-                // 'automatic_payment_methods' => [
-                //     'enabled' => true,
-                // ],
-
-                // Force uniquement la carte bancaire
                 'payment_method_types' => ['card'], 
-                // Optionnel mais très utile : on attache l'ID du panier à ce paiement 
-                // pour le retrouver facilement plus tard (dans le Webhook par exemple)
                 'metadata' => [
                     'panier_id' => $panier->getId(),
                     'Email' => $user->getUserIdentifier(),
@@ -74,7 +71,7 @@ class StripeController extends AbstractController
                 ]
             ]);
 
-            // 7. Renvoyer l'autorisation au front-end React
+            // 7. Renvoyer l'autorisation au front-end
             return new JsonResponse([
                 'clientSecret' => $paymentIntent->client_secret,
             ]);

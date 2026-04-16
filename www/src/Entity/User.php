@@ -17,11 +17,17 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[ApiResource(
-    security: "is_granted('ROLE_ADMIN') or object == user", 
-    securityMessage: "Vous ne pouvez accéder qu'à votre propre compte.",
+    normalizationContext: ['groups' => ['user:read']],
     operations: [
-        new Get(normalizationContext: ['groups' => ['user:read']]),
-        new GetCollection(normalizationContext: ['groups' => ['user:read']])
+        // On permet le GET seulement si c'est l'admin ou l'utilisateur lui-même
+        new Get(
+            security: "is_granted('ROLE_ADMIN') or object == user"
+        ),
+        // On permet la collection (nécessaire pour certains filtres internes)
+        // mais API Platform appliquera automatiquement des filtres si configuré
+        new GetCollection(
+            security: "is_granted('ROLE_ADMIN')" // Seul l'admin voit la liste complète
+        )
     ]
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface

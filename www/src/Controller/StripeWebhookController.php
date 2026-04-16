@@ -54,7 +54,7 @@ class StripeWebhookController extends AbstractController
                         ->getOneOrNullResult();
 
                     if (!$etatPaye) {
-                        $logger->error("ERREUR : État contenant 'Payées' introuvable en base de données.");
+                        $logger->error("ERREUR : État contenant 'Payées' introuvable.");
                         return new Response('Etat introuvable', 404);
                     }
 
@@ -62,46 +62,63 @@ class StripeWebhookController extends AbstractController
                     $order = new Order();
                     $order->setUser($panier->getUser());
                     $order->setEtat($etatPaye);
-                    // Utilisation du namespace global pour éviter l'erreur de redeclaration
                     $order->setCreatedAt(new \DateTime());
                     
                     $totalPrice = 0;
+                    $invoiceLines = [];
 
                     // 2. TRANSFERT ET DÉCRÉMENTATION DU STOCK
-                    // On utilise getItems() car la relation ManyToMany directe a été supprimée
                     foreach ($panier->getItems() as $item) {
                         $product = $item->getProduct(); 
-                        $qtyBought = $item->getQuantity();
+                        if (!$product) continue;
 
-                        // Ajout du produit à l'historique Order selon la quantité
-                        for ($i = 0; $i < $qtyBought; $i++) {
-                            $order->addProduct($product); 
-                        }
+                        $qtyBought = $item->getQuantity();
+                        $subtotal = $product->getPrice() * $qtyBought;
+
+                        $invoiceLines[] = [
+                            'title' => $product->getTitle(),
+                            'price' => $product->getPrice(),
+                            'quantity' => $qtyBought,
+                            'subtotal' => $subtotal
+                        ];
+
+                        $order->addProduct($product); 
                         
-                        // Déduction du stock réel (Stock - Quantité achetée)
                         $currentQuantity = $product->getQuantity();
                         $product->setQuantity(max(0, $currentQuantity - $qtyBought));
                         
-                        // Calcul du prix total
-                        $totalPrice += ($product->getPrice() * $qtyBought);
-
-                        // On supprime l'item du panier (vidage)
+                        $totalPrice += $subtotal;
                         $em->remove($item);
                     }
 
-                    // 3. GÉNÉRATION DU PDF
+                    // 3. GÉNÉRATION DU PDF ET TRAITEMENT DE L'IMAGE
                     $logger->info("Génération du PDF en cours...");
                     $pdfOptions = new Options();
                     $pdfOptions->set('defaultFont', 'Arial');
                     $pdfOptions->set('isRemoteEnabled', true); 
                     $dompdf = new Dompdf($pdfOptions);
 
+                    // --- AJOUT POUR LE LOGO ---
+                    // On va chercher l'image physique dans le dossier public/images/
+                    $logoPath = $params->get('kernel.project_dir') . '/public/images/logo.png';
+                    $logoData = null;
+
+                    if (file_exists($logoPath)) {
+                        $type = pathinfo($logoPath, PATHINFO_EXTENSION);
+                        $data = file_get_contents($logoPath);
+                        $logoData = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                    } else {
+                        $logger->warning("Attention: Logo introuvable au chemin : " . $logoPath);
+                    }
+                    // --------------------------
+
                     $html = $twig->render('invoice/invoice.html.twig', [
                         'order' => $order,
                         'user' => $panier->getUser(),
-                        'products' => $order->getProducts(),
+                        'lines' => $invoiceLines, 
                         'total' => $totalPrice,
-                        'date' => $order->getCreatedAt()
+                        'date' => clone $order->getCreatedAt(),
+                        'logo' => $logoData // On passe la variable logo à Twig ici
                     ]);
 
                     $dompdf->loadHtml($html);

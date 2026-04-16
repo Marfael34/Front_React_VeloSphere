@@ -4,60 +4,183 @@
     <meta charset="UTF-8">
     <title>Facture #{{ order.id }}</title>
     <style>
-        body { font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; color: #333; }
-        .invoice-box { max-width: 800px; margin: auto; padding: 30px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); }
-        .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
-        .header h1 { color: #f97316; margin: 0; }
-        .details { display: table; width: 100%; margin-bottom: 20px; }
-        .details-col { display: table-cell; width: 50%; }
-        table { width: 100%; line-height: inherit; text-align: left; border-collapse: collapse; }
-        table th, table td { padding: 10px; border-bottom: 1px solid #eee; }
-        table th { background: #f8f8f8; font-weight: bold; }
-        .total { text-align: right; font-size: 1.2em; font-weight: bold; margin-top: 20px; color: #f97316; }
+        body { 
+            font-family: 'Helvetica', Arial, sans-serif; 
+            color: #333; 
+        }
+        .invoice-box { 
+            max-width: 800px; 
+            margin: auto; 
+            padding: 30px; 
+            background-color: #fff; 
+        }
+        .header { 
+            width: 100%;
+            margin-bottom: 50px; 
+        }
+        .header table {
+            width: 100%;
+            border: none;
+        }
+        .logo-img {
+            max-width: 150px;
+            height: auto;
+        }
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #1a1a1a;
+        }
+        .company-details {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+        .title-facture {
+            font-size: 32px;
+            color: #ccc;
+            text-align: right;
+            font-weight: 300;
+            text-transform: uppercase;
+        }
+        .details-table {
+            width: 100%;
+            margin-bottom: 40px;
+        }
+        .details-table td {
+            vertical-align: top;
+            width: 50%;
+        }
+        .label {
+            font-weight: bold;
+            color: #555;
+            font-size: 13px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .value {
+            font-size: 15px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .items-table th {
+            background: #f9f9f9;
+            color: #555;
+            text-transform: uppercase;
+            font-size: 12px;
+            padding: 12px;
+            border-bottom: 2px solid #eee;
+            text-align: left;
+        }
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        
+        .total-container {
+            width: 100%;
+        }
+        .total-wrapper {
+            float: right;
+            width: 250px;
+        }
+        .total-row {
+            padding: 10px 0;
+            font-size: 15px;
+        }
+        .total-final {
+            border-top: 2px solid #eee;
+            margin-top: 10px;
+            padding-top: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #f28c33; /* Ton orange */
+        }
     </style>
 </head>
 <body>
     <div class="invoice-box">
         <div class="header">
-            <div>
-                <h1>LA ROUE LIBRE</h1>
-                <p>123 Rue du Vélo, 34000 Montpellier<br>contact@larouelibre.fr<br>SIRET : 123 456 789 00012</p>
-            </div>
+            <table>
+                <tr>
+                    <td>
+                        {% if logo %}
+                            <img src="{{ logo }}" class="logo-img">
+                        {% endif %}
+                        <div class="company-name">LA ROUE LIBRE</div>
+                        <div class="company-details">
+                            123 Rue du Vélo, 34000 Montpellier<br>
+                            contact@larouelibre.fr<br>
+                            SIRET : 123 456 789 00012
+                        </div>
+                    </td>
+                    <td class="title-facture">
+                        Facture
+                    </td>
+                </tr>
+            </table>
         </div>
 
-        <div class="details">
-            <div class="details-col">
-                <strong>Facturé à :</strong><br>
-                {{ user.firstname }} {{ user.lastname }}<br>
-                {{ user.email }}
-            </div>
-            <div class="details-col" style="text-align: right;">
-                <strong>Facture n° :</strong> FAC-{{ date|date('Y') }}-{{ random(1000, 9999) }}<br>
-                <strong>Date :</strong> {{ date|date('d/m/Y') }}
-            </div>
-        </div>
+        <table class="details-table">
+            <tr>
+                <td>
+                    <span class="label">Facturé à :</span>
+                    <div class="value">{{ user.firstname }} {{ user.lastname }}</div>
+                    <div class="value">{{ user.email }}</div>
+                </td>
+                <td class="text-right">
+                    <span class="label">Détails :</span>
+                    <div class="value">N° FAC-{{ date|date('Y') }}-{{ random(1000, 9999) }}</div>
+                    <div class="value">Date : {{ date|date('d/m/Y') }}</div>
+                </td>
+            </tr>
+        </table>
 
-        <table>
+        <table class="items-table">
             <thead>
                 <tr>
                     <th>Article</th>
-                    <th>Quantité</th>
-                    <th style="text-align: right;">Prix unitaire TTC</th>
+                    <th class="text-center">Quantité</th>
+                    <th class="text-right">Prix Unitaire</th>
+                    <th class="text-right">Total HT</th>
                 </tr>
             </thead>
             <tbody>
-                {% for product in products %}
+                {% for line in lines %}
                 <tr>
-                    <td>{{ product.title }}</td>
-                    <td>1</td>
-                    <td style="text-align: right;">{{ product.price }} €</td>
+                    <td>{{ line.title }}</td>
+                    <td class="text-center">{{ line.quantity }}</td>
+                    <td class="text-right">{{ line.price|number_format(2, ',', ' ') }} €</td>
+                    <td class="text-right">{{ line.subtotal|number_format(2, ',', ' ') }} €</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <div class="total">
-            Total TTC : {{ total }} €
+        <div class="total-container">
+            <div class="total-wrapper">
+                <table style="width: 100%;">
+                    <tr class="total-row">
+                        <td>Sous-total</td>
+                        <td class="text-right">{{ total|number_format(2, ',', ' ') }} €</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>TVA (0%)</td>
+                        <td class="text-right">0,00 €</td>
+                    </tr>
+                    <tr class="total-final">
+                        <td>TOTAL TTC</td>
+                        <td class="text-right">{{ total|number_format(2, ',', ' ') }} €</td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
 </body>

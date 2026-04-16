@@ -13,22 +13,21 @@ use Symfony\Component\Serializer\Attribute\Groups;
 class PanierItem
 {
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
-    #[Groups(['panier:read'])]
+    #[Groups(['panier:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Panier::class, inversedBy: 'items')]
-    #[Groups(['panier:read', 'panier:write'])]
+    #[Groups(['panier:write'])] // Uniquement write pour bloquer la boucle 500
     private ?Panier $panier = null;
 
     #[ORM\ManyToOne(targetEntity: Products::class)]
-    #[Groups(['panier:read', 'panier:write'])]
+    #[Groups(['panier:read', 'panier:write', 'user:read'])]
     private ?Products $product = null;
 
     #[ORM\Column]
-    #[Groups(['panier:read', 'panier:write'])]
+    #[Groups(['panier:read', 'panier:write', 'user:read'])]
     private int $quantity = 1;
 
-    // Getters et Setters indispensables...
     public function getId(): ?int { return $this->id; }
     public function getProduct(): ?Products { return $this->product; }
     public function setProduct(?Products $product): self { $this->product = $product; return $this; }
