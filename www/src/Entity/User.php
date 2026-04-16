@@ -4,11 +4,11 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
 use App\Repository\UserRepository;
+use App\State\UserPasswordHasher;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -20,14 +20,10 @@ use Symfony\Component\Serializer\Attribute\Groups;
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']],
     operations: [
-        // On permet le GET seulement si c'est l'admin ou l'utilisateur lui-même
-        new Get(
+        new Get(security: "is_granted('ROLE_ADMIN') or object == user"),
+        new Patch(
+            processor: UserPasswordHasher::class,
             security: "is_granted('ROLE_ADMIN') or object == user"
-        ),
-        // On permet la collection (nécessaire pour certains filtres internes)
-        // mais API Platform appliquera automatiquement des filtres si configuré
-        new GetCollection(
-            security: "is_granted('ROLE_ADMIN')" // Seul l'admin voit la liste complète
         )
     ]
 )]
@@ -36,18 +32,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read'], ['user:write'])]
+    #[Groups(['user:read', 'user:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user:read'], ['user:write'])]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $email = null;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Groups(['user:read'], ['user:write'])]
+    #[Groups(['user:read', 'user:write'])]
     private array $roles = [];
 
     /**
@@ -57,23 +53,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['user:read'], ['user:write'])]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['user:read'], ['user:write'])]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 150)]
-    #[Groups(['user:read'], ['user:write'])]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $pseudo = null;
 
     #[ORM\Column]
-    #[Groups(['user:read'], ['user:write'])]
+    #[Groups(['user:read', 'user:write'])]
     private ?\DateTime $birthday = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read'], ['user:write'])]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $avatar = null;
 
     #[ORM\Column]
@@ -119,7 +115,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Adress>
      */
     #[ORM\ManyToMany(targetEntity: Adress::class, cascade:['persist', 'remove'])]
-    #[Groups(['user:read'], ['user:write'])]
+    #[Groups(['user:read', 'user:write'])]
     private Collection $adresses;
 
     public function __construct()

@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\AdressRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -13,9 +15,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: AdressRepository::class)]
 #[ApiResource(
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']], // Ajoutez ceci
     operations: [
         new Get(normalizationContext: ['groups' => ['user:read']]),
-        new GetCollection(normalizationContext: ['groups' => ['user:read']])
+        new GetCollection(normalizationContext: ['groups' => ['user:read']]),
+        new Post(), // Permet de créer une nouvelle adresse
+        new Patch() // Permet de modifier une adresse existante
     ]
 )]
 class Adress
@@ -27,27 +33,27 @@ class Adress
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $number = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $complement = null;
 
     #[ORM\Column(length: 20)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $type = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $label = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $city = null;
 
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'user:write'])]
     private ?int $cp = null;
 
     /**
