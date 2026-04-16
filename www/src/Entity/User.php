@@ -18,6 +18,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[ApiResource(
     normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']],
     operations: [
         // On permet le GET seulement si c'est l'admin ou l'utilisateur lui-même
         new Get(
@@ -35,17 +36,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read'], ['user:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Groups(['user:read'], ['user:write'])]
     private ?string $email = null;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read'], ['user:write'])]
     private array $roles = [];
 
     /**
@@ -55,23 +57,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read'], ['user:write'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read'], ['user:write'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 150)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read'], ['user:write'])]
     private ?string $pseudo = null;
 
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read'], ['user:write'])]
     private ?\DateTime $birthday = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read'], ['user:write'])]
     private ?string $avatar = null;
 
     #[ORM\Column]
@@ -117,7 +119,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Adress>
      */
     #[ORM\ManyToMany(targetEntity: Adress::class, cascade:['persist', 'remove'])]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read'], ['user:write'])]
     private Collection $adresses;
 
     public function __construct()
