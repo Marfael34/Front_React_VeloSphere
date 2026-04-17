@@ -45,23 +45,42 @@ class StripeWebhookController extends AbstractController
                         return new Response('Panier introuvable', 404);
                     }
 
-                    $etatPaye = $em->getRepository(Etat::class)
+                    // --- RÉCUPÉRATION DES ÉTATS OPTIMISÉE ---
+                    // On récupère "Payées" et "En attente de validation" en une seule requête
+                    $etats = $em->getRepository(Etat::class)
                         ->createQueryBuilder('e')
-                        ->where('e.label LIKE :motCle')
-                        ->setParameter('motCle', '%Payées%')
-                        ->setMaxResults(1)
+                        ->where('e.label LIKE :paye OR e.label LIKE :validation')
+                        ->setParameter('paye', '%Payées%')
+                        ->setParameter('validation', '%En attente de validation%')
                         ->getQuery()
-                        ->getOneOrNullResult();
+                        ->getResult();
 
-                    if (!$etatPaye) {
-                        $logger->error("ERREUR : État contenant 'Payées' introuvable.");
-                        return new Response('Etat introuvable', 404);
+                    $etatPaye = null;
+                    $etatValidation = null;
+
+                    // Tri des états récupérés
+                    foreach ($etats as $etat) {
+                        if (stripos($etat->getLabel(), 'payées') !== false) {
+                            $etatPaye = $etat;
+                        } elseif (stripos($etat->getLabel(), 'en attente de validation') !== false) {
+                            $etatValidation = $etat;
+                        }
+                    }
+
+                    // Vérification que les DEUX états existent bien
+                    if (!$etatPaye || !$etatValidation) {
+                        $logger->error("ERREUR : L'état 'Payées' ou 'En attente de validation' est introuvable en BDD.");
+                        return new Response('Etats manquants', 404);
                     }
 
                     // 1. CRÉATION DE L'ORDER
                     $order = new Order();
                     $order->setUser($panier->getUser());
+                    
+                    // Ajout de la relation ManyToMany pour les états
                     $order->addEtat($etatPaye);
+                    $order->addEtat($etatValidation);
+                    
                     $order->setCreatedAt(new \DateTime());
                     
                     $totalPrice = 0;
@@ -138,6 +157,8 @@ class StripeWebhookController extends AbstractController
                     
                     // 5. MISE À JOUR DE L'ORDER ET ÉTAT DU PANIER
                     $order->setPath('/uploads/invoices/' . $fileName);
+                    
+                    // Le panier reste associé uniquement à l'état "Payées" (ManyToOne)
                     $panier->setEtat($etatPaye);
 
                     $em->persist($order);

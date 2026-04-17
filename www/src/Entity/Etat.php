@@ -24,11 +24,11 @@ class Etat
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['panier:read', 'product:read','etat:read'])]
+    #[Groups(['panier:read', 'product:read','etat:read', 'order:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 200)]
-    #[Groups(['panier:read', 'product:read','etat:read'])]
+    #[Groups(['panier:read', 'product:read','etat:read', 'order:read'])]
     private ?string $label = null;
 
     /**
