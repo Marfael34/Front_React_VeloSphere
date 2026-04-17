@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -120,6 +121,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Adress::class, cascade:['persist', 'remove'])]
     #[Groups(['user:read', 'user:write'])]
     private Collection $adresses;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(['user:read', 'user:write'])]
+    #[Assert\Regex(
+        pattern: '/^[0-9]{2}\.[0-9]{2}\.[0-9]{2}\.[0-9]{2}\.[0-9]{2}$/',
+        message: 'Le numéro de téléphone doit être au format xx.xx.xx.xx.xx'
+    )]
+    private ?string $telephone = null;
 
     public function __construct()
     {
@@ -490,6 +499,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeAdress(Adress $adress): static
     {
         $this->adresses->removeElement($adress);
+
+        return $this;
+    }
+
+    public function getTelephone(): ?string
+    {
+        return $this->telephone;
+    }
+
+    public function setTelephone(?string $telephone): static
+    {
+        $this->telephone = $telephone;
 
         return $this;
     }

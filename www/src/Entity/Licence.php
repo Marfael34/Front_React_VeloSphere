@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\LicenceRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: LicenceRepository::class)]
 #[ApiResource]
@@ -21,8 +22,13 @@ class Licence
     #[ORM\Column(length: 50)]
     private ?string $country_resid = null;
 
-    #[ORM\Column]
-    private ?int $phone = null;
+    #[ORM\Column(length: 14)]
+    #[Assert\NotBlank(message: 'Le numéro de téléphone est obligatoire.')]
+    #[Assert\Regex(
+        pattern: '/^[0-9]{2}\.[0-9]{2}\.[0-9]{2}\.[0-9]{2}\.[0-9]{2}$/',
+        message: 'Le numéro de téléphone doit être au format xx.xx.xx.xx.xx'
+    )]
+    private ?string $phone = null;
 
     #[ORM\Column]
     private ?\DateTime $createdAt = null;
@@ -71,12 +77,12 @@ class Licence
         return $this;
     }
 
-    public function getPhone(): ?int
+    public function getPhone(): ?string
     {
         return $this->phone;
     }
 
-    public function setPhone(int $phone): static
+    public function setPhone(string $phone): static
     {
         $this->phone = $phone;
 

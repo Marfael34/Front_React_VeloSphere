@@ -13,6 +13,7 @@ use App\Entity\User;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use InvalidArgumentException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
@@ -32,6 +33,12 @@ class AppFixtures extends Fixture
         $this->loadPriceLicence($manager);
 
         $manager->flush();
+    }
+
+    private function validatePhoneNumber(string $phone): bool
+    {
+        // La regex vérifie 5 groupes de 2 chiffres séparés par des points
+        return preg_match('/^\d{2}\.\d{2}\.\d{2}\.\d{2}\.\d{2}$/', $phone) === 1;
     }
 
     public function loadCharacteristic(ObjectManager $manager)
@@ -625,9 +632,9 @@ class AppFixtures extends Fixture
 
         // création d'utilisateur
         $arrayUser = [
-            ['prenom' => 'Léna', 'nom' => 'Bertrand', 'email' => 'l.bertrand.crea@gmail.com', 'pseudo' => 'PixelArtiste_92', 'birthday' => '1992-05-14'],
-            ['prenom' => 'Julien', 'nom' => 'Masson', 'email' => 'j-masson-85@gmail.com', 'pseudo' => 'JulesLeRandonneur', 'birthday' => '1985-11-03'],
-            ['prenom' => 'Inès', 'nom' => 'Belkacem', 'email' => 'belkacem.ines@gmail.com', 'pseudo' => 'CyberInes_XP', 'birthday' => '2001-08-22']
+            ['prenom' => 'Léna', 'nom' => 'Bertrand', 'email' => 'l.bertrand.crea@gmail.com', 'pseudo' => 'PixelArtiste_92', 'birthday' => '1992-05-14', 'phone' => '06.11.22.33.44'],
+            ['prenom' => 'Julien', 'nom' => 'Masson', 'email' => 'j-masson-85@gmail.com', 'pseudo' => 'JulesLeRandonneur', 'birthday' => '1985-11-03', 'phone' => '07.99.88.77.66'],
+            ['prenom' => 'Inès', 'nom' => 'Belkacem', 'email' => 'belkacem.ines@gmail.com', 'pseudo' => 'CyberInes_XP', 'birthday' => '2001-08-22', 'phone' => '06.55.44.33.22'],
         ];
 
         foreach ($arrayUser as $key => $value) {
@@ -642,8 +649,18 @@ class AppFixtures extends Fixture
             $user->setCreatedAt(new DateTime());
             $user->setIsActive(true);
 
-            // <-- LIAISON ADRESSE UTILISATEURS
-            // $key correspond à 0, 1 et 2 dans la boucle arrayUser
+            // Validation et ajout du téléphone
+            if ($this->validatePhoneNumber($value['phone'])) {
+                $user->setTelephone($value['phone']);
+            } else {
+                throw new InvalidArgumentException(sprintf(
+                    "Format de téléphone invalide pour l'utilisateur %s : %s. Le format attendu est xx.xx.xx.xx.xx", 
+                    $value['pseudo'], 
+                    $value['phone']
+                ));
+            }
+
+            //  LIAISON ADRESSE UTILISATEURS
             if ($this->hasReference('adress_' . $key, Adress::class)) {
                 $user->addAdress($this->getReference('adress_' . $key, Adress::class));
             }
@@ -696,7 +713,7 @@ class AppFixtures extends Fixture
 
     public function loadEtat(ObjectManager $manager)
     {
-        $arrayEtat = ['En attentes de paiement', 'Payées','En attente de validation', 'Validées', 'En cours de préparation', 'En cours de livraison', 'Livrées'];
+        $arrayEtat = ['En attentes de paiement', 'Payées','En attente de validation', 'Validées', 'En cours de préparation', 'En cours de livraison', 'Livrées '];
 
         foreach ($arrayEtat as $value) {
             $etat = new Etat();
