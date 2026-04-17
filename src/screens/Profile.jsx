@@ -4,7 +4,7 @@ import { API_ROOT, IMAGE_URL } from '../constants/apiConstant';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom'; 
 import ButtonLoader from '../components/Loader/ButtonLoader';
-import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake, FaBoxOpen, FaEdit } from 'react-icons/fa';
+import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake, FaBoxOpen, FaEdit, FaPhone } from 'react-icons/fa';
 import CustomButton from '../components/UI/CustomButton';
 import EditProfileForm from '../components/Market/EditProfileForm';
 
@@ -152,6 +152,13 @@ const Profile = () => {
                                     <div>
                                         <p className="text-gray-400 text-sm">Email</p>
                                         <p className="font-medium">{fullUser?.email}</p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <FaPhone className="text-orange" size={18} />
+                                        <div>
+                                            <p className="text-gray-400 text-sm">Téléphone</p>
+                                            <p className="font-medium">{fullUser?.telephone || fullUser?.phone || "Non renseigné"}</p>
+                                        </div>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <FaBirthdayCake className="text-orange" size={18} />

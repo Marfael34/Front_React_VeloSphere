@@ -11,6 +11,7 @@ const EditProfileForm = ({ user, fullUser, onCancel, onSuccess }) => {
         lastname: fullUser?.lastname || "",
         pseudo: fullUser?.pseudo || "",
         email: fullUser?.email || "",
+        telephone: fullUser?.telephone || fullUser?.phone || "",
         birthday: fullUser?.birthday ? fullUser.birthday.split('T')[0] : "",
         password: "",
         adresses: fullUser?.adresses?.length > 0 ? [...fullUser.adresses] : []
@@ -81,6 +82,7 @@ const EditProfileForm = ({ user, fullUser, onCancel, onSuccess }) => {
                 lastname: formData.lastname,
                 pseudo: formData.pseudo,
                 email: formData.email,
+                telephone: formData.telephone,
                 birthday: formData.birthday || null,
                 adresses: processedAdresses
             };
@@ -135,6 +137,7 @@ const EditProfileForm = ({ user, fullUser, onCancel, onSuccess }) => {
             </div>
             <CustomInput label="Pseudo" state={formData.pseudo} callable={(e) => handleChange(e, 'pseudo')} />
             <CustomInput label="Email" state={formData.email} callable={(e) => handleChange(e, 'email')} />
+            <CustomInput label="Téléphone" type="tel" state={formData.telephone} callable={(e) => handleChange(e, 'telephone')} />
             <CustomInput label="Anniversaire" type="date" state={formData.birthday} callable={(e) => handleChange(e, 'birthday')} />
             <CustomInput label="Nouveau mot de passe" type="password" state={formData.password} callable={(e) => handleChange(e, 'password')} placeholder="Laisser vide pour garder l'actuel" />
 
