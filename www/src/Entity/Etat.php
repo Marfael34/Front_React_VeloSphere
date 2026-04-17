@@ -46,7 +46,7 @@ class Etat
     /**
      * @var Collection<int, Order>
      */
-    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'etat')]
+    #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'etats')]
     private Collection $orders;
 
     public function __construct()
@@ -145,7 +145,7 @@ class Etat
     {
         if (!$this->orders->contains($order)) {
             $this->orders->add($order);
-            $order->setEtat($this);
+            $order->addEtat($this);
         }
 
         return $this;
@@ -154,10 +154,7 @@ class Etat
     public function removeOrder(Order $order): static
     {
         if ($this->orders->removeElement($order)) {
-            // set the owning side to null (unless already changed)
-            if ($order->getEtat() === $this) {
-                $order->setEtat(null);
-            }
+            $order->removeEtat($this);
         }
 
         return $this;

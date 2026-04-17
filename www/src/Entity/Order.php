@@ -25,9 +25,12 @@ class Order
     #[Groups(['order:read'])]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'orders')]
+    /**
+     * @var Collection<int, Etat>
+     */
+    #[ORM\ManyToMany(targetEntity: Etat::class, inversedBy: 'orders')]
     #[Groups(['order:read'])]
-    private ?Etat $etat = null;
+    private Collection $etats;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
     #[Groups(['order:read'])]
@@ -51,6 +54,7 @@ class Order
     public function __construct()
     {
         $this->products = new ArrayCollection();
+        $this->etats = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -58,14 +62,26 @@ class Order
         return $this->id;
     }
 
-    public function getEtat(): ?Etat
+    /**
+     * @return Collection<int, Etat>
+     */
+    public function getEtats(): Collection
     {
-        return $this->etat;
+        return $this->etats;
     }
 
-    public function setEtat(?Etat $etat): static
+    public function addEtat(Etat $etat): static
     {
-        $this->etat = $etat;
+        if (!$this->etats->contains($etat)) {
+            $this->etats->add($etat);
+        }
+
+        return $this;
+    }
+
+    public function removeEtat(Etat $etat): static
+    {
+        $this->etats->removeElement($etat);
 
         return $this;
     }

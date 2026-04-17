@@ -6,7 +6,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Patch;
 use App\Repository\UserRepository;
-use App\State\UserPasswordHasher;
+use App\State\UserProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -22,7 +22,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
     operations: [
         new Get(security: "is_granted('ROLE_ADMIN') or object == user"),
         new Patch(
-            processor: UserPasswordHasher::class,
+            processor: UserProcessor::class, // <-- On utilise le nouveau processeur ici
             security: "is_granted('ROLE_ADMIN') or object == user"
         )
     ]
@@ -51,6 +51,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     private ?string $password = null;
+
+    #[Groups(['user:write'])]
+    private ?string $plainPassword = null;
 
     #[ORM\Column(length: 100)]
     #[Groups(['user:read', 'user:write'])]
@@ -145,6 +148,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): static
+    {
+        $this->plainPassword = $plainPassword;
+
+        return $this;
+    }
+
     /**
      * A visual identifier that represents this user.
      *
@@ -158,6 +173,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see UserInterface
      */
+    public function eraseCredentials(): void
+    {
+        // Si vous stockez des données temporaires sensibles, effacez-les ici
+        $this->plainPassword = null;
+    }
     public function getRoles(): array
     {
         $roles = $this->roles;

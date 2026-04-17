@@ -61,7 +61,7 @@ class StripeWebhookController extends AbstractController
                     // 1. CRÉATION DE L'ORDER
                     $order = new Order();
                     $order->setUser($panier->getUser());
-                    $order->setEtat($etatPaye);
+                    $order->addEtat($etatPaye);
                     $order->setCreatedAt(new \DateTime());
                     
                     $totalPrice = 0;
