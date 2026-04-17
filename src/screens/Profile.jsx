@@ -5,7 +5,6 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom'; 
 import ButtonLoader from '../components/Loader/ButtonLoader';
 import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake, FaBoxOpen, FaEdit } from 'react-icons/fa';
-import DeliveryTracker from '../components/UI/Order/DeliveryTracker';
 import CustomButton from '../components/UI/CustomButton';
 import EditProfileForm from '../components/Market/EditProfileForm';
 
@@ -72,7 +71,7 @@ const Profile = () => {
         fetchProfileData();
     }, [user, navigate]);
 
-    // Logique d'agrégation du panier (identique à votre original)
+    // Logique d'agrégation du panier
     const aggregatedCartItems = useMemo(() => {
         if (!cart || !cart.items) return [];
         const groups = cart.items.reduce((acc, item) => {
@@ -96,9 +95,8 @@ const Profile = () => {
     const handleUpdateSuccess = (updatedUser) => {
         setIsEditing(false);
         setFullUser(updatedUser);
-        // On rafraîchit les infos globales du contexte (pseudo, etc)
         setUser({ ...user, ...updatedUser }); 
-        fetchProfileData(); // On recharge tout pour être sûr
+        fetchProfileData();
     };
 
     if (!user) return null; 
@@ -186,7 +184,7 @@ const Profile = () => {
                         )}
                     </div>
 
-                    {/* COLONNE DROITE : PANIER & COMMANDES (Identique à votre original) */}
+                    {/* COLONNE DROITE : PANIER & COMMANDES */}
                     <div className="lg:col-span-2 space-y-8">
                         {/* PANIER */}
                         <div className="bg-nigth-blue p-6 rounded-2xl shadow-lg border border-white/5">
@@ -226,7 +224,14 @@ const Profile = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <p className="text-gray-400 italic text-center py-6 bg-black/20 rounded-xl">Votre panier est vide.</p>
+                                <div className="bg-black/20 p-6 rounded-xl border border-white/5 flex flex-col items-center gap-4">
+                                    <p className="text-gray-400 italic text-center">Votre panier est vide.</p>
+                                        <Link
+                                            to="/market"
+                                            className="main-button text-sm px-6  text-center ">
+                                        Aller à la boutique
+                                    </Link>
+                                </div>
                             )}
                         </div>
 
@@ -245,20 +250,34 @@ const Profile = () => {
                                                     <p className="text-sm text-gray-400 flex items-center gap-2">
                                                         <FaBoxOpen className="text-gray-500" /> {order.products?.length || 0} article(s)
                                                     </p>
-                                                    <p className="text-xs text-gray-400 mt-1">
+                                                    <p className="text-xs text-gray-400 mt-1 mb-2">
                                                         Le : {order.created_at ? new Date(order.created_at).toLocaleDateString() : "Inconnue"}
                                                     </p>
+                                                    
+                                                    {/* Affichage propre de l'état actuel de la commande */}
+                                                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-slate-grey text-orange">
+                                                        {order.etats && order.etats.length > 0 ? order.etats[order.etats.length - 1].label : "En cours"}
+                                                    </span>
                                                 </div>
+
                                                 {order.path && (
                                                     <a href={`${API_ROOT}${order.path}`} target="_blank" rel="noopener noreferrer" className="bg-white/10 hover:bg-orange text-white hover:text-black font-bold px-4 py-2 rounded-lg text-sm transition">
                                                         Voir la facture
                                                     </a>
                                                 )}
                                             </div>
+                                            
                                             <hr className="border-white/5 my-4" />
+                                            
                                             <div className="w-full">
-                                                <p className="text-xs font-bold text-gray-400 uppercase mb-2">Suivi :</p>
-                                                <DeliveryTracker statusLabel={order.etat?.label} />
+                                                {/* Le lien vers la nouvelle page de tracking ! */}
+                                                <Link 
+                                                    to={`/profile/order/${order.id}`} 
+                                                    state={{ order: order }}
+                                                    className="main-button block text-center w-full !m-0 !py-3 text-sm"
+                                                >
+                                                    Suivre ma commande
+                                                </Link>
                                             </div>
                                         </div>
                                     ))}

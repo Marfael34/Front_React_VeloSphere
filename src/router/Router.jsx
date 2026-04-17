@@ -12,6 +12,7 @@ import ProductDetail from "../screens/ProductDetail";
 import EditProduct from "../screens/EditProduct";
 import Checkout from "../screens/Checkout";
 import Invoice from "../screens/InVoice";
+import OrderTracking from "../screens/OrderTracking";
 
 const Router = createBrowserRouter([
     {
@@ -65,6 +66,10 @@ const Router = createBrowserRouter([
             { 
                 path: "/invoice/:id", 
                 element: <Invoice/> 
+            },
+            {
+                path: "/profile/order/:id",
+                element: <OrderTracking/>
             }
             
         ]

@@ -30,6 +30,9 @@ const Login = () => {
         email: email,
         password: password,
       }, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
         withCredentials: true
       });
 
