@@ -5,24 +5,27 @@ import { API_ROOT, IMAGE_URL } from '../constants/apiConstant';
 import { AuthContext } from '../contexts/AuthContext';
 import ButtonLoader from '../components/Loader/ButtonLoader';
 import { FaChevronLeft, FaEdit, FaShoppingCart } from 'react-icons/fa';
+import AddToCartModal from '../components/UI/AddToCartModal';
 
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
+    
     const [cart, setCart] = useState(null);
     const [product, setProduct] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    
+    // 2. State pour contrôler l'affichage de la modale
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Récupération du produit
                 const productRes = await axios.get(`${API_ROOT}/api/products/${id}`);
                 setProduct(productRes.data);
 
-                // Récupération du panier en cours si l'utilisateur est connecté
                 if (user?.token && user?.id) {
                     const authConfig = { headers: { Authorization: `Bearer ${user.token}` } };
                     const etatsRes = await axios.get(`${API_ROOT}/api/etats`, authConfig);
@@ -53,105 +56,96 @@ const ProductDetail = () => {
     }, [id, user]);
 
     const handleAddToCart = async () => {
-    if (!user || !user.token) {
-        navigate('/login');
-        return;
-    }
-
-    if (product.quantity <= 0) {
-        alert("Désolé, ce produit est en rupture de stock.");
-        return;
-    }
-
-    try {
-        const authConfig = { 
-            headers: { 
-                Authorization: `Bearer ${user.token}`,
-                'Content-Type': 'application/ld+json' 
-            } 
-        };
-
-        // 1. On récupère l'état exact pour être sûr de la recherche
-        const etatsRes = await axios.get(`${API_ROOT}/api/etats`, authConfig);
-        const etats = etatsRes.data.member || etatsRes.data['hydra:member'] || [];
-        
-        // On cherche le label "En attentes de paiement" (orthographe exacte de votre profil)
-        const etatEnAttente = etats.find(e => 
-            e.label === "En attentes de paiement" || 
-            e.label.toLowerCase().includes("attente")
-        );
-
-        if (!etatEnAttente) {
-            alert("Erreur : État de panier introuvable.");
+        if (!user || !user.token) {
+            navigate('/login');
             return;
         }
 
-        const etatIri = etatEnAttente['@id'];
-        const productIri = product['@id'] || `/api/products/${product.id}`;
+        if (product.quantity <= 0) {
+            alert("Désolé, ce produit est en rupture de stock.");
+            return;
+        }
 
-        // 2. LOGIQUE DE VÉRIFICATION DU PANIER
-        let currentCart = cart;
+        try {
+            const authConfig = { 
+                headers: { 
+                    Authorization: `Bearer ${user.token}`,
+                    'Content-Type': 'application/ld+json' 
+                } 
+            };
 
-        // Si le state 'cart' est vide, on force une vérification en base de données
-        // pour éviter de recréer un panier si l'utilisateur a rafraîchi la page
-        if (!currentCart) {
-            const panierRes = await axios.get(
-                `${API_ROOT}/api/paniers?user=/api/users/${user.id}&etat=${etatIri}`,
-                authConfig
-            );
-            const paniersExistants = panierRes.data.member || panierRes.data['hydra:member'] || [];
+            const etatsRes = await axios.get(`${API_ROOT}/api/etats`, authConfig);
+            const etats = etatsRes.data.member || etatsRes.data['hydra:member'] || [];
             
-            if (paniersExistants.length > 0) {
-                currentCart = paniersExistants[0];
-            } else {
-                // SEULEMENT SI rien n'existe en base, on crée un nouveau panier
-                const newPanierRes = await axios.post(`${API_ROOT}/api/paniers`, 
-                    { user: `/api/users/${user.id}`, etat: etatIri }, 
+            const etatEnAttente = etats.find(e => 
+                e.label === "En attentes de paiement" || 
+                e.label.toLowerCase().includes("attente")
+            );
+
+            if (!etatEnAttente) {
+                alert("Erreur : État de panier introuvable.");
+                return;
+            }
+
+            const etatIri = etatEnAttente['@id'];
+            const productIri = product['@id'] || `/api/products/${product.id}`;
+
+            let currentCart = cart;
+
+            if (!currentCart) {
+                const panierRes = await axios.get(
+                    `${API_ROOT}/api/paniers?user=/api/users/${user.id}&etat=${etatIri}`,
                     authConfig
                 );
-                currentCart = newPanierRes.data;
+                const paniersExistants = panierRes.data.member || panierRes.data['hydra:member'] || [];
+                
+                if (paniersExistants.length > 0) {
+                    currentCart = paniersExistants[0];
+                } else {
+                    const newPanierRes = await axios.post(`${API_ROOT}/api/paniers`, 
+                        { user: `/api/users/${user.id}`, etat: etatIri }, 
+                        authConfig
+                    );
+                    currentCart = newPanierRes.data;
+                }
+                setCart(currentCart);
             }
-            setCart(currentCart);
+
+            const existingItem = currentCart.items?.find(item => {
+                const itemProdIri = item.product['@id'] || `/api/products/${item.product.id}`;
+                return itemProdIri === productIri;
+            });
+
+            if (existingItem) {
+                await axios.patch(`${API_ROOT}/api/panier_items/${existingItem.id}`, 
+                    { quantity: existingItem.quantity + 1 },
+                    { headers: { ...authConfig.headers, 'Content-Type': 'application/merge-patch+json' } }
+                );
+                // On ouvre la modale au lieu du vieux 'alert'
+                setIsModalOpen(true);
+            } else {
+                await axios.post(`${API_ROOT}/api/panier_items`, 
+                    {
+                        panier: `/api/paniers/${currentCart.id}`,
+                        product: productIri,
+                        quantity: 1
+                    },
+                    authConfig
+                );
+                // On ouvre la modale au lieu du vieux 'alert'
+                setIsModalOpen(true);
+            }
+
+            const updatedCartRes = await axios.get(`${API_ROOT}/api/paniers/${currentCart.id}`, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            setCart(updatedCartRes.data);
+
+        } catch (error) {
+            console.error("Erreur lors de l'ajout :", error.response?.data || error);
+            alert("Une erreur est survenue lors de l'ajout au panier.");
         }
-
-        // 3. AJOUT OU MISE À JOUR DE L'ITEM
-        // On cherche si le produit est déjà dans ce panier spécifique
-        const existingItem = currentCart.items?.find(item => {
-            const itemProdIri = item.product['@id'] || `/api/products/${item.product.id}`;
-            return itemProdIri === productIri;
-        });
-
-        if (existingItem) {
-            // Augmenter la quantité d'un item existant
-            await axios.patch(`${API_ROOT}/api/panier_items/${existingItem.id}`, 
-                { quantity: existingItem.quantity + 1 },
-                { headers: { ...authConfig.headers, 'Content-Type': 'application/merge-patch+json' } }
-            );
-            alert("Quantité mise à jour !");
-        } else {
-            // Créer une nouvelle ligne (PanierItem) dans le panier existant
-            await axios.post(`${API_ROOT}/api/panier_items`, 
-                {
-                    panier: `/api/paniers/${currentCart.id}`,
-                    product: productIri,
-                    quantity: 1
-                },
-                authConfig
-            );
-            alert("Produit ajouté au panier !");
-        }
-
-        // 4. Mise à jour de l'état local pour refléter les changements immédiatement
-        const updatedCartRes = await axios.get(`${API_ROOT}/api/paniers/${currentCart.id}`, {
-            headers: { Authorization: `Bearer ${user.token}` }
-        });
-        setCart(updatedCartRes.data);
-
-    } catch (error) {
-        console.error("Erreur lors de l'ajout :", error.response?.data || error);
-        alert("Une erreur est survenue lors de l'ajout au panier.");
-    }
-};
+    };
 
     const getRolesFromToken = (token) => {
         if (!token) return [];
@@ -170,7 +164,7 @@ const ProductDetail = () => {
     if (!product) return null; 
 
     return (
-        <div className="bg-dark-nigth-blue min-h-screen pb-10 text-white">
+        <div className="bg-dark-nigth-blue min-h-screen pb-10 text-white relative">
             <div className="max-w-6xl mx-auto px-4 py-8">
                 <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-400 hover:text-orange mb-8 transition-colors">
                     <FaChevronLeft /> Retour au catalogue
@@ -218,6 +212,13 @@ const ProductDetail = () => {
                     </div>
                 </div>
             </div>
+
+            {/*  composant de la modale à la toute fin de la page */}
+            <AddToCartModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                product={product} 
+            />
         </div>
     );
 };

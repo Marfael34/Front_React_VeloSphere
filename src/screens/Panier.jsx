@@ -51,7 +51,7 @@ const Panier = () => {
     fetchCart();
   }, [user, navigate]);
 
-  // Agrégation : Regroupe les items et on les trie par ID pour que l'ordre reste fixe
+  //Regroupe les items et on les trie par ID pour que l'ordre reste fixe
   const aggregatedCartItems = useMemo(() => {
     if (!cart?.items) return [];
     
@@ -81,7 +81,7 @@ const Panier = () => {
     return aggregatedCartItems.reduce((acc, item) => acc + item.quantity, 0);
   };
 
-  // NOUVEAU : Fonction pour mettre à jour la quantité (+ ou -)
+  // Fonction pour mettre à jour la quantité (+ ou -)
   const handleUpdateQuantity = async (aggregatedItem, delta) => {
     // 1. Vérification du stock disponible
     if (delta === 1 && aggregatedItem.quantity >= aggregatedItem.product.quantity) {
@@ -106,7 +106,7 @@ const Panier = () => {
         } 
       };
 
-      // Cas rare : Si la ligne ciblée a une quantité de 1 et qu'on fait -1, on supprime la ligne
+      // Si la ligne ciblée a une quantité de 1 et qu'on fait -1, on supprime la ligne
       if (delta === -1 && originalItem.quantity === 1) {
         await axios.delete(`${API_ROOT}/api/panier_items/${targetDbId}`, {
             headers: { Authorization: `Bearer ${user.token}` }
@@ -196,7 +196,7 @@ const Panier = () => {
                     </h3>
                     <p className="text-gray-400 text-sm mb-2">{item.product?.brand}</p>
                     
-                    {/* DESIGN AJOUTÉ : Contrôleur de quantité aligné avec le prix */}
+                    {/* Contrôleur de quantité aligné avec le prix */}
                     <div className="flex items-center gap-6 mt-2">
                       <p className="text-orange font-bold text-lg w-20">
                         {(parseFloat(item.product?.price || 0) * item.quantity).toFixed(2)} €
