@@ -140,14 +140,14 @@ const Profile = () => {
                 <div className="flex justify-between items-center mb-10">
                     <h1 className="title-h1">Mon Profil</h1>
                     {!isEditing && (
-                        <CustomButton onClick={() => setIsEditing(true)} className="!py-2 !px-4 text-sm">
+                        <CustomButton onClick={() => setIsEditing(true)} className="py-2! px-4! text-sm">
                             <FaEdit /> Modifier mon profil
                         </CustomButton>
                     )}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* INFOS USER (inchangé) */}
+                     {/* COLONNE GAUCHE : INFOS OU FORMULAIRE */}
                     <div className="bg-black/40 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-xl h-fit">
                         {isEditing ? (
                             <EditProfileForm 
@@ -170,17 +170,52 @@ const Profile = () => {
                                     <h2 className="text-2xl font-bold">{fullUser?.firstname || fullUser?.firstName} {fullUser?.lastname || fullUser?.lastName}</h2>
                                     <p className="text-orange font-medium">@{fullUser?.pseudo}</p>
                                 </div>
+
                                 <div className="space-y-5 border-t border-white/10 pt-6">
-                                    <div><p className="text-gray-400 text-sm">Email</p><p className="font-medium">{fullUser?.email}</p></div>
-                                    <div className="flex items-center gap-3"><FaPhone className="text-orange" size={18} /><div><p className="text-gray-400 text-sm">Téléphone</p><p className="font-medium">{fullUser?.telephone || "Non renseigné"}</p></div></div>
-                                    <div className="flex items-center gap-3"><FaBirthdayCake className="text-orange" size={18} /><div><p className="text-gray-400 text-sm">Date de naissance</p><p className="font-medium">{formatDate(fullUser?.birthday)}</p></div></div>
+                                    <div>
+                                        <p className="text-gray-400 text-sm">Email</p>
+                                        <p className="font-medium">{fullUser?.email}</p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <FaPhone className="text-orange" size={18} />
+                                        <div>
+                                            <p className="text-gray-400 text-sm">Téléphone</p>
+                                            <p className="font-medium">{fullUser?.telephone || fullUser?.phone || "Non renseigné"}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <FaBirthdayCake className="text-orange" size={18} />
+                                        <div>
+                                            <p className="text-gray-400 text-sm">Date de naissance</p>
+                                            <p className="font-medium">{formatDate(fullUser?.birthday)}</p>
+                                        </div>
+                                    </div>
+                                    <div className="pt-2">
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <FaMapMarkerAlt className="text-orange" size={18} />
+                                            <p className="text-gray-400 text-sm">Mon Adresse</p>
+                                        </div>
+                                        {fullUser?.adresses && fullUser.adresses.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {fullUser.adresses.map((adr, index) => (
+                                                    <div key={index} className="bg-white/5 p-3 rounded-lg border border-white/5 text-sm">
+                                                        <p className="font-medium">{adr.number} {adr.type} {adr.label}</p>
+                                                        {adr.complement && <p className="text-gray-400 italic text-xs">{adr.complement}</p>}
+                                                        <p className="font-bold text-orange mt-1">{adr.cp} {adr.city}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-gray-500 italic text-sm ml-7">Aucune adresse enregistrée</p>
+                                        )}
+                                    </div>
                                 </div>
                             </>
                         )}
                     </div>
 
                     <div className="lg:col-span-2 space-y-8">
-                        {/* PANIER (inchangé) */}
+                        {/* PANIER */}
                         <div className="bg-nigth-blue p-6 rounded-2xl shadow-lg border border-white/5">
                             <h2 className="text-xl font-bold flex items-center gap-3 mb-6 border-b border-white/10 pb-4"><FaShoppingBag className="text-orange" /> Mon Panier</h2>
                             {aggregatedCartItems.length > 0 ? (
@@ -201,7 +236,7 @@ const Profile = () => {
                             ) : <p className="text-gray-400 italic text-center">Panier vide.</p>}
                         </div>
 
-                        {/* COMMANDES (inchangé) */}
+                        {/* COMMANDES) */}
                         <div className="bg-black/20 p-6 rounded-2xl border border-white/10">
                             <h2 className="text-xl font-bold flex items-center gap-3 mb-6 border-b border-white/10 pb-4"><FaHistory className="text-orange" /> Historique</h2>
                             {orders.length > 0 ? (
@@ -209,53 +244,55 @@ const Profile = () => {
                                     {orders.map((order) => (
                                         <div key={order.id} className="bg-white/5 p-5 rounded-xl border border-white/5">
                                             <p className="font-bold">Commande #{order.id}</p>
-                                            <Link to={`/profile/order/${order.id}`} state={{ order }} className="main-button block text-center w-full !m-0 !py-3 text-sm mt-4">Suivre</Link>
+                                            <Link to={`/profile/order/${order.id}`} state={{ order }} className="main-button block text-center w-full m-0! py-3! text-sm mt-4">Suivre</Link>
                                         </div>
                                     ))}
                                 </div>
                             ) : <p className="text-gray-400 italic text-center py-6">Aucune commande.</p>}
                         </div>
+
+                        {/* --- SECTION WISHLIST --- */}
+                        <div className="bg-black/20 p-6 rounded-2xl border border-white/10">
+                            <h2 className="text-2xl font-bold flex items-center gap-3 mb-8 border-b border-white/10 pb-4">
+                                <FaHeart className="text-orange" /> Ma Wishlist
+                            </h2>
+                            {filteredWishlist.length > 0 ? (
+                                <div className="flex flex-col gap-6">
+                                    {filteredWishlist.map((item) => (
+                                        <div key={item.id} className="bg-black/40 backdrop-blur-md p-5 rounded-2xl border border-white/10 shadow-xl">
+                                            <div className="flex flex-col gap-3">
+                                                {/* Affichage des données brutes de la wishlist */}
+                                                <h3 className="text-xl font-bold text-white">{item.placeName || "Produit sans nom"}</h3>
+                                                
+                                                <div className="flex justify-between items-center mt-2">
+                                                    <span className="text-orange font-medium">
+                                                        {item.placeDifficulty ? `Difficulté : ${item.placeDifficulty}` : "Favori"}
+                                                    </span>
+                                                    <span className="text-gray-400 text-xs">Ajouté le {item.createdAt}</span>
+                                                </div>
+                                                
+                                                {/* Lien vers le détail si nécessaire, utilisant l'id de la wishlist ou du produit lié */}
+                                                <Link 
+                                                    to={`/location/${item.placeId}`} 
+                                                    className="mt-4 text-center bg-orange/20 hover:bg-orange/40 text-orange py-2 rounded-lg transition-all border border-orange/50 text-sm font-bold"
+                                                >
+                                                    Voir le détail
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="bg-black/20 p-10 rounded-2xl border border-dashed border-white/10 flex flex-col items-center gap-4">
+                                    <p className="text-gray-400 text-lg">Votre wishlist est vide.</p>
+                                    <Link to="/boutique" className="text-orange hover:underline font-medium">Parcourir le catalogue</Link>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                {/* --- SECTION WISHLIST --- */}
-                <div className="mt-12">
-                    <h2 className="text-2xl font-bold flex items-center gap-3 mb-8 border-b border-white/10 pb-4">
-                        <FaHeart className="text-orange" /> Ma Wishlist
-                    </h2>
-                    {filteredWishlist.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredWishlist.map((item) => (
-                                <div key={item.id} className="bg-black/40 backdrop-blur-md p-5 rounded-2xl border border-white/10 shadow-xl">
-                                    <div className="flex flex-col gap-3">
-                                        {/* Affichage des données brutes de la wishlist */}
-                                        <h3 className="text-xl font-bold text-white">{item.placeName || "Produit sans nom"}</h3>
-                                        
-                                        <div className="flex justify-between items-center mt-2">
-                                            <span className="text-orange font-medium">
-                                                {item.placeDifficulty ? `Difficulté : ${item.placeDifficulty}` : "Favori"}
-                                            </span>
-                                            <span className="text-gray-400 text-xs">Ajouté le {formatDate(item.createdAt)}</span>
-                                        </div>
-                                        
-                                        {/* Lien vers le détail si nécessaire, utilisant l'id de la wishlist ou du produit lié */}
-                                        <Link 
-                                            to={`/wishlist/item/${item.id}`} 
-                                            className="mt-4 text-center bg-orange/20 hover:bg-orange/40 text-orange py-2 rounded-lg transition-all border border-orange/50 text-sm font-bold"
-                                        >
-                                            Voir le détail
-                                        </Link>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="bg-black/20 p-10 rounded-2xl border border-dashed border-white/10 flex flex-col items-center gap-4">
-                            <p className="text-gray-400 text-lg">Votre wishlist est vide.</p>
-                            <Link to="/boutique" className="text-orange hover:underline font-medium">Parcourir le catalogue</Link>
-                        </div>
-                    )}
-                </div>
+                
             </div>
         </div>
     );
