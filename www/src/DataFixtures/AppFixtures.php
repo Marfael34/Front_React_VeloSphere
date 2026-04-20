@@ -713,7 +713,7 @@ class AppFixtures extends Fixture
 
     public function loadEtat(ObjectManager $manager)
     {
-        $arrayEtat = ['En attentes de paiement', 'Payées','En attente de validation', 'Validées', 'En cours de préparation', 'En cours de livraison', 'Livrées', 'Favoris'];
+        $arrayEtat = ['En attentes de paiement', 'Payées','En attente de validation', 'Validées','Annulées', 'En cours de préparation', 'En cours de livraison', 'Livrées', 'Favoris'];
 
         foreach ($arrayEtat as $value) {
             $etat = new Etat();
