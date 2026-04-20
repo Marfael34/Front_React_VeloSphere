@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
     normalizationContext: ['groups' => ['etat:read']],
     operations: [
         new Get(),
-        new GetCollection(), // Permet de lister tous les états
+        new GetCollection(), 
     ]
 )]
 class Etat
@@ -24,11 +24,11 @@ class Etat
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['panier:read', 'product:read','etat:read', 'order:read'])]
+    #[Groups(['panier:read', 'product:read','etat:read', 'order:read', 'wishlist:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 200)]
-    #[Groups(['panier:read', 'product:read','etat:read', 'order:read'])]
+    #[Groups(['panier:read', 'product:read','etat:read', 'order:read', 'wishlist:read'])]
     private ?string $label = null;
 
     /**
@@ -49,11 +49,18 @@ class Etat
     #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'etats')]
     private Collection $orders;
 
+    /**
+     * @var Collection<int, Wishlist>
+     */
+    #[ORM\OneToMany(targetEntity: Wishlist::class, mappedBy: 'etat')]
+    private Collection $wishlists;
+
     public function __construct()
     {
         $this->licences = new ArrayCollection();
         $this->paniers = new ArrayCollection();
         $this->orders = new ArrayCollection();
+        $this->wishlists = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -69,7 +76,6 @@ class Etat
     public function setLabel(string $label): static
     {
         $this->label = $label;
-
         return $this;
     }
 
@@ -87,19 +93,16 @@ class Etat
             $this->licences->add($licence);
             $licence->setEtat($this);
         }
-
         return $this;
     }
 
     public function removeLicence(Licence $licence): static
     {
         if ($this->licences->removeElement($licence)) {
-            // set the owning side to null (unless already changed)
             if ($licence->getEtat() === $this) {
                 $licence->setEtat(null);
             }
         }
-
         return $this;
     }
 
@@ -117,19 +120,16 @@ class Etat
             $this->paniers->add($panier);
             $panier->setEtat($this);
         }
-
         return $this;
     }
 
     public function removePanier(Panier $panier): static
     {
         if ($this->paniers->removeElement($panier)) {
-            // set the owning side to null (unless already changed)
             if ($panier->getEtat() === $this) {
                 $panier->setEtat(null);
             }
         }
-
         return $this;
     }
 
@@ -147,7 +147,6 @@ class Etat
             $this->orders->add($order);
             $order->addEtat($this);
         }
-
         return $this;
     }
 
@@ -155,6 +154,36 @@ class Etat
     {
         if ($this->orders->removeElement($order)) {
             $order->removeEtat($this);
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Wishlist>
+     */
+    public function getWishlists(): Collection
+    {
+        return $this->wishlists;
+    }
+
+    public function addWishlist(Wishlist $wishlist): static
+    {
+        if (!$this->wishlists->contains($wishlist)) {
+            $this->wishlists->add($wishlist);
+            // On utilise setEtat (sans 's') car c'est le nom de la propriété dans Wishlist
+            $wishlist->setEtat($this); 
+        }
+
+        return $this;
+    }
+
+    public function removeWishlist(Wishlist $wishlist): static
+    {
+        if ($this->wishlists->removeElement($wishlist)) {
+            // On vérifie getEtat (sans 's')
+            if ($wishlist->getEtat() === $this) {
+                $wishlist->setEtat(null);
+            }
         }
 
         return $this;

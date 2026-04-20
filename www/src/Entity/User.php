@@ -130,6 +130,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     )]
     private ?string $telephone = null;
 
+    /**
+     * @var Collection<int, Wishlist>
+     */
+    #[ORM\ManyToMany(targetEntity: Places::class)]
+    #[ORM\JoinTable(name: "user_wishlist")]
+    private Collection $wishlist;
+
     public function __construct()
     {
         $this->places = new ArrayCollection();
@@ -138,6 +145,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->paniers = new ArrayCollection();
         $this->orders = new ArrayCollection();
         $this->adresses = new ArrayCollection();
+        $this->wishlist = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -512,6 +520,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->telephone = $telephone;
 
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Wishlist>
+     */
+    public function getWishlist(): Collection {
+        return $this->wishlist;
+    }
+
+    public function addWishlist(Places $place): self {
+        if (!$this->wishlist->contains($place)) {
+            $this->wishlist->add($place);
+        }
+        return $this;
+    }
+
+    public function removeWishlist(Places $place): self {
+        $this->wishlist->removeElement($place);
         return $this;
     }
 }
