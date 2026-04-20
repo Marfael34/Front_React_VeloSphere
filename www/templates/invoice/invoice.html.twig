@@ -106,6 +106,9 @@
     </style>
 </head>
 <body>
+    {# --- DÉFINITION DU TAUX DE TVA (20%) --- #}
+    {% set tva_rate = 20 %}
+
     <div class="invoice-box">
         <div class="header">
             <table>
@@ -148,16 +151,22 @@
                 <tr>
                     <th>Article</th>
                     <th class="text-center">Quantité</th>
-                    <th class="text-right">Prix Unitaire</th>
+                    <th class="text-right">Prix Unitaire HT</th>
                     <th class="text-right">Total HT</th>
+                    <th class="text-right">Total TTC</th>
                 </tr>
             </thead>
             <tbody>
                 {% for line in lines %}
+                {# Calculs pour chaque ligne : Extraction du HT depuis le TTC #}
+                {% set prix_unitaire_ht = line.price / (1 + (tva_rate / 100)) %}
+                {% set sous_total_ht = line.subtotal / (1 + (tva_rate / 100)) %}
+                
                 <tr>
                     <td>{{ line.title }}</td>
                     <td class="text-center">{{ line.quantity }}</td>
-                    <td class="text-right">{{ line.price|number_format(2, ',', ' ') }} €</td>
+                    <td class="text-right">{{ prix_unitaire_ht|number_format(2, ',', ' ') }} €</td>
+                    <td class="text-right">{{ sous_total_ht|number_format(2, ',', ' ') }} €</td>
                     <td class="text-right">{{ line.subtotal|number_format(2, ',', ' ') }} €</td>
                 </tr>
                 {% endfor %}
@@ -166,14 +175,18 @@
 
         <div class="total-container">
             <div class="total-wrapper">
+                {# Calculs globaux #}
+                {% set total_ht = total / (1 + (tva_rate / 100)) %}
+                {% set total_tva = total - total_ht %}
+
                 <table style="width: 100%;">
                     <tr class="total-row">
-                        <td>Sous-total</td>
-                        <td class="text-right">{{ total|number_format(2, ',', ' ') }} €</td>
+                        <td>Total HT</td>
+                        <td class="text-right">{{ total_ht|number_format(2, ',', ' ') }} €</td>
                     </tr>
                     <tr class="total-row">
-                        <td>TVA (0%)</td>
-                        <td class="text-right">0,00 €</td>
+                        <td>TVA ({{ tva_rate }}%)</td>
+                        <td class="text-right">{{ total_tva|number_format(2, ',', ' ') }} €</td>
                     </tr>
                     <tr class="total-final">
                         <td>TOTAL TTC</td>
