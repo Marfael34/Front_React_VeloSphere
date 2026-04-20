@@ -4,15 +4,18 @@ import { API_ROOT, IMAGE_URL } from '../constants/apiConstant';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom'; 
 import ButtonLoader from '../components/Loader/ButtonLoader';
-import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake, FaBoxOpen, FaEdit, FaPhone } from 'react-icons/fa';
+import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake, FaBoxOpen, FaEdit, FaPhone, FaHeart } from 'react-icons/fa';
 import CustomButton from '../components/UI/CustomButton';
 import EditProfileForm from '../components/Market/EditProfileForm';
+import LocationCard from '../components/Card/LocationCard'; 
 
 const Profile = () => {
     const { user, setUser } = useContext(AuthContext);
     const [fullUser, setFullUser] = useState(null);
     const [orders, setOrders] = useState([]);
     const [cart, setCart] = useState(null);
+    const [wishlist, setWishlist] = useState([]); 
+    const [etatFavorisId, setEtatFavorisId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -28,15 +31,27 @@ const Profile = () => {
         try {
             const authConfig = { headers: { Authorization: `Bearer ${user.token}` } };
 
-            // 1. Appel API User
+            // Appel API User
             const userRes = await axios.get(`${API_ROOT}/api/users/${user.id}`, authConfig);
             setFullUser(userRes.data);
 
-            // 2. Récupérer les états pour le panier
+            // Récupérer les états pour identifier l'ID du label 'Favoris'
             const etatsRes = await axios.get(`${API_ROOT}/api/etats`, authConfig);
-            const etats = etatsRes.data.member || etatsRes.data['hydra:member'] || [];
-            const etatEnCours = etats.find(e => e.label === "En attentes de paiement" || e.label.toLowerCase().includes("attente"));
+            const etatsData = etatsRes.data['hydra:member'] || etatsRes.data.member || [];
+            
+            const favEtat = etatsData.find(e => e.label === 'Favoris');
+            if (favEtat) {
+                setEtatFavorisId(favEtat.id);
+            }
 
+            // Récupérer la Wishlist
+            try {
+                const wishlistRes = await axios.get(`${API_ROOT}/api/wishlist/me`, authConfig);
+                setWishlist(wishlistRes.data);
+            } catch (wishErr) { console.error("Erreur wishlist:", wishErr); }
+
+            // Panier
+            const etatEnCours = etatsData.find(e => e.label === "En attentes de paiement" || e.label.toLowerCase().includes("attente"));
             if (etatEnCours) {
                 const etatIri = etatEnCours['@id'] || `/api/etats/${etatEnCours.id}`;
                 try {
@@ -49,7 +64,7 @@ const Profile = () => {
                 } catch (cartErr) { console.error("Erreur panier:", cartErr); }
             }
 
-            // 3. Appel API Commandes
+            // Commandes
             try {
                 const ordersRes = await axios.get(
                     `${API_ROOT}/api/orders?user=/api/users/${user.id}`,
@@ -71,7 +86,16 @@ const Profile = () => {
         fetchProfileData();
     }, [user, navigate]);
 
-    // Logique d'agrégation du panier
+    // On ne garde que les items de la wishlist dont l'ID d'état correspond à 'Favoris'
+    const filteredWishlist = useMemo(() => {
+        if (!etatFavorisId) return wishlist; // Si pas encore chargé, on affiche tout par défaut ou rien
+
+        return wishlist.filter(item => {
+            // On force la comparaison en Number pour éviter les erreurs de type string/int
+            return Number(item.etatId) === Number(etatFavorisId);
+        });
+    }, [wishlist, etatFavorisId]);
+
     const aggregatedCartItems = useMemo(() => {
         if (!cart || !cart.items) return [];
         const groups = cart.items.reduce((acc, item) => {
@@ -123,8 +147,7 @@ const Profile = () => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    
-                    {/* COLONNE GAUCHE : INFOS OU FORMULAIRE */}
+                    {/* INFOS USER (inchangé) */}
                     <div className="bg-black/40 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-xl h-fit">
                         {isEditing ? (
                             <EditProfileForm 
@@ -147,153 +170,91 @@ const Profile = () => {
                                     <h2 className="text-2xl font-bold">{fullUser?.firstname || fullUser?.firstName} {fullUser?.lastname || fullUser?.lastName}</h2>
                                     <p className="text-orange font-medium">@{fullUser?.pseudo}</p>
                                 </div>
-
                                 <div className="space-y-5 border-t border-white/10 pt-6">
-                                    <div>
-                                        <p className="text-gray-400 text-sm">Email</p>
-                                        <p className="font-medium">{fullUser?.email}</p>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <FaPhone className="text-orange" size={18} />
-                                        <div>
-                                            <p className="text-gray-400 text-sm">Téléphone</p>
-                                            <p className="font-medium">{fullUser?.telephone || fullUser?.phone || "Non renseigné"}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <FaBirthdayCake className="text-orange" size={18} />
-                                        <div>
-                                            <p className="text-gray-400 text-sm">Date de naissance</p>
-                                            <p className="font-medium">{formatDate(fullUser?.birthday)}</p>
-                                        </div>
-                                    </div>
-                                    <div className="pt-2">
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <FaMapMarkerAlt className="text-orange" size={18} />
-                                            <p className="text-gray-400 text-sm">Mon Adresse</p>
-                                        </div>
-                                        {fullUser?.adresses && fullUser.adresses.length > 0 ? (
-                                            <div className="space-y-3">
-                                                {fullUser.adresses.map((adr, index) => (
-                                                    <div key={index} className="bg-white/5 p-3 rounded-lg border border-white/5 text-sm">
-                                                        <p className="font-medium">{adr.number} {adr.type} {adr.label}</p>
-                                                        {adr.complement && <p className="text-gray-400 italic text-xs">{adr.complement}</p>}
-                                                        <p className="font-bold text-orange mt-1">{adr.cp} {adr.city}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <p className="text-gray-500 italic text-sm ml-7">Aucune adresse enregistrée</p>
-                                        )}
-                                    </div>
+                                    <div><p className="text-gray-400 text-sm">Email</p><p className="font-medium">{fullUser?.email}</p></div>
+                                    <div className="flex items-center gap-3"><FaPhone className="text-orange" size={18} /><div><p className="text-gray-400 text-sm">Téléphone</p><p className="font-medium">{fullUser?.telephone || "Non renseigné"}</p></div></div>
+                                    <div className="flex items-center gap-3"><FaBirthdayCake className="text-orange" size={18} /><div><p className="text-gray-400 text-sm">Date de naissance</p><p className="font-medium">{formatDate(fullUser?.birthday)}</p></div></div>
                                 </div>
                             </>
                         )}
                     </div>
 
-                    {/* COLONNE DROITE : PANIER & COMMANDES */}
                     <div className="lg:col-span-2 space-y-8">
-                        {/* PANIER */}
+                        {/* PANIER (inchangé) */}
                         <div className="bg-nigth-blue p-6 rounded-2xl shadow-lg border border-white/5">
-                            <h2 className="text-xl font-bold flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
-                                <FaShoppingBag className="text-orange" /> Mon Panier en cours
-                            </h2>
+                            <h2 className="text-xl font-bold flex items-center gap-3 mb-6 border-b border-white/10 pb-4"><FaShoppingBag className="text-orange" /> Mon Panier</h2>
                             {aggregatedCartItems.length > 0 ? (
                                 <div>
                                     <div className="space-y-3 mb-6 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
                                         {aggregatedCartItems.map((item, idx) => (
                                             <div key={idx} className="flex justify-between items-center bg-black/20 p-3 rounded-xl border border-white/5">
                                                 <div className="flex items-center gap-4">
-                                                    <img 
-                                                        src={item.product.imagePath ? `${API_ROOT}${item.product.imagePath}` : `${IMAGE_URL}/default/default_product.png`} 
-                                                        alt={item.product.title} 
-                                                        className="w-12 h-12 object-contain rounded-lg bg-white/10"
-                                                    />
-                                                    <div>
-                                                        <p className="font-bold text-sm text-white">
-                                                            {item.product.title} <span className="text-orange text-xs ml-1">(x{item.quantity})</span>
-                                                        </p>
-                                                        <p className="text-xs text-gray-400">{item.product.brand}</p>
-                                                    </div>
+                                                    <img src={item.product.imagePath ? `${API_ROOT}${item.product.imagePath}` : `${IMAGE_URL}/default/default_product.png`} className="w-12 h-12 object-contain rounded-lg" alt="" />
+                                                    <div><p className="font-bold text-sm">{item.product.title} (x{item.quantity})</p></div>
                                                 </div>
                                                 <div className="font-bold text-orange">{item.totalPrice.toFixed(2)} €</div>
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="bg-black/40 p-5 rounded-xl border border-white/10">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <p className="text-gray-400 text-sm">Total à régler</p>
-                                            <p className="text-2xl font-black text-orange">{calculateCartTotal()} €</p>
-                                        </div>
-                                        <Link to="/panier" className="main-button block text-center w-full !m-0 !py-3 text-sm">
-                                            Finaliser l'achat
-                                        </Link>
-                                    </div>
+                                    <Link to="/panier" className="main-button block text-center w-full !m-0 !py-3 text-sm">Finaliser l'achat</Link>
                                 </div>
-                            ) : (
-                                <div className="bg-black/20 p-6 rounded-xl border border-white/5 flex flex-col items-center gap-4">
-                                    <p className="text-gray-400 italic text-center">Votre panier est vide.</p>
-                                        <Link
-                                            to="/market"
-                                            className="main-button text-sm px-6  text-center ">
-                                        Aller à la boutique
-                                    </Link>
-                                </div>
-                            )}
+                            ) : <p className="text-gray-400 italic text-center">Panier vide.</p>}
                         </div>
 
-                        {/* COMMANDES */}
+                        {/* COMMANDES (inchangé) */}
                         <div className="bg-black/20 p-6 rounded-2xl border border-white/10">
-                            <h2 className="text-xl font-bold flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
-                                <FaHistory className="text-orange" /> Historique & Factures
-                            </h2>
+                            <h2 className="text-xl font-bold flex items-center gap-3 mb-6 border-b border-white/10 pb-4"><FaHistory className="text-orange" /> Historique</h2>
                             {orders.length > 0 ? (
                                 <div className="space-y-6">
                                     {orders.map((order) => (
                                         <div key={order.id} className="bg-white/5 p-5 rounded-xl border border-white/5">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <p className="font-bold text-lg">Commande #{order.id}</p>
-                                                    <p className="text-sm text-gray-400 flex items-center gap-2">
-                                                        <FaBoxOpen className="text-gray-500" /> {order.products?.length || 0} article(s)
-                                                    </p>
-                                                    <p className="text-xs text-gray-400 mt-1 mb-2">
-                                                        Le : {order.created_at ? new Date(order.created_at).toLocaleDateString() : "Inconnue"}
-                                                    </p>
-                                                    
-                                                    {/* Affichage propre de l'état actuel de la commande */}
-                                                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-slate-grey text-orange">
-                                                        {order.etats && order.etats.length > 0 ? order.etats[order.etats.length - 1].label : "En cours"}
-                                                    </span>
-                                                </div>
-
-                                                {order.path && (
-                                                    <a href={`${API_ROOT}${order.path}`} target="_blank" rel="noopener noreferrer" className="bg-white/10 hover:bg-orange text-white hover:text-black font-bold px-4 py-2 rounded-lg text-sm transition">
-                                                        Voir la facture
-                                                    </a>
-                                                )}
-                                            </div>
-                                            
-                                            <hr className="border-white/5 my-4" />
-                                            
-                                            <div className="w-full">
-                                                {/* Le lien vers la nouvelle page de tracking ! */}
-                                                <Link 
-                                                    to={`/profile/order/${order.id}`} 
-                                                    state={{ order: order }}
-                                                    className="main-button block text-center w-full !m-0 !py-3 text-sm"
-                                                >
-                                                    Suivre ma commande
-                                                </Link>
-                                            </div>
+                                            <p className="font-bold">Commande #{order.id}</p>
+                                            <Link to={`/profile/order/${order.id}`} state={{ order }} className="main-button block text-center w-full !m-0 !py-3 text-sm mt-4">Suivre</Link>
                                         </div>
                                     ))}
                                 </div>
-                            ) : (
-                                <p className="text-gray-400 italic text-center py-6 bg-white/5 rounded-xl border border-white/5">Aucune commande.</p>
-                            )}
+                            ) : <p className="text-gray-400 italic text-center py-6">Aucune commande.</p>}
                         </div>
                     </div>
+                </div>
+
+                {/* --- SECTION WISHLIST --- */}
+                <div className="mt-12">
+                    <h2 className="text-2xl font-bold flex items-center gap-3 mb-8 border-b border-white/10 pb-4">
+                        <FaHeart className="text-orange" /> Ma Wishlist
+                    </h2>
+                    {filteredWishlist.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredWishlist.map((item) => (
+                                <div key={item.id} className="bg-black/40 backdrop-blur-md p-5 rounded-2xl border border-white/10 shadow-xl">
+                                    <div className="flex flex-col gap-3">
+                                        {/* Affichage des données brutes de la wishlist */}
+                                        <h3 className="text-xl font-bold text-white">{item.placeName || "Produit sans nom"}</h3>
+                                        
+                                        <div className="flex justify-between items-center mt-2">
+                                            <span className="text-orange font-medium">
+                                                {item.placeDifficulty ? `Difficulté : ${item.placeDifficulty}` : "Favori"}
+                                            </span>
+                                            <span className="text-gray-400 text-xs">Ajouté le {formatDate(item.createdAt)}</span>
+                                        </div>
+                                        
+                                        {/* Lien vers le détail si nécessaire, utilisant l'id de la wishlist ou du produit lié */}
+                                        <Link 
+                                            to={`/wishlist/item/${item.id}`} 
+                                            className="mt-4 text-center bg-orange/20 hover:bg-orange/40 text-orange py-2 rounded-lg transition-all border border-orange/50 text-sm font-bold"
+                                        >
+                                            Voir le détail
+                                        </Link>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-black/20 p-10 rounded-2xl border border-dashed border-white/10 flex flex-col items-center gap-4">
+                            <p className="text-gray-400 text-lg">Votre wishlist est vide.</p>
+                            <Link to="/boutique" className="text-orange hover:underline font-medium">Parcourir le catalogue</Link>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

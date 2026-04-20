@@ -21,23 +21,44 @@ export const IMG_LOGO = `${IMAGE_URL}/logo.png`
 
 // Navigation principale 
 export const dataNav = [
-    {title: "Acceuil", path: "/", icon: AiOutlineHome},
-    {title: "Market", path: "/market", icon: MdOutlinePedalBike},
-    {title: "Lieux", path: "/location", icon: LuMapPin},
+  {
+    title: "Acceuil",
+    path: "/", icon: AiOutlineHome
+  },
+  {
+    title: "Market",
+    path: "/market", icon: MdOutlinePedalBike
+  },
+  {
+    title: "Lieux",
+    path: "/location", icon: LuMapPin
+  },
 
 ]
 
 // Navigation utilisateur (compte et playlists)
 export const OfflinedataUserNav = [
-  {title: "Login", path: "/login", icon: BiLogIn},
-  {title: "Resgister", path: "/register", icon: AiOutlineUserAdd},
+  {
+    title: "Login",
+    path: "/login", icon: BiLogIn
+  },
+  {
+    title: "Resgister",
+    path: "/register", icon: AiOutlineUserAdd
+  },
   
 ]
 
 // Navigation utilisateur (compte et playlists)
 export const OnlinedataUserNav = [
-  {title: "Profile", path: "/profile", icon: FaRegUserCircle },
-  {title: "Panier", path: "/panier", icon: RiShoppingBasket2Line }
+  {
+    title: "Profile",
+    path: "/profile", icon: FaRegUserCircle
+  },
+  {
+    title: "Panier",
+    path: "/panier", icon: RiShoppingBasket2Line
+  }
 
 ]
 
