@@ -191,7 +191,7 @@ const ProductDetail = () => {
                             )}
                         </div>
                         
-                        <p className="text-3xl font-bold text-orange mb-2">{product.price} €</p>
+                        <p className="text-3xl font-bold text-orange mb-2">{product.price / 100} €</p>
                         
                         <div className={`mb-6 font-bold ${product.quantity > 0 ? 'text-green-400' : 'text-red-500'}`}>
                             {product.quantity > 0 ? `En stock : ${product.quantity} unité(s)` : 'Rupture de stock'}

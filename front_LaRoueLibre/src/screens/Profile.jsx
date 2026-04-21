@@ -222,12 +222,12 @@ const Profile = () => {
                                 <div>
                                     <div className="space-y-3 mb-6 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
                                         {aggregatedCartItems.map((item, idx) => (
-                                            <div key={idx} className="flex justify-between items-center bg-black/20 p-3 rounded-xl border border-white/5">
+                                            <div key={idx} className="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5">
                                                 <div className="flex items-center gap-4">
                                                     <img src={item.product.imagePath ? `${API_ROOT}${item.product.imagePath}` : `${IMAGE_URL}/default/default_product.png`} className="w-12 h-12 object-contain rounded-lg" alt="" />
                                                     <div><p className="font-bold text-sm">{item.product.title} (x{item.quantity})</p></div>
                                                 </div>
-                                                <div className="font-bold text-orange">{item.totalPrice.toFixed(2)} €</div>
+                                                <div className="font-bold text-orange">{item.totalPrice.toFixed(2) / 100} €</div>
                                             </div>
                                         ))}
                                     </div>
@@ -236,23 +236,39 @@ const Profile = () => {
                             ) : <p className="text-gray-400 italic text-center">Panier vide.</p>}
                         </div>
 
-                        {/* COMMANDES) */}
-                        <div className="bg-black/20 p-6 rounded-2xl border border-white/10">
-                            <h2 className="text-xl font-bold flex items-center gap-3 mb-6 border-b border-white/10 pb-4"><FaHistory className="text-orange" /> Historique</h2>
+                        {/* COMMANDES */}
+                        <div className="bg-nigth-blue p-6 rounded-2xl shadow-lg border border-white/5">
+                            <h2 className="text-xl font-bold flex items-center gap-3 mb-6 border-b border-white/10 pb-4"><FaHistory className="text-orange" /> Mes Commandes</h2>
                             {orders.length > 0 ? (
-                                <div className="space-y-6">
+                                <div className="space-y-4">
                                     {orders.map((order) => (
-                                        <div key={order.id} className="bg-white/5 p-5 rounded-xl border border-white/5">
-                                            <p className="font-bold">Commande #{order.id}</p>
-                                            <Link to={`/profile/order/${order.id}`} state={{ order }} className="main-button block text-center w-full m-0! py-3! text-sm mt-4">Suivre</Link>
+                                        <div key={order.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-black/40 p-5 rounded-xl border border-white/5 hover:border-orange/30 transition-colors gap-4">
+                                            <div>
+                                                <div className="flex items-center gap-3 mb-1">
+                                                    <h3 className="font-bold text-lg text-white">Commande #{order.id}</h3>
+                                                    <span className="text-xs text-gray-400">{formatDate(order.createdAt || order.created_at)}</span>
+                                                </div>
+                                                <div className="flex flex-wrap gap-2 mt-3">
+                                                    {order.etats?.map((etat, idx) => (
+                                                        <span key={idx} className="bg-white/10 text-gray-300 text-xs px-2.5 py-1 rounded-md border border-white/10">
+                                                            {etat.label}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="w-full sm:w-auto mt-2 sm:mt-0">
+                                                <Link to={`/profile/order/${order.id}`} state={{ order }} className="bg-orange hover:bg-orange/80 text-black font-bold py-2.5 px-6 rounded-lg transition-colors text-sm w-full sm:w-auto block text-center shadow-lg">
+                                                    Suivre
+                                                </Link>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
-                            ) : <p className="text-gray-400 italic text-center py-6">Aucune commande.</p>}
+                            ) : <p className="text-gray-400 italic text-center py-6">Aucune commande pour le moment.</p>}
                         </div>
 
                         {/* --- SECTION WISHLIST --- */}
-                        <div className="bg-black/20 p-6 rounded-2xl border border-white/10">
+                        <div className="bg-nigth-blue p-6 rounded-2xl border border-white/10">
                             <h2 className="text-2xl font-bold flex items-center gap-3 mb-8 border-b border-white/10 pb-4">
                                 <FaHeart className="text-orange" /> Ma Wishlist
                             </h2>

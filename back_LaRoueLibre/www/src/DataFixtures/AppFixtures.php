@@ -50,7 +50,7 @@ class AppFixtures extends Fixture
             ['type' => 'Catégorie vélo', 'description' => 'categorie_velo', 'value' => 'Route et Gravel'],
             ['type' => 'Catégorie vélo', 'description' => 'categorie_velo', 'value' => 'Vélos électriques'],
             ['type' => 'Catégorie vélo', 'description' => 'categorie_velo', 'value' => 'Enfant et Pliable'],
-            
+
             // --- TYPES DE PIÈCES DÉTACHÉES ---
             ['type' => 'Pièce détachée', 'description' => 'categorie_piece', 'value' => 'Cadre'],
             ['type' => 'Pièce détachée', 'description' => 'categorie_piece', 'value' => 'Roue et Pneu'],
@@ -84,7 +84,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Elops Speed 920",
                 'description' => "Un vélo urbain ultra-dynamique, cadre alu, avec moyeu Alfine 8 vitesses et éclairage intégré par moyeu dynamo. Poids: 12kg. Tailles: M à XL. Non électrique.",
-                'price' => "650",
+                'price' => 65000,
                 'brand' => "Decathlon",
                 'image' => "",
                 'category' => "Vélos ville",
@@ -93,7 +93,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Loft 7i",
                 'description' => "Le style California par excellence. Cadre ouvert, assise droite et transmission intégrée pour ne jamais dérailler. Poids: 15.5kg. Tailles: S, M, L. Non électrique.",
-                'price' => "899",
+                'price' => 89900,
                 'brand' => "Electra",
                 'image' => "",
                 'category' => "Vélos ville",
@@ -102,7 +102,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Roadlite 5",
                 'description' => "Un pur vélo de fitness. Très léger, il combine la rapidité d'un vélo de route avec un cintre plat. Poids: 9.9kg. Tailles: 2XS à 2XL. Non électrique.",
-                'price' => "949",
+                'price' => 94900,
                 'brand' => "Canyon",
                 'image' => "",
                 'category' => "Vélos ville",
@@ -111,7 +111,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Bad Boy 3",
                 'description' => "Le roi du style urbain : fourche monobras Lefty et look noir mat furtif. Poids: 11.8kg. Tailles: S à XL. Non électrique.",
-                'price' => "1099",
+                'price' => 109900,
                 'brand' => "Cannondale",
                 'image' => "",
                 'category' => "Vélos ville",
@@ -120,7 +120,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Sirrus 2.0",
                 'description' => "Équilibré et robuste. Un excellent vélo de tous les jours avec points de fixation pour porte-bagages. Poids: 11.5kg. Tailles: XS à XL. Non électrique.",
-                'price' => "750",
+                'price' => 75000,
                 'brand' => "Specialized",
                 'image' => "",
                 'category' => "Vélos ville",
@@ -129,7 +129,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "District 4",
                 'description' => "Haut de gamme urbain avec transmission par courroie Gates Carbon Drive propre et silencieuse. Poids: 13.2kg. Tailles: S à XL. Non électrique.",
-                'price' => "1649",
+                'price' => 164900,
                 'brand' => "Trek",
                 'image' => "",
                 'category' => "Vélos ville",
@@ -138,7 +138,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Hyde Pro",
                 'description' => "Look épuré et pneus larges pour absorber les pavés. Équipé d'un moyeu Shimano Nexus 8. Poids: 13.4kg. Tailles: XS à XL. Non électrique.",
-                'price' => "1149",
+                'price' => 114900,
                 'brand' => "Cube",
                 'image' => "",
                 'category' => "Vélos ville",
@@ -147,7 +147,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Presidio 2",
                 'description' => "Conçu pour le commuting pur et dur. Freins à disque hydrauliques puissants pour la pluie. Poids: 12.5kg. Tailles: S à XL. Non électrique.",
-                'price' => "850",
+                'price' => 85000,
                 'brand' => "Marin",
                 'image' => "",
                 'category' => "Vélos ville",
@@ -156,7 +156,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Avenue",
                 'description' => "Vélo hollandais à la française. Stable, confortable, idéal pour les courtes distances. Poids: 14.8kg. Tailles: M, L. Non électrique.",
-                'price' => "699",
+                'price' => 69900,
                 'brand' => "MBK",
                 'image' => "",
                 'category' => "Vélos ville",
@@ -165,7 +165,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Brooklyn Cruiser",
                 'description' => "Un design intemporel avec cadre en acier chromoly. Un vélo élégant pour flâner. Poids: 15kg. Taille: Unique. Non électrique.",
-                'price' => "780",
+                'price' => 78000,
                 'brand' => "Brooklyn",
                 'image' => "",
                 'category' => "Vélos ville",
@@ -176,7 +176,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Lundi 27.1",
                 'description' => "Le cadre iconique en M pour une stabilité hors pair. Moteur Bosch Active Line Plus. Poids: 25kg. Tailles: S, M, L. Électrique.",
-                'price' => "3299",
+                'price' => 329900,
                 'brand' => "Moustache",
                 'image' => "",
                 'category' => "Vélos électriques",
@@ -185,7 +185,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Cowboy Cruiser",
                 'description' => "Vélo ultra-intelligent sans boutons. Assistance automatique et GPS intégré. Poids: 19.3kg. Taille: 170-195cm. Électrique.",
-                'price' => "2990",
+                'price' => 299000,
                 'brand' => "Cowboy",
                 'image' => "",
                 'category' => "Vélos électriques",
@@ -194,7 +194,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "VanMoof S5",
                 'description' => "Futuriste avec moteur ultra-silencieux et bouton Turbo Boost. Poids: 23kg. Taille: 165-210cm. Électrique.",
-                'price' => "3498",
+                'price' => 349800,
                 'brand' => "VanMoof",
                 'image' => "",
                 'category' => "Vélos électriques",
@@ -203,7 +203,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Turbo Vado 4.0",
                 'description' => "Moteur Specialized 2.0 développant 70Nm de couple. Grande autonomie. Poids: 24.5kg. Tailles: S à XL. Électrique.",
-                'price' => "4000",
+                'price' => 400000,
                 'brand' => "Specialized",
                 'image' => "",
                 'category' => "Vélos électriques",
@@ -212,7 +212,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Endeavour 5.B",
                 'description' => "Le SUV du vélo électrique. Solide, puissant (Bosch Performance). Poids: 26kg. Tailles: S à XL. Électrique.",
-                'price' => "3199",
+                'price' => 319900,
                 'brand' => "Kalkhoff",
                 'image' => "",
                 'category' => "Vélos électriques",
@@ -221,7 +221,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "GSD S10",
                 'description' => "Vélo cargo compact. Peut porter 200kg (enfants, bagages). Poids: 33kg. Taille: Unique. Électrique.",
-                'price' => "5499",
+                'price' => 549900,
                 'brand' => "Tern",
                 'image' => "",
                 'category' => "Vélos électriques",
@@ -230,7 +230,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "RadRunner 3 Plus",
                 'description' => "Utility bike à grosses roues. Look de mini-moto, parfait pour le sable. Poids: 34kg. Taille: Unique. Électrique.",
-                'price' => "2199",
+                'price' => 219000,
                 'brand' => "Rad Power",
                 'image' => "",
                 'category' => "Vélos électriques",
@@ -239,7 +239,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Nevo 4",
                 'description' => "Confort premium avec suspension totale et configuration personnalisable. Poids: 27kg. Tailles: 43 à 56cm. Électrique.",
-                'price' => "5200",
+                'price' => 520000,
                 'brand' => "Riese & Müller",
                 'image' => "",
                 'category' => "Vélos électriques",
@@ -248,7 +248,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Angell S/Rapide",
                 'description' => "Un des VAE les plus légers au monde. Écran intégré et fonctions de sécurité. Poids: 16.3kg. Taille: 160-180cm. Électrique.",
-                'price' => "2850",
+                'price' => 285000,
                 'brand' => "Angell",
                 'image' => "",
                 'category' => "Vélos électriques",
@@ -257,7 +257,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "C20",
                 'description' => "Électrique pliant d'entrée de gamme. Idéal pour les petits budgets urbains. Poids: 21kg. Taille: Unique. Électrique.",
-                'price' => "899",
+                'price' => 89900,
                 'brand' => "Xiaomi",
                 'image' => "",
                 'category' => "Vélos électriques",
@@ -268,7 +268,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Rockrider XC 120",
                 'description' => "Géométrie compétition. Fourche Rockshox Recon 100mm et SRAM NX Eagle 12v. Poids: 12.1kg. Tailles: S à XL. Non électrique.",
-                'price' => "1299",
+                'price' => 129900,
                 'brand' => "Decathlon",
                 'image' => "",
                 'category' => "VTT",
@@ -277,7 +277,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Fuel EX 8",
                 'description' => "VTT tout-suspendu polyvalent (Trail). Suspension FOX Rhythm 36. Poids: 15.6kg. Tailles: XS à XL. Non électrique.",
-                'price' => "3999",
+                'price' => 399900,
                 'brand' => "Trek",
                 'image' => "",
                 'category' => "VTT",
@@ -286,7 +286,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Nomad 6",
                 'description' => "La référence de l'Enduro. Roues Mullet (29/27.5) pour l'agilité. Poids: 15.4kg. Tailles: S à XL. Non électrique.",
-                'price' => "6500",
+                'price' => 650000,
                 'brand' => "Santa Cruz",
                 'image' => "",
                 'category' => "VTT",
@@ -295,7 +295,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Grand Canyon 7",
                 'description' => "Hardtail moderne avec tige de selle télescopique de série. Poids: 13.9kg. Tailles: XS à XL. Non électrique.",
-                'price' => "1249",
+                'price' => 124900,
                 'brand' => "Canyon",
                 'image' => "",
                 'category' => "VTT",
@@ -304,7 +304,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Spark RC",
                 'description' => "Vélo de XC champion du monde. Amortisseur intégré dans le cadre. Poids: 10.9kg. Tailles: S à XL. Non électrique.",
-                'price' => "5800",
+                'price' => 580000,
                 'brand' => "Scott",
                 'image' => "",
                 'category' => "VTT",
@@ -313,7 +313,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Alma M50",
                 'description' => "Cadre en carbone haut de gamme (OMR). Un vélo nerveux pour les bosses. Poids: 11.5kg. Tailles: S à XL. Non électrique.",
-                'price' => "1899",
+                'price' => 189900,
                 'brand' => "Orbea",
                 'image' => "",
                 'category' => "VTT",
@@ -322,7 +322,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Epic World Cup",
                 'description' => "Vitesse pure. Suspension arrière minimaliste pour circuits de coupe du monde. Poids: 9.5kg. Tailles: S à XL. Non électrique.",
-                'price' => "4500",
+                'price' => 450000,
                 'brand' => "Specialized",
                 'image' => "",
                 'category' => "VTT",
@@ -331,7 +331,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Meta HT AM",
                 'description' => "Un endurigide increvable. Grosse fourche de 160mm pour la descente. Poids: 14.5kg. Tailles: S à XL. Non électrique.",
-                'price' => "1600",
+                'price' => 160000,
                 'brand' => "Commencal",
                 'image' => "",
                 'category' => "VTT",
@@ -340,7 +340,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "SB160",
                 'description' => "Système Switch Infinity. Précision chirurgicale pour l'Enduro. Poids: 15.2kg. Tailles: S à XL. Non électrique.",
-                'price' => "8200",
+                'price' => 820000,
                 'brand' => "Yeti",
                 'image' => "",
                 'category' => "VTT",
@@ -349,7 +349,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Trance X 29 1",
                 'description' => "Tout-suspendu avec système Maestro. Équilibré montée/descente. Poids: 14.8kg. Tailles: S à XL. Non électrique.",
-                'price' => "2700",
+                'price' => 270000,
                 'brand' => "Giant",
                 'image' => "",
                 'category' => "VTT",
@@ -360,7 +360,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "NCR CF",
                 'description' => "Neo Carbon Road. Vélo polyvalent en carbone, freins à disque. Poids: 8.3kg. Tailles: XXS à XL. Non électrique.",
-                'price' => "1800",
+                'price' => 180000,
                 'brand' => "Van Rysel",
                 'image' => "",
                 'category' => "Route et Gravel",
@@ -369,7 +369,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Madone SLR 9",
                 'description' => "Summum de l'aéro avec IsoFlow. Shimano Dura-Ace Di2. Poids: 7.1kg. Tailles: 47 à 62cm. Non électrique.",
-                'price' => "12500",
+                'price' => 1250000,
                 'brand' => "Trek",
                 'image' => "",
                 'category' => "Route et Gravel",
@@ -378,7 +378,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Grizl CF SL 8",
                 'description' => "Gravel d'aventure. Pneus de 45mm et géométrie stable hors-piste. Poids: 9.1kg. Tailles: 2XS à 2XL. Non électrique.",
-                'price' => "2499",
+                'price' => 249900,
                 'brand' => "Canyon",
                 'image' => "",
                 'category' => "Route et Gravel",
@@ -387,7 +387,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Oltre RC",
                 'description' => "Hyperbike aéro avec déflecteurs d'air. Technologie italienne pure. Poids: 6.8kg. Tailles: 47 à 59cm. Non électrique.",
-                'price' => "13800",
+                'price' => 1380000,
                 'brand' => "Bianchi",
                 'image' => "",
                 'category' => "Route et Gravel",
@@ -396,7 +396,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Domane AL 2",
                 'description' => "Vélo de route d'endurance abordable. Position confortable. Poids: 10.7kg. Tailles: 47 à 62cm. Non électrique.",
-                'price' => "999",
+                'price' => 99900,
                 'brand' => "Trek",
                 'image' => "",
                 'category' => "Route et Gravel",
@@ -405,7 +405,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Dogma F",
                 'description' => "Le choix des pros. Équilibre parfait entre poids, aéro et rigidité. Poids: 6.9kg. Tailles: 11 choix. Non électrique.",
-                'price' => "14500",
+                'price' => 1450000,
                 'brand' => "Pinarello",
                 'image' => "",
                 'category' => "Route et Gravel",
@@ -414,7 +414,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Diverge STR",
                 'description' => "Gravel avec double suspension Future Shock. Confort ultime. Poids: 8.9kg. Tailles: 49 à 61cm. Non électrique.",
-                'price' => "3200",
+                'price' => 320000,
                 'brand' => "Specialized",
                 'image' => "",
                 'category' => "Route et Gravel",
@@ -423,7 +423,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "S5 Ultegra Di2",
                 'description' => "Le plus rapide du peloton. Guidon en V unique. Poids: 7.9kg. Tailles: 48 à 61cm. Non électrique.",
-                'price' => "9000",
+                'price' => 900000,
                 'brand' => "Cervélo",
                 'image' => "",
                 'category' => "Route et Gravel",
@@ -432,7 +432,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Reveal 04",
                 'description' => "Route endurance. Câblage intégré et cadre carbone filtrant. Poids: 7.8kg. Tailles: 50 à 63cm. Non électrique.",
-                'price' => "2600",
+                'price' => 260000,
                 'brand' => "Rose",
                 'image' => "",
                 'category' => "Route et Gravel",
@@ -441,7 +441,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Filante SLR",
                 'description' => "Ultra-léger et aéro utilisé par les pros. Peinture haut de gamme. Poids: 6.8kg. Tailles: XS à XXL. Non électrique.",
-                'price' => "8500",
+                'price' => 850000,
                 'brand' => "Wilier",
                 'image' => "",
                 'category' => "Route et Gravel",
@@ -452,7 +452,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "C Line Explore",
                 'description' => "Le pliable le plus compact au monde. Fabriqué à Londres. Poids: 12kg. Roues: 16 pouces. Non électrique.",
-                'price' => "1750",
+                'price' => 175000,
                 'brand' => "Brompton",
                 'image' => "",
                 'category' => "Enfant et Pliable",
@@ -461,7 +461,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Woom 3",
                 'description' => "Ultra-léger pour les 4-6 ans. Ergonomie parfaite. Poids: 5.4kg. Roues: 16 pouces. Non électrique.",
-                'price' => "449",
+                'price' => 44900,
                 'brand' => "Woom",
                 'image' => "",
                 'category' => "Enfant et Pliable",
@@ -470,7 +470,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Runride 500",
                 'description' => "Draisienne robuste avec vrai frein arrière. Poids: 3.4kg. Roues: 10 pouces. Non électrique.",
-                'price' => "60",
+                'price' => 6000,
                 'brand' => "Btwin",
                 'image' => "",
                 'category' => "Enfant et Pliable",
@@ -479,7 +479,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Frog 55",
                 'description' => "Vélo hybride haut de gamme pour enfants. Composants adaptés. Poids: 8.5kg. Roues: 20 pouces. Non électrique.",
-                'price' => "530",
+                'price' => 53000,
                 'brand' => "Frog Bikes",
                 'image' => "",
                 'category' => "Enfant et Pliable",
@@ -488,7 +488,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Mariner D8",
                 'description' => "Pliable polyvalent résistant à la corrosion marine. Poids: 12.4kg. Roues: 20 pouces. Non électrique.",
-                'price' => "850",
+                'price' => 85000,
                 'brand' => "Dahon",
                 'image' => "",
                 'category' => "Enfant et Pliable",
@@ -497,7 +497,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Belter 16",
                 'description' => "Alu brossé et transmission par courroie (sans graisse). Poids: 5.9kg. Roues: 16 pouces. Non électrique.",
-                'price' => "500",
+                'price' => 50000,
                 'brand' => "Early Rider",
                 'image' => "",
                 'category' => "Enfant et Pliable",
@@ -506,7 +506,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Node D8",
                 'description' => "Pliable avec grandes roues pour un confort urbain classique. Poids: 13.3kg. Roues: 24 pouces. Non électrique.",
-                'price' => "950",
+                'price' => 95000,
                 'brand' => "Tern",
                 'image' => "",
                 'category' => "Enfant et Pliable",
@@ -515,7 +515,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Cyke 20-7",
                 'description' => "Qualité allemande. Complet avec garde-boue et porte-bagages. Poids: 9.9kg. Roues: 20 pouces. Non électrique.",
-                'price' => "380",
+                'price' => 38000,
                 'brand' => "Puky",
                 'image' => "",
                 'category' => "Enfant et Pliable",
@@ -524,7 +524,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Tilt 500 E",
                 'description' => "Pliable électrique Decathlon. Autonomie 35km. Poids: 18.6kg. Roues: 20 pouces. Électrique.",
-                'price' => "850",
+                'price' => 85000,
                 'brand' => "Decathlon",
                 'image' => "",
                 'category' => "Enfant et Pliable",
@@ -533,7 +533,7 @@ class AppFixtures extends Fixture
             [
                 'title' => "Ramones 16",
                 'description' => "Mini VTT avec gros pneus pour les petits casse-cous. Poids: 8kg. Roues: 16 pouces. Non électrique.",
-                'price' => "450",
+                'price' => 45000,
                 'brand' => "Commencal",
                 'image' => "",
                 'category' => "Enfant et Pliable",
@@ -545,7 +545,7 @@ class AppFixtures extends Fixture
             $product = new Products();
             $product->setTitle($value['title']);
             $product->setDescription($value['description']);
-            $product->setPrice($value['price']);
+            $product->setPrice($value['price']); // Le prix est déjà en centimes dans l'array
             $product->setBrand($value['brand']);
             $product->setImagePath($value['image']);
             $product->setCreatedAt(new DateTime());
@@ -554,11 +554,11 @@ class AppFixtures extends Fixture
 
             if (isset($value['category'])) {
                 $referenceName = 'char_' . $value['category'];
-                
+
                 if ($this->hasReference($referenceName, Characteristic::class)) {
                     $product->addCharacteristic($this->getReference($referenceName, Characteristic::class));
                 }
-            }  
+            }
 
             $manager->persist($product);
         }
@@ -603,7 +603,7 @@ class AppFixtures extends Fixture
             $adress->setCp($value['cp']);
 
             $manager->persist($adress);
-            
+
             // <-- AJOUT DE LA RÉFÉRENCE ICI
             $this->addReference('adress_' . $key, $adress);
         }
@@ -654,8 +654,8 @@ class AppFixtures extends Fixture
                 $user->setTelephone($value['phone']);
             } else {
                 throw new InvalidArgumentException(sprintf(
-                    "Format de téléphone invalide pour l'utilisateur %s : %s. Le format attendu est xx.xx.xx.xx.xx", 
-                    $value['pseudo'], 
+                    "Format de téléphone invalide pour l'utilisateur %s : %s. Le format attendu est xx.xx.xx.xx.xx",
+                    $value['pseudo'],
                     $value['phone']
                 ));
             }
@@ -713,7 +713,7 @@ class AppFixtures extends Fixture
 
     public function loadEtat(ObjectManager $manager)
     {
-        $arrayEtat = ['En attentes de paiement', 'Payées','En attente de validation', 'Validées','Annulées', 'En cours de préparation', 'En cours de livraison', 'Livrées', 'Favoris'];
+        $arrayEtat = ['En attentes de paiement', 'Payées', 'En attente de validation', 'Validées', 'Annulées', 'En cours de préparation', 'En cours de livraison', 'Livrées', 'Favoris'];
 
         foreach ($arrayEtat as $value) {
             $etat = new Etat();

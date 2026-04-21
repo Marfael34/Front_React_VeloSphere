@@ -4,6 +4,7 @@ import { API_ROOT, IMAGE_URL } from '../constants/apiConstant';
 import { AuthContext } from '../contexts/AuthContext';
 import ButtonLoader from '../components/Loader/ButtonLoader';
 import { Link, useNavigate } from 'react-router-dom'; 
+import { RiDeleteBinLine } from 'react-icons/ri';
 
 const Panier = () => {
   const [cart, setCart] = useState(null);
@@ -73,7 +74,7 @@ const Panier = () => {
 
   const calculateTotal = () => {
     return aggregatedCartItems.reduce((acc, item) => {
-      return acc + (parseFloat(item.product.price || 0) * item.quantity);
+      return acc + ((parseFloat(item.product.price || 0) / 100) * item.quantity);
     }, 0).toFixed(2);
   };
 
@@ -199,7 +200,7 @@ const Panier = () => {
                     {/* Contrôleur de quantité aligné avec le prix */}
                     <div className="flex items-center gap-6 mt-2">
                       <p className="text-orange font-bold text-lg w-20">
-                        {(parseFloat(item.product?.price || 0) * item.quantity).toFixed(2)} €
+                        {((parseFloat(item.product?.price || 0) / 100) * item.quantity).toFixed(2)} €
                       </p>
 
                       <div className="flex items-center gap-2 bg-black/30 rounded-lg p-1 border border-white/5">
@@ -222,9 +223,11 @@ const Panier = () => {
                   </div>
                   <button 
                     onClick={() => handleRemoveProduct(item.dbIds)}
-                    className="text-red-500 hover:text-white hover:bg-red-500 transition px-3 py-1 border border-red-500 rounded text-sm ml-4"
+                    className="text-red-500 hover:text-white hover:bg-red-500 transition-colors border border-red-500 rounded ml-4 flex items-center justify-center p-2 md:px-3 md:py-1 text-sm"
+                    aria-label="Retirer le produit"
                   >
-                    Retirer
+                    <RiDeleteBinLine className="text-lg md:mr-2" />
+                    <span className="hidden md:inline">Retirer</span>
                   </button>
                 </div>
               ))}

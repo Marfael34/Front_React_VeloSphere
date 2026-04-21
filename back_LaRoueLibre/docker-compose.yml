@@ -43,7 +43,7 @@ services:
     environment:
       # variables d'environnement (utiliser un fichier .env pour la sécurité)
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-superAdmin} # mot de passe root
-      - MYSQL_DATABASE=${MYSQL_DATABASE:-bdd_name} # nom de la base de données
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-larouelibre} # nom de la base de données
       - MYSQL_USER=${MYSQL_USER:-admin} # nom de l'utilisateur
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-admin} # mot de passe de l'utilisateur
       - MYSQL_ROOT_HOST=${MYSQL_ROOT_HOST:-%} # autoriser les connexions root depuis n'importe quel host

@@ -6,7 +6,7 @@ const ProductCard = ({ product }) => {
     
     const productId = product?.id ?? 0;
     const productTitle = product?.title ?? "Produit inconnu";
-    const productPrice = product?.price ? `${product?.price} €` : "Prix non renseigné";
+    const productPrice = product?.price ? `${product?.price / 100} €` : "Prix non renseigné";
     const productBrand = product?.brand ?? "Marque inconnue"; 
     
     // L'image utilise la constante IMAGE_URL (http://localhost:8087/images)

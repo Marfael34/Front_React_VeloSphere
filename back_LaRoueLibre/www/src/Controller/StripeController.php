@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\Etat;
@@ -25,7 +26,7 @@ class StripeController extends AbstractController
 
         // Trouver l'état "En attentes de paiement"
         $etatEnAttente = $em->getRepository(Etat::class)->findOneBy(['label' => 'En attentes de paiement']);
-        
+
         if (!$etatEnAttente) {
             return new JsonResponse(['error' => 'Erreur de configuration des états'], 500);
         }
@@ -46,13 +47,13 @@ class StripeController extends AbstractController
         foreach ($panier->getItems() as $item) {
             $product = $item->getProduct();
             if ($product) {
-                // On multiplie le prix unitaire par la quantité de l'item
+                // On multiplie le prix unitaire par la quantité de l'item (le prix est DÉJÀ en centimes)
                 $totalPrice += ($product->getPrice() * $item->getQuantity());
             }
         }
 
-        // Stripe attend un montant en CENTIMES et entier
-        $amountInCents = (int) round($totalPrice * 100);
+        // Stripe attend un montant en CENTIMES, donc on envoie simplement le total
+        $amountInCents = (int) round($totalPrice);
 
         // 5. Initialiser Stripe avec ta clé secrète
         Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
@@ -60,13 +61,13 @@ class StripeController extends AbstractController
         try {
             // 6. Créer l'intention de paiement
             $paymentIntent = PaymentIntent::create([
-                'amount' => $amountInCents, 
+                'amount' => $amountInCents,
                 'currency' => 'eur',
-                'payment_method_types' => ['card'], 
+                'payment_method_types' => ['card'],
                 'metadata' => [
                     'panier_id' => $panier->getId(),
                     'Email' => $user->getUserIdentifier(),
-                    'Prénom' => $user->getFirstname(), 
+                    'Prénom' => $user->getFirstname(),
                     'Nom' => $user->getLastname(),
                 ]
             ]);

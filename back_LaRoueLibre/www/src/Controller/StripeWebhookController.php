@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\Etat;
@@ -19,8 +20,8 @@ class StripeWebhookController extends AbstractController
 {
     #[Route('/api/stripe/webhook', name: 'api_stripe_webhook', methods: ['POST'])]
     public function handleWebhook(
-        Request $request, 
-        EntityManagerInterface $em, 
+        Request $request,
+        EntityManagerInterface $em,
         LoggerInterface $logger,
         Environment $twig,
         ParameterBagInterface $params
@@ -39,7 +40,7 @@ class StripeWebhookController extends AbstractController
             if ($panierId) {
                 try {
                     $panier = $em->getRepository(Panier::class)->find($panierId);
-                    
+
                     if (!$panier) {
                         $logger->error("ERREUR : Panier introuvable en base pour l'ID " . $panierId);
                         return new Response('Panier introuvable', 404);
@@ -76,36 +77,37 @@ class StripeWebhookController extends AbstractController
                     // 1. CRÉATION DE L'ORDER
                     $order = new Order();
                     $order->setUser($panier->getUser());
-                    
+
                     // Ajout de la relation ManyToMany pour les états
                     $order->addEtat($etatPaye);
                     $order->addEtat($etatValidation);
-                    
+
                     $order->setCreatedAt(new \DateTime());
-                    
+
                     $totalPrice = 0;
                     $invoiceLines = [];
 
                     // 2. TRANSFERT ET DÉCRÉMENTATION DU STOCK
                     foreach ($panier->getItems() as $item) {
-                        $product = $item->getProduct(); 
+                        $product = $item->getProduct();
                         if (!$product) continue;
 
                         $qtyBought = $item->getQuantity();
-                        $subtotal = $product->getPrice() * $qtyBought;
+                        $unitPriceEuros = $product->getPrice() / 100;
+                        $subtotal = $unitPriceEuros * $qtyBought;
 
                         $invoiceLines[] = [
                             'title' => $product->getTitle(),
-                            'price' => $product->getPrice(),
+                            'price' => $unitPriceEuros,
                             'quantity' => $qtyBought,
                             'subtotal' => $subtotal
                         ];
 
-                        $order->addProduct($product); 
-                        
+                        $order->addProduct($product);
+
                         $currentQuantity = $product->getQuantity();
                         $product->setQuantity(max(0, $currentQuantity - $qtyBought));
-                        
+
                         $totalPrice += $subtotal;
                         $em->remove($item);
                     }
@@ -114,7 +116,7 @@ class StripeWebhookController extends AbstractController
                     $logger->info("Génération du PDF en cours...");
                     $pdfOptions = new Options();
                     $pdfOptions->set('defaultFont', 'Arial');
-                    $pdfOptions->set('isRemoteEnabled', true); 
+                    $pdfOptions->set('isRemoteEnabled', true);
                     $dompdf = new Dompdf($pdfOptions);
 
                     // --- AJOUT POUR LE LOGO ---
@@ -134,7 +136,7 @@ class StripeWebhookController extends AbstractController
                     $html = $twig->render('invoice/invoice.html.twig', [
                         'order' => $order,
                         'user' => $panier->getUser(),
-                        'lines' => $invoiceLines, 
+                        'lines' => $invoiceLines,
                         'total' => $totalPrice,
                         'date' => clone $order->getCreatedAt(),
                         'logo' => $logoData // On passe la variable logo à Twig ici
@@ -147,17 +149,17 @@ class StripeWebhookController extends AbstractController
                     // 4. SAUVEGARDE DU PDF SUR LE SERVEUR
                     $fileName = 'facture_' . uniqid() . '.pdf';
                     $pdfDirectory = $params->get('kernel.project_dir') . '/public/uploads/invoices';
-                    
+
                     if (!is_dir($pdfDirectory)) {
                         mkdir($pdfDirectory, 0777, true);
                     }
-                    
+
                     $pdfPath = $pdfDirectory . '/' . $fileName;
                     file_put_contents($pdfPath, $dompdf->output());
-                    
+
                     // 5. MISE À JOUR DE L'ORDER ET ÉTAT DU PANIER
                     $order->setPath('/uploads/invoices/' . $fileName);
-                    
+
                     // Le panier reste associé uniquement à l'état "Payées" (ManyToOne)
                     $panier->setEtat($etatPaye);
 
@@ -165,7 +167,6 @@ class StripeWebhookController extends AbstractController
                     $em->flush();
 
                     $logger->info("SUCCÈS : Commande FAC-" . $order->getId() . " créée.");
-
                 } catch (\Exception $e) {
                     $logger->error("ERREUR FATALE WEBHOOK : " . $e->getMessage() . " à la ligne " . $e->getLine());
                     return new Response('Erreur serveur', 500);
