@@ -69,12 +69,6 @@ class Products
     private ?bool $isActive = null;
 
     /**
-     * @var Collection<int, Panier>
-     */
-    #[ORM\ManyToMany(targetEntity: Panier::class, mappedBy: 'products')]
-    private Collection $paniers;
-
-    /**
      * @var Collection<int, Order>
      */
     #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'products')]
@@ -93,7 +87,6 @@ class Products
 
     public function __construct()
     {
-        $this->paniers = new ArrayCollection();
         $this->orders = new ArrayCollection();
         $this->characteristics = new ArrayCollection();
     }
@@ -195,33 +188,6 @@ class Products
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Panier>
-     */
-    public function getPaniers(): Collection
-    {
-        return $this->paniers;
-    }
-
-    public function addPanier(Panier $panier): static
-    {
-        if (!$this->paniers->contains($panier)) {
-            $this->paniers->add($panier);
-            $panier->addProduct($this);
-        }
-
-        return $this;
-    }
-
-    public function removePanier(Panier $panier): static
-    {
-        if ($this->paniers->removeElement($panier)) {
-            $panier->removeProduct($this);
-        }
 
         return $this;
     }

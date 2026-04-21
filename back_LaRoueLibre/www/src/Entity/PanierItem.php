@@ -28,11 +28,34 @@ class PanierItem
     #[Groups(['panier:read', 'panier:write', 'user:read'])]
     private int $quantity = 1;
 
-    public function getId(): ?int { return $this->id; }
-    public function getProduct(): ?Products { return $this->product; }
-    public function setProduct(?Products $product): self { $this->product = $product; return $this; }
-    public function getQuantity(): int { return $this->quantity; }
-    public function setQuantity(int $quantity): self { $this->quantity = $quantity; return $this; }
-    public function getPanier(): ?Panier { return $this->panier; }
-    public function setPanier(?Panier $panier): self { $this->panier = $panier; return $this; }
+    public function getId(): ?int 
+    { 
+        return $this->id; 
+    }
+
+    public function getProduct(): ?Products 
+    { 
+        return $this->product; 
+    }
+
+    public function setProduct(?Products $product): self 
+    {
+        $this->product = $product; return $this; 
+    }
+    public function getQuantity(): int 
+    { 
+        return $this->quantity;
+    }
+    public function setQuantity(int $quantity): self 
+    { 
+        $this->quantity = $quantity; return $this; 
+    }
+    public function getPanier(): ?Panier 
+    { 
+        return $this->panier; 
+    }
+    public function setPanier(?Panier $panier): self 
+    { 
+        $this->panier = $panier; return $this; 
+    }
 }
