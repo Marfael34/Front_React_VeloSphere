@@ -1,0 +1,13 @@
+nelmio_cors:
+    defaults:
+        origin_regex: true
+        allow_origin: 
+            - '^https?://localhost(:[0-9]+)?$'
+            - '^https?://127\.0\.0\.1(:[0-9]+)?$' # Ajoute cette ligne pour autoriser l'IP
+        allow_methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
+        allow_headers: ['Content-Type', 'Authorization', 'X-Requested-With'] # Ajout de X-Requested-With souvent utile
+        expose_headers: ['Link']
+        max_age: 3600
+        allow_credentials: true
+    paths:
+        '^/api/': ~

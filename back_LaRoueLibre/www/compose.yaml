@@ -1,0 +1,29 @@
+services:
+###> doctrine/doctrine-bundle ###
+  database:
+    image: mariadb:10.11
+    environment:
+      # Mot de passe de l'utilisateur root (très important de le définir)
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-!ChangeMe!}
+      # Nom de la base de données qui sera créée automatiquement
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-app}
+      # Utilisateur classique pour Symfony
+      MYSQL_USER: ${MYSQL_USER:-app}
+      # Mot de passe pour l'utilisateur classique
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-!ChangeMe!}
+    ports:
+      # On expose le port 3306 pour que votre ordinateur puisse s'y connecter
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - database_data:/var/lib/mysql:rw
+###< doctrine/doctrine-bundle ###
+
+volumes:
+###> doctrine/doctrine-bundle ###
+  database_data:
+###< doctrine/doctrine-bundle ###

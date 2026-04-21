@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Facture #{{ order.id }}</title>
+    <style>
+        body { 
+            font-family: 'Helvetica', Arial, sans-serif; 
+            color: #333; 
+        }
+        .invoice-box { 
+            max-width: 800px; 
+            margin: auto; 
+            padding: 30px; 
+            background-color: #fff; 
+        }
+        .header { 
+            width: 100%;
+            margin-bottom: 50px; 
+        }
+        .header table {
+            width: 100%;
+            border: none;
+        }
+        .logo-img {
+            max-width: 150px;
+            height: auto;
+        }
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #1a1a1a;
+        }
+        .company-details {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+        .title-facture {
+            font-size: 32px;
+            color: #ccc;
+            text-align: right;
+            font-weight: 300;
+            text-transform: uppercase;
+        }
+        .details-table {
+            width: 100%;
+            margin-bottom: 40px;
+        }
+        .details-table td {
+            vertical-align: top;
+            width: 50%;
+        }
+        .label {
+            font-weight: bold;
+            color: #555;
+            font-size: 13px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .value {
+            font-size: 15px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .items-table th {
+            background: #f9f9f9;
+            color: #555;
+            text-transform: uppercase;
+            font-size: 12px;
+            padding: 12px;
+            border-bottom: 2px solid #eee;
+            text-align: left;
+        }
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        
+        .total-container {
+            width: 100%;
+        }
+        .total-wrapper {
+            float: right;
+            width: 250px;
+        }
+        .total-row {
+            padding: 10px 0;
+            font-size: 15px;
+        }
+        .total-final {
+            border-top: 2px solid #eee;
+            margin-top: 10px;
+            padding-top: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #f28c33; /* Ton orange */
+        }
+    </style>
+</head>
+<body>
+    {# --- DÉFINITION DU TAUX DE TVA (20%) --- #}
+    {% set tva_rate = 20 %}
+
+    <div class="invoice-box">
+        <div class="header">
+            <table>
+                <tr>
+                    <td>
+                        {% if logo %}
+                            <img src="{{ logo }}" class="logo-img">
+                        {% endif %}
+                        <div class="company-name">LA ROUE LIBRE</div>
+                        <div class="company-details">
+                            123 Rue du Vélo, 34000 Montpellier<br>
+                            contact@larouelibre.fr<br>
+                            SIRET : 123 456 789 00012
+                        </div>
+                    </td>
+                    <td class="title-facture">
+                        Facture
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <table class="details-table">
+            <tr>
+                <td>
+                    <span class="label">Facturé à :</span>
+                    <div class="value">{{ user.firstname }} {{ user.lastname }}</div>
+                    <div class="value">{{ user.email }}</div>
+                </td>
+                <td class="text-right">
+                    <span class="label">Détails :</span>
+                    <div class="value">N° FAC-{{ date|date('Y') }}-{{ random(1000, 9999) }}</div>
+                    <div class="value">Date : {{ date|date('d/m/Y') }}</div>
+                </td>
+            </tr>
+        </table>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Article</th>
+                    <th class="text-center">Quantité</th>
+                    <th class="text-right">Prix Unitaire HT</th>
+                    <th class="text-right">Total HT</th>
+                    <th class="text-right">Total TTC</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in lines %}
+                {# Calculs pour chaque ligne : Extraction du HT depuis le TTC #}
+                {% set prix_unitaire_ht = line.price / (1 + (tva_rate / 100)) %}
+                {% set sous_total_ht = line.subtotal / (1 + (tva_rate / 100)) %}
+                
+                <tr>
+                    <td>{{ line.title }}</td>
+                    <td class="text-center">{{ line.quantity }}</td>
+                    <td class="text-right">{{ prix_unitaire_ht|number_format(2, ',', ' ') }} €</td>
+                    <td class="text-right">{{ sous_total_ht|number_format(2, ',', ' ') }} €</td>
+                    <td class="text-right">{{ line.subtotal|number_format(2, ',', ' ') }} €</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="total-container">
+            <div class="total-wrapper">
+                {# Calculs globaux #}
+                {% set total_ht = total / (1 + (tva_rate / 100)) %}
+                {% set total_tva = total - total_ht %}
+
+                <table style="width: 100%;">
+                    <tr class="total-row">
+                        <td>Total HT</td>
+                        <td class="text-right">{{ total_ht|number_format(2, ',', ' ') }} €</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>TVA ({{ tva_rate }}%)</td>
+                        <td class="text-right">{{ total_tva|number_format(2, ',', ' ') }} €</td>
+                    </tr>
+                    <tr class="total-final">
+                        <td>TOTAL TTC</td>
+                        <td class="text-right">{{ total|number_format(2, ',', ' ') }} €</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
