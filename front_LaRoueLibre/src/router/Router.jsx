@@ -14,6 +14,13 @@ import Checkout from "../screens/Checkout";
 import Invoice from "../screens/InVoice";
 import OrderTracking from "../screens/OrderTracking";
 import LocationDetail from "../screens/LocationDetail";
+import Dashboard from "../screens/admin/Dashboard";
+import UsersManagement from "../screens/admin/UsersManagement";
+import ProductsManagement from "../screens/admin/ProductsManagement";
+import PlacesManagement from "../screens/admin/PlacesManagement";
+import OrdersManagement from "../screens/admin/OrdersManagement";
+import AdminLayout from "../screens/admin/AdminLayout";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 const Router = createBrowserRouter([
     {
@@ -75,6 +82,36 @@ const Router = createBrowserRouter([
             {
                 path: "/location/:id",
                 element: <LocationDetail/> 
+            },
+            {
+                element: <ProtectedRoute allowedRoles={["ROLE_ADMIN"]} />,
+                children: [
+                    {
+                        element: <AdminLayout />,
+                        children: [
+                            {
+                                path: "/dashboard",
+                                element: <Dashboard/>
+                            },
+                            {
+                                path: "/admin/users",
+                                element: <UsersManagement/>
+                            },
+                            {
+                                path: "/admin/products",
+                                element: <ProductsManagement/>
+                            },
+                            {
+                                path: "/admin/places",
+                                element: <PlacesManagement/>
+                            },
+                            {
+                                path: "/admin/orders",
+                                element: <OrdersManagement/>
+                            }
+                        ]
+                    }
+                ]
             }
             
         ]

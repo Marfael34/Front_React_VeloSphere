@@ -14,7 +14,16 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
 #[ApiResource(
-    normalizationContext: ['groups' => ['order:read']]
+    normalizationContext: ['groups' => ['order:read']],
+    denormalizationContext: ['groups' => ['order:write']],
+    operations: [
+        new \ApiPlatform\Metadata\Get(),
+        new \ApiPlatform\Metadata\GetCollection(),
+        new \ApiPlatform\Metadata\Post(),
+        new \ApiPlatform\Metadata\Put(security: "is_granted('ROLE_ADMIN')"),
+        new \ApiPlatform\Metadata\Patch(security: "is_granted('ROLE_ADMIN')"),
+        new \ApiPlatform\Metadata\Delete(security: "is_granted('ROLE_ADMIN')")
+    ]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['user' => 'exact'])]
 class Order
@@ -29,18 +38,18 @@ class Order
      * @var Collection<int, Etat>
      */
     #[ORM\ManyToMany(targetEntity: Etat::class, inversedBy: 'orders')]
-    #[Groups(['order:read'])]
+    #[Groups(['order:read', 'order:write'])]
     private Collection $etats;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
-    #[Groups(['order:read'])]
+    #[Groups(['order:read', 'order:write'])]
     private ?User $user = null;
 
     /**
      * @var Collection<int, Products>
      */
     #[ORM\ManyToMany(targetEntity: Products::class, inversedBy: 'orders')]
-    #[Groups(['order:read'])]
+    #[Groups(['order:read', 'order:write'])]
     private Collection $products;
 
     #[ORM\Column(nullable: true)]

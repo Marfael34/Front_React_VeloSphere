@@ -134,6 +134,20 @@ const Profile = () => {
         } catch (err) { return "Date invalide"; }
     };
 
+    const getStatusStyle = (status) => {
+        switch (status) {
+            case 'Payées': 
+            case 'Validées':
+            case 'Livrées': return 'bg-green-500/20 text-green-400 border-green-500/30';
+            case 'En attentes de paiement':
+            case 'En attente de validation':
+            case 'En cours de préparation':
+            case 'En cours de livraison': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+            case 'Annulées': return 'bg-red-500/20 text-red-400 border-red-500/30';
+            default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+        }
+    };
+
     return (
         <div className="bg-dark-nigth-blue min-h-screen pb-10">
             <div className="max-w-7xl mx-auto px-4 py-10 text-white">
@@ -241,28 +255,29 @@ const Profile = () => {
                             <h2 className="text-xl font-bold flex items-center gap-3 mb-6 border-b border-white/10 pb-4"><FaHistory className="text-orange" /> Mes Commandes</h2>
                             {orders.length > 0 ? (
                                 <div className="space-y-4">
-                                    {orders.map((order) => (
-                                        <div key={order.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-black/40 p-5 rounded-xl border border-white/5 hover:border-orange/30 transition-colors gap-4">
-                                            <div>
-                                                <div className="flex items-center gap-3 mb-1">
-                                                    <h3 className="font-bold text-lg text-white">Commande #{order.id}</h3>
-                                                    <span className="text-xs text-gray-400">{formatDate(order.createdAt || order.created_at)}</span>
-                                                </div>
-                                                <div className="flex flex-wrap gap-2 mt-3">
-                                                    {order.etats?.map((etat, idx) => (
-                                                        <span key={idx} className="bg-white/10 text-gray-300 text-xs px-2.5 py-1 rounded-md border border-white/10">
-                                                            {etat.label}
+                                    {orders.map((order) => {
+                                        const currentStatus = order.etats?.length > 0 ? order.etats[order.etats.length - 1].label : "En attente";
+                                        return (
+                                            <div key={order.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-black/40 p-5 rounded-xl border border-white/5 hover:border-orange/30 transition-colors gap-4">
+                                                <div>
+                                                    <div className="flex items-center gap-3 mb-1">
+                                                        <h3 className="font-bold text-lg text-white">Commande ORD-{order.id.toString().padStart(5, '0')}</h3>
+                                                        <span className="text-xs text-gray-400">{formatDate(order.created_at || order.createdAt)}</span>
+                                                    </div>
+                                                    <div className="mt-3">
+                                                        <span className={`px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${getStatusStyle(currentStatus)}`}>
+                                                            {currentStatus}
                                                         </span>
-                                                    ))}
+                                                    </div>
+                                                </div>
+                                                <div className="w-full sm:w-auto mt-2 sm:mt-0">
+                                                    <Link to={`/profile/order/${order.id}`} state={{ order }} className="bg-orange hover:bg-orange/80 text-black font-bold py-2.5 px-6 rounded-lg transition-colors text-sm w-full sm:w-auto block text-center shadow-lg">
+                                                        Suivre la commande
+                                                    </Link>
                                                 </div>
                                             </div>
-                                            <div className="w-full sm:w-auto mt-2 sm:mt-0">
-                                                <Link to={`/profile/order/${order.id}`} state={{ order }} className="bg-orange hover:bg-orange/80 text-black font-bold py-2.5 px-6 rounded-lg transition-colors text-sm w-full sm:w-auto block text-center shadow-lg">
-                                                    Suivre
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             ) : <p className="text-gray-400 italic text-center py-6">Aucune commande pour le moment.</p>}
                         </div>

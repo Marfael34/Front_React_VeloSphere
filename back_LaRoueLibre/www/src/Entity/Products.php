@@ -36,11 +36,11 @@ class Products
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['product:read', 'panier:read'])]
+    #[Groups(['product:read', 'panier:read', 'order:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 200)]
-    #[Groups(['product:read', 'panier:read'])]
+    #[Groups(['product:read', 'panier:read', 'order:read'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -48,7 +48,7 @@ class Products
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['product:read', 'panier:read'])]
+    #[Groups(['product:read', 'panier:read', 'order:read'])]
     private ?float $price = null;
 
     #[ORM\Column(length: 150)]

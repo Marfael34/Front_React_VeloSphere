@@ -10,6 +10,7 @@ import {
 import { API_ROOT } from "../../constants/apiConstant";
 import { RiCloseLine } from "react-icons/ri";
 import { HiOutlineMenu } from "react-icons/hi";
+import { FaChartLine } from "react-icons/fa";
 
 const Navbar = ({ user, onLogout }) => {
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -56,6 +57,14 @@ const Navbar = ({ user, onLogout }) => {
                 <span>{item.title}</span>
               </NavLink>
             ))}
+
+            {/* Lien Dashboard pour les Admins */}
+            {user?.roles?.includes("ROLE_ADMIN") && (
+              <NavLink to="/dashboard" className={activeLinkStyle}>
+                <FaChartLine className="text-xl" />
+                <span>Admin</span>
+              </NavLink>
+            )}
 
             {/* Séparateur vertical */}
             <div className="h-6 w-px bg-slate-grey_06"></div>
@@ -107,6 +116,13 @@ const Navbar = ({ user, onLogout }) => {
               <span>{item.title}</span>
             </NavLink>
           ))}
+
+          {user?.roles?.includes("ROLE_ADMIN") && (
+            <NavLink to="/dashboard" className={activeLinkStyle} onClick={() => setMobileMenu(false)}>
+              <FaChartLine className="text-xl" />
+              <span>Admin</span>
+            </NavLink>
+          )}
 
           <p className="text-slate-grey_06 text-xs uppercase font-bold mt-4">Profil</p>
           {currentProfileNav.map((item) => (
