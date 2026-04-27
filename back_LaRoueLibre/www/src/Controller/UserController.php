@@ -15,7 +15,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class UserController extends AbstractController
 {
     #[Route('/api/users/{id}/avatar', name: 'api_user_avatar', methods: ['POST'])]
-    #[IsGranted('ROLE_ADMIN')]
     public function uploadAvatar(
         int $id,
         Request $request,
@@ -27,6 +26,11 @@ class UserController extends AbstractController
 
             if (!$user) {
                 return $this->json(['message' => 'Utilisateur non trouvé'], 404);
+            }
+
+            // Vérification de la sécurité : Admin ou l'utilisateur lui-même
+            if (!$this->isGranted('ROLE_ADMIN') && $this->getUser() !== $user) {
+                return $this->json(['message' => 'Accès refusé'], 403);
             }
 
             /** @var UploadedFile $file */
@@ -52,20 +56,22 @@ class UserController extends AbstractController
             $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
 
             $file->move(
-                $this->getParameter('kernel.project_dir') . '/public/images/avatars',
+                $this->getParameter('kernel.project_dir') . '/public/uploads',
                 $newFilename
             );
 
             // Optionnel : Supprimer l'ancien avatar s'il existe
             $oldAvatar = $user->getAvatar();
             if ($oldAvatar) {
-                $oldAvatarPath = $this->getParameter('kernel.project_dir') . '/public/images/avatars/' . $oldAvatar;
+                // On retire le préfixe '/uploads/' si présent pour trouver le fichier sur le disque
+                $filename = str_replace('/uploads/', '', $oldAvatar);
+                $oldAvatarPath = $this->getParameter('kernel.project_dir') . '/public/uploads/' . $filename;
                 if (file_exists($oldAvatarPath) && !is_dir($oldAvatarPath)) {
                     @unlink($oldAvatarPath);
                 }
             }
 
-            $user->setAvatar($newFilename);
+            $user->setAvatar('/uploads/' . $newFilename);
             $entityManager->flush();
 
             return $this->json([
@@ -75,8 +81,45 @@ class UserController extends AbstractController
         } catch (\Exception $e) {
             return $this->json([
                 'message' => 'Une erreur est survenue lors de l\'upload',
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    #[Route('/api/users/{id}/avatar', name: 'api_user_avatar_delete', methods: ['DELETE'])]
+    public function deleteAvatar(
+        int $id,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        try {
+            $user = $entityManager->getRepository(User::class)->find($id);
+
+            if (!$user) {
+                return $this->json(['message' => 'Utilisateur non trouvé'], 404);
+            }
+
+            // Sécurité : Admin ou l'utilisateur lui-même
+            if (!$this->isGranted('ROLE_ADMIN') && $this->getUser() !== $user) {
+                return $this->json(['message' => 'Accès refusé'], 403);
+            }
+
+            $avatar = $user->getAvatar();
+            if ($avatar) {
+                $filename = str_replace('/uploads/', '', $avatar);
+                $avatarPath = $this->getParameter('kernel.project_dir') . '/public/uploads/' . $filename;
+                if (file_exists($avatarPath) && !is_dir($avatarPath)) {
+                    @unlink($avatarPath);
+                }
+                
+                $user->setAvatar(null);
+                $entityManager->flush();
+            }
+
+            return $this->json(['message' => 'Avatar supprimé avec succès']);
+        } catch (\Exception $e) {
+            return $this->json([
+                'message' => 'Une erreur est survenue lors de la suppression',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

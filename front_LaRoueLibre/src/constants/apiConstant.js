@@ -18,5 +18,5 @@ export const API_URL = `${API_ROOT}/api`;
 export const IMAGE_URL = `${API_ROOT}/images`;
 
 // Avatars des utilisateur 
-export const AVATAR_URL = `${IMAGE_URL}/avatars`;
+export const AVATAR_URL = `${API_ROOT}/uploads`;
 
