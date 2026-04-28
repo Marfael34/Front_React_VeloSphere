@@ -76,6 +76,23 @@ const PlaceFormModal = ({ initialPlace, onClose, onSuccess }) => {
         }
     };
 
+    const handleDeleteImage = async () => {
+        if (!editingPlace.id || !editingPlace.path) return;
+        if (!window.confirm("Supprimer l'image définitivement ?")) return;
+
+        try {
+            await axios.delete(`${API_ROOT}/api/places/${editingPlace.id}/image`, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            setEditingPlace(prev => ({ ...prev, path: "" }));
+            setImageFile(null);
+            setPreviewUrl(null);
+        } catch (err) {
+            console.error("Erreur suppression image:", err);
+            setUpdateError("Impossible de supprimer l'image.");
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
             <div className="bg-dark-nigth-blue border border-white/10 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden animate-slideup">
@@ -144,13 +161,23 @@ const PlaceFormModal = ({ initialPlace, onClose, onSuccess }) => {
                         <div className="space-y-2 md:col-span-2">
                             <label className="text-sm font-bold text-gray-400 uppercase tracking-wider">Image du lieu</label>
                             <div className="flex gap-6 items-center bg-black/20 p-4 rounded-xl border border-white/5">
-                                <div className="text-center">
+                                <div className="relative text-center">
                                     <p className="text-[10px] text-gray-400 uppercase mb-2">Actuelle</p>
                                     <img
-                                        src={editingPlace.path ? (editingPlace.path.startsWith('/') ? `${API_ROOT}${editingPlace.path}` : `${IMAGE_URL}/places/${editingPlace.path}`) : `${IMAGE_URL}/default/default_location.png`}
+                                        src={editingPlace.path ? (editingPlace.path.startsWith('/') ? `${API_ROOT}${editingPlace.path}` : `${API_ROOT}/images/places/${editingPlace.path}`) : `${IMAGE_URL}/default/default_location.png`}
                                         alt="Aperçu actuel"
                                         className="w-16 h-16 rounded-xl object-cover border border-white/10 shrink-0"
+                                        onError={(e) => { e.target.onerror = null; e.target.src = `${IMAGE_URL}/default/default_location.png`; }}
                                     />
+                                    {editingPlace.path && (
+                                        <button 
+                                            type="button" onClick={handleDeleteImage}
+                                            className="absolute -top-1 -right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors shadow-lg"
+                                            title="Supprimer l'image"
+                                        >
+                                            <FaTimes size={10} />
+                                        </button>
+                                    )}
                                 </div>
                                 {previewUrl && (
                                     <div className="text-center">

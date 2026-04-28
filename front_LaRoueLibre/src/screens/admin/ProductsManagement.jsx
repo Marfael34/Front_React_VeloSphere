@@ -50,6 +50,20 @@ const ProductsManagement = () => {
         });
     };
 
+    const handleDelete = async (id) => {
+        if (!window.confirm("Voulez-vous vraiment supprimer ce produit ?")) return;
+
+        try {
+            await axios.delete(`${API_ROOT}/api/products/${id}`, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            fetchProducts();
+        } catch (err) {
+            console.error("Erreur suppression produit:", err);
+            alert("Impossible de supprimer le produit.");
+        }
+    };
+
     if (isLoading) return <div className="flex justify-center py-20"><ButtonLoader size={60} /></div>;
 
     return (
@@ -84,9 +98,10 @@ const ProductsManagement = () => {
                                     <div className="flex items-center gap-4">
                                         <div className="h-12 w-12 rounded-lg overflow-hidden bg-white/10 border border-white/5 shrink-0">
                                             <img
-                                                src={p.imagePath ? `${IMAGE_URL}/products/${p.imagePath}` : `${IMAGE_URL}/default/default_product.png`}
+                                                src={p.imagePath ? (p.imagePath.startsWith('/') ? `${API_ROOT}${p.imagePath}` : `${API_ROOT}/images/products/${p.imagePath}`) : `${IMAGE_URL}/default/default_product.png`}
                                                 alt={p.title}
                                                 className="w-full h-full object-cover"
+                                                onError={(e) => { e.target.onerror = null; e.target.src = `${IMAGE_URL}/default/default_product.png`; }}
                                             />
                                         </div>
                                         <div>
@@ -114,7 +129,10 @@ const ProductsManagement = () => {
                                         >
                                             <FaEdit size={18} />
                                         </button>
-                                        <button className="p-2 hover:bg-red-500/20 text-red-500 rounded-lg transition-all" title="Supprimer">
+                                        <button 
+                                            onClick={() => handleDelete(p.id)}
+                                            className="p-2 hover:bg-red-500/20 text-red-500 rounded-lg transition-all" title="Supprimer"
+                                        >
                                             <FaTrashAlt size={18} />
                                         </button>
                                     </div>

@@ -51,6 +51,20 @@ const PlacesManagement = () => {
         });
     };
 
+    const handleDelete = async (id) => {
+        if (!window.confirm("Voulez-vous vraiment supprimer ce lieu ?")) return;
+
+        try {
+            await axios.delete(`${API_ROOT}/api/places/${id}`, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            fetchPlaces();
+        } catch (err) {
+            console.error("Erreur suppression lieu:", err);
+            alert("Impossible de supprimer le lieu.");
+        }
+    };
+
     if (isLoading) return <div className="flex justify-center py-20"><ButtonLoader size={60} /></div>;
 
     return (
@@ -84,9 +98,10 @@ const PlacesManagement = () => {
                                     <div className="flex items-center gap-4">
                                         <div className="h-12 w-12 rounded-lg overflow-hidden bg-white/10 border border-white/5 shrink-0">
                                             <img
-                                                src={p.path ? (p.path.startsWith('/') ? `${API_ROOT}${p.path}` : `${IMAGE_URL}/places/${p.path}`) : `${IMAGE_URL}/default/default_location.png`}
+                                                src={p.path ? (p.path.startsWith('/') ? `${API_ROOT}${p.path}` : `${API_ROOT}/images/places/${p.path}`) : `${IMAGE_URL}/default/default_location.png`}
                                                 alt={p.name}
                                                 className="w-full h-full object-cover"
+                                                onError={(e) => { e.target.onerror = null; e.target.src = `${IMAGE_URL}/default/default_location.png`; }}
                                             />
                                         </div>
                                         <div className="flex items-center gap-2 text-white group-hover:text-orange transition-colors">
@@ -109,7 +124,10 @@ const PlacesManagement = () => {
                                         >
                                             <FaEdit size={18} />
                                         </button>
-                                        <button className="p-2 hover:bg-red-500/20 text-red-500 rounded-lg transition-all" title="Supprimer">
+                                        <button 
+                                            onClick={() => handleDelete(p.id)}
+                                            className="p-2 hover:bg-red-500/20 text-red-500 rounded-lg transition-all" title="Supprimer"
+                                        >
                                             <FaTrashAlt size={18} />
                                         </button>
                                     </div>

@@ -173,7 +173,7 @@ const ProductDetail = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-black/30 p-8 rounded-3xl border border-white/10 shadow-2xl">
                     <div className="flex items-center justify-center bg-white/5 rounded-2xl p-4">
                         <img 
-                            src={`${API_ROOT}${product.imagePath}`} 
+                            src={product.imagePath ? (product.imagePath.startsWith('/') ? `${API_ROOT}${product.imagePath}` : `${API_ROOT}/images/products/${product.imagePath}`) : `${IMAGE_URL}/default/default_product.png`} 
                             alt={product.title}
                             className="max-h-125 object-contain rounded-xl"
                             onError={(e) => { e.target.src = `${IMAGE_URL}/default/default_product.png`; }}

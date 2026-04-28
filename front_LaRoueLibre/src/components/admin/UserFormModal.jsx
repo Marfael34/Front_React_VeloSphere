@@ -106,7 +106,7 @@ const UserFormModal = ({ initialUser, onClose, onSuccess }) => {
                     </button>
                 </div>
 
-                <form onSubmit={handleUpdateSubmit} className="p-8 space-y-6">
+                <form onSubmit={handleUpdateSubmit} className="p-8 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-gray-400 uppercase tracking-wider">Prénom</label>

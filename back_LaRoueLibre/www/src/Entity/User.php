@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Delete;
 use App\Repository\UserRepository;
 use App\State\UserProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -27,7 +28,8 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Patch(
             processor: UserProcessor::class, // <-- On utilise le nouveau processeur ici
             security: "is_granted('ROLE_ADMIN') or object == user"
-        )
+        ),
+        new Delete(security: "is_granted('ROLE_ADMIN')")
     ]
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -148,6 +150,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->orders = new ArrayCollection();
         $this->adresses = new ArrayCollection();
         $this->wishlist = new ArrayCollection();
+        $this->createdAt = new \DateTime();
+        $this->isActive = true;
     }
 
     public function getId(): ?int

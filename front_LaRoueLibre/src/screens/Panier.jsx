@@ -186,7 +186,7 @@ const Panier = () => {
               {aggregatedCartItems.map((item) => (
                 <div key={item.product.id} className="flex items-center bg-gray-800 p-4 rounded-lg shadow border border-white/5 hover:border-orange/30 transition">
                   <img 
-                    src={item.product?.imagePath ? `${API_ROOT}${item.product.imagePath}` : `${IMAGE_URL}/default/default_product.png`} 
+                    src={item.product?.imagePath ? (item.product.imagePath.startsWith('/') ? `${API_ROOT}${item.product.imagePath}` : `${API_ROOT}/images/products/${item.product.imagePath}`) : `${IMAGE_URL}/default/default_product.png`} 
                     alt={item.product?.title} 
                     onError={(e) => { e.target.onerror = null; e.target.src = `${IMAGE_URL}/default/default_product.png`; }}
                     className="w-24 h-24 object-contain rounded-md mr-4 bg-white/5"

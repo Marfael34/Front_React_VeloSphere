@@ -43,7 +43,7 @@ const ProductFormModal = ({ initialProduct, onClose, onSuccess }) => {
                 price: Math.round((parseFloat(editingProduct.price) || 0) * 100),
                 brand: editingProduct.brand,
                 quantity: parseInt(editingProduct.quantity, 10) || 0,
-                imagePath: editingProduct.imagePath || null
+                imagePath: editingProduct.imagePath || ""
             };
 
             let productId = editingProduct.id;
@@ -82,6 +82,23 @@ const ProductFormModal = ({ initialProduct, onClose, onSuccess }) => {
         }
     };
 
+    const handleDeleteImage = async () => {
+        if (!editingProduct.id || !window.confirm("Supprimer l'image de ce produit ?")) return;
+        setIsUpdating(true);
+        try {
+            await axios.delete(`${API_ROOT}/api/products/${editingProduct.id}/image`, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            setEditingProduct(prev => ({ ...prev, imagePath: null }));
+            if (onSuccess) onSuccess(); // Optionnel : rafraîchir la liste
+        } catch (err) {
+            console.error("Erreur suppression image:", err);
+            setUpdateError("Impossible de supprimer l'image.");
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
             <div className="bg-dark-nigth-blue border border-white/10 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden animate-slideup">
@@ -95,7 +112,7 @@ const ProductFormModal = ({ initialProduct, onClose, onSuccess }) => {
                     </button>
                 </div>
 
-                <form onSubmit={handleUpdateSubmit} className="p-8 space-y-6">
+                <form onSubmit={handleUpdateSubmit} className="p-8 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2 md:col-span-2">
                             <label className="text-sm font-bold text-gray-400 uppercase tracking-wider">Titre</label>
@@ -128,13 +145,25 @@ const ProductFormModal = ({ initialProduct, onClose, onSuccess }) => {
                         <div className="space-y-2 md:col-span-2">
                             <label className="text-sm font-bold text-gray-400 uppercase tracking-wider">Image</label>
                             <div className="flex gap-6 items-center bg-black/20 p-4 rounded-xl border border-white/5">
-                                <div className="text-center">
+                                <div className="text-center relative group/img">
                                     <p className="text-[10px] text-gray-400 uppercase mb-2">Actuel</p>
-                                    <img
-                                        src={editingProduct.imagePath ? (editingProduct.imagePath.startsWith('/') ? `${API_ROOT}${editingProduct.imagePath}` : `${IMAGE_URL}/products/${editingProduct.imagePath}`) : `${IMAGE_URL}/default/default_product.png`}
-                                        alt="Aperçu actuel"
-                                        className="w-16 h-16 rounded-xl object-cover border border-white/10 shrink-0"
-                                    />
+                                    <div className="relative">
+                                        <img
+                                            src={editingProduct.imagePath ? (editingProduct.imagePath.startsWith('/') ? `${API_ROOT}${editingProduct.imagePath}` : `${API_ROOT}/images/products/${editingProduct.imagePath}`) : `${IMAGE_URL}/default/default_product.png`}
+                                            alt="Aperçu actuel"
+                                            className="w-16 h-16 rounded-xl object-cover border border-white/10 shrink-0"
+                                            onError={(e) => { e.target.onerror = null; e.target.src = `${IMAGE_URL}/default/default_product.png`; }}
+                                        />
+                                        {editingProduct.imagePath && (
+                                            <button 
+                                                type="button" onClick={handleDeleteImage}
+                                                className="absolute -top-2 -right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg opacity-0 group-hover/img:opacity-100 transition-opacity hover:bg-red-600"
+                                                title="Supprimer l'image"
+                                            >
+                                                <FaTimes size={10} />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                                 {previewUrl && (
                                     <div className="text-center">

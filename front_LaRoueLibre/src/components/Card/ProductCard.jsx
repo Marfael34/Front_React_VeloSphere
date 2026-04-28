@@ -11,20 +11,25 @@ const ProductCard = ({ product }) => {
     
     // L'image utilise la constante IMAGE_URL (http://localhost:8087/images)
     // Assurez-vous que vos images soient dans le dossier public/images/ de Symfony
-    const imageUrl = `${API_ROOT}${product.imagePath}`;
+    const imageUrl = product.imagePath ? (product.imagePath.startsWith('/') ? `${API_ROOT}${product.imagePath}` : `${API_ROOT}/images/products/${product.imagePath}`) : `${IMAGE_URL}/default/default_product.png`;
 
   return (
     <div className='flex flex-col items-center w-65.5 p-4 bg-nigth-blue hover:bg-dark-nigth-blue_09 transition-all ease-in-out duration-500 animate-slideup rounded-lg cursor-pointer group'>
         <div className="relative w-full flex flex-col">
             
             {/* Image du produit cliquable */}
-            <Link to={`/product/${productId}`} >
+            <Link to={`/product/${productId}`} className="relative group">
                 <img 
                     src={imageUrl}
                     alt={`Image du produit ${productTitle}`} 
-                    className="mx-auto rounded-lg object-cover h-52 w-52 bg-white/10"
+                    className={`mx-auto rounded-lg object-cover h-52 w-52 bg-white/10 ${product.quantity <= 0 ? 'grayscale opacity-60' : ''}`}
                     onError={(e) => { e.target.src = `${IMAGE_URL}/default/default_product.png`; }}
                 />
+                {product.quantity <= 0 && (
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-600/90 text-white px-3 py-1.5 rounded-lg font-black text-xs uppercase tracking-widest shadow-xl border border-red-500/50 backdrop-blur-sm whitespace-nowrap rotate-[-5deg]">
+                        Rupture de stock
+                    </div>
+                )}
             </Link>
 
             {/* Bouton d'action au survol */}

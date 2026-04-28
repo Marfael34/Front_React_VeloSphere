@@ -31,6 +31,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
     paginationItemsPerPage: 100
 )]
 
+#[ORM\HasLifecycleCallbacks]
 class Products
 {
     #[ORM\Id]
@@ -55,8 +56,8 @@ class Products
     #[Groups(['product:read', 'panier:read'])]
     private ?string $brand = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['product:read', 'panier:read'])]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['product:read', 'panier:read', 'order:read'])]
     private ?string $imagePath = null;
 
     #[ORM\Column]
@@ -89,6 +90,19 @@ class Products
     {
         $this->orders = new ArrayCollection();
         $this->characteristics = new ArrayCollection();
+        $this->createdAt = new \DateTime();
+        $this->isActive = true;
+    }
+
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
+    {
+        if ($this->createdAt === null) {
+            $this->createdAt = new \DateTime();
+        }
+        if ($this->isActive === null) {
+            $this->isActive = true;
+        }
     }
 
     public function getId(): ?int
@@ -149,7 +163,7 @@ class Products
         return $this->imagePath;
     }
 
-    public function setImagePath(string $imagePath): static
+    public function setImagePath(?string $imagePath): static
     {
         $this->imagePath = $imagePath;
 

@@ -53,6 +53,25 @@ const UsersManagement = () => {
         });
     };
 
+    const handleDelete = async (id) => {
+        if (id === currentUser.id) {
+            alert("Vous ne pouvez pas supprimer votre propre compte.");
+            return;
+        }
+
+        if (!window.confirm("Voulez-vous vraiment supprimer cet utilisateur ? Cette action est irréversible.")) return;
+
+        try {
+            await axios.delete(`${API_ROOT}/api/users/${id}`, {
+                headers: { Authorization: `Bearer ${currentUser.token}` }
+            });
+            fetchUsers();
+        } catch (err) {
+            console.error("Erreur suppression utilisateur:", err);
+            alert("Impossible de supprimer l'utilisateur. " + (err.response?.data?.['hydra:description'] || err.message));
+        }
+    };
+
     if (isLoading) return <div className="flex justify-center py-20"><ButtonLoader size={60} /></div>;
 
     return (
@@ -89,6 +108,7 @@ const UsersManagement = () => {
                                                 src={u.avatar ? (u.avatar.startsWith('/') ? `${API_ROOT}${u.avatar}` : `${AVATAR_URL}/${u.avatar}`) : `${IMAGE_URL}/default/avatar/default-avatar-1.png`}
                                                 alt={u.firstname}
                                                 className="w-full h-full object-cover"
+                                                onError={(e) => { e.target.onerror = null; e.target.src = `${IMAGE_URL}/default/avatar/default-avatar-1.png`; }}
                                             />
                                         </div>
                                         <div>
@@ -117,7 +137,11 @@ const UsersManagement = () => {
                                         >
                                             <FaUserEdit size={18} />
                                         </button>
-                                        <button className="p-2 hover:bg-red-500/20 text-red-500 rounded-lg transition-all" title="Supprimer">
+                                        <button 
+                                            onClick={() => handleDelete(u.id)}
+                                            className="p-2 hover:bg-red-500/20 text-red-500 rounded-lg transition-all" title="Supprimer"
+                                            disabled={u.id === currentUser.id}
+                                        >
                                             <FaTrashAlt size={18} />
                                         </button>
                                     </div>
