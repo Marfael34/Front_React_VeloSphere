@@ -8,19 +8,27 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+use Symfony\Component\Serializer\Attribute\Groups;
+
 #[ORM\Entity(repositoryClass: PriceLicenceRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['price_licence:read']],
+    denormalizationContext: ['groups' => ['price_licence:write']]
+)]
 class PriceLicence
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['price_licence:read', 'licence:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 200)]
+    #[Groups(['price_licence:read', 'licence:read', 'user:read'])]
     private ?string $label = null;
 
     #[ORM\Column]
+    #[Groups(['price_licence:read', 'licence:read', 'user:read'])]
     private ?int $price = null;
 
     /**

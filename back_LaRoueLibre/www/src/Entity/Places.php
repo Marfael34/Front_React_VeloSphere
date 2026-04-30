@@ -40,7 +40,7 @@ class Places
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(length: 25, nullable: true)]
+    #[ORM\Column(length:225, nullable: true)]
     private ?string $coordinates = null;
 
     #[ORM\Column(nullable: true)]

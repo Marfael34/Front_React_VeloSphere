@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page { margin: 0; }
+        body { 
+            font-family: 'Helvetica', 'Arial', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f0f2f5;
+            color: #1a202c;
+        }
+        .license-container {
+            width: 85.6mm; /* ID-1 format width */
+            height: 54mm;  /* ID-1 format height */
+            margin: 50px auto;
+            background: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .top-stripe {
+            height: 5px;
+            background: #ff6b00;
+        }
+        .header {
+            background: #1a365d;
+            padding: 8px 12px;
+            color: white;
+            text-align: center;
+            border-bottom: 2px solid #ff6b00;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 900;
+        }
+        .header p {
+            margin: 0;
+            font-size: 8px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            letter-spacing: 0.5px;
+        }
+        .content {
+            padding: 10px;
+        }
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .photo-area {
+            width: 60px;
+            height: 75px;
+            background: #edf2f7;
+            border: 1px solid #cbd5e0;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 8px;
+            color: #a0aec0;
+            border-radius: 4px;
+        }
+        .user-details {
+            padding-left: 12px;
+            vertical-align: top;
+        }
+        .name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #1a365d;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
+        .sub-info {
+            font-size: 8px;
+            color: #4a5568;
+            margin-bottom: 6px;
+        }
+        .info-grid {
+            width: 100%;
+            margin-top: 5px;
+        }
+        .info-item {
+            width: 50%;
+            padding-bottom: 4px;
+        }
+        .label {
+            font-size: 6px;
+            text-transform: uppercase;
+            color: #718096;
+            font-weight: bold;
+            display: block;
+        }
+        .value {
+            font-size: 9px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        .qr-code {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 35px;
+            height: 35px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            padding: 2px;
+        }
+        .qr-mock {
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, #000, #000 1px, #fff 1px, #fff 3px);
+            opacity: 0.8;
+        }
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 40px;
+            font-weight: 900;
+            color: rgba(26, 54, 93, 0.03);
+            white-space: nowrap;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .logo-small {
+            position: absolute;
+            top: 8px;
+            left: 10px;
+            height: 20px;
+            z-index: 2;
+        }
+        .signature-area {
+            position: absolute;
+            bottom: 10px;
+            left: 12px;
+            width: 100px;
+        }
+        .signature-line {
+            border-top: 0.5px solid #a0aec0;
+            margin-bottom: 2px;
+        }
+        .signature-text {
+            font-size: 5px;
+            text-transform: uppercase;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <div class="license-container">
+        <div class="top-stripe"></div>
+        <div class="header">
+            {% if logo %}
+                <img src="{{ logo }}" class="logo-small" alt="Logo">
+            {% endif %}
+            <h1>Fédération La Roue Libre</h1>
+            <p>Licence Officielle de Compétition BMX</p>
+        </div>
+        
+        <div class="watermark">LA ROUE LIBRE</div>
+
+        <div class="content">
+            <table class="main-table">
+                <tr>
+                    <td class="photo-area">
+                        {% if avatar %}
+                            <img src="{{ avatar }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" alt="Avatar">
+                        {% else %}
+                            <div style="padding-top: 25px;">PHOTO</div>
+                        {% endif %}
+                    </td>
+                    <td class="user-details">
+                        <div class="name">{{ user.firstname }} {{ user.lastname }}</div>
+                        <div class="sub-info">Né(e) le {{ user.birthday|date('d/m/Y') }} • {{ licence.nationaly }}</div>
+                        
+                        <table class="info-grid">
+                            <tr>
+                                <td class="info-item">
+                                    <span class="label">ID Licence</span>
+                                    <span class="value">LR-{{ "now"|date('Y') }}-{{ licence.id|format('%05d') }}</span>
+                                </td>
+                                <td class="info-item">
+                                    <span class="label">Catégorie</span>
+                                    <span class="value">{{ licence.priceLicence.label }}</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="info-item">
+                                    <span class="label">Émis le</span>
+                                    <span class="value">{{ "now"|date('d/m/Y') }}</span>
+                                </td>
+                                <td class="info-item">
+                                    <span class="label">Validité</span>
+                                    <span class="value">31/12/{{ "now"|date('Y') }}</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="signature-area">
+            <div class="signature-line"></div>
+            <div class="signature-text">Signature du titulaire</div>
+        </div>
+
+        <div class="qr-code">
+            <div class="qr-mock"></div>
+        </div>
+    </div>
+
+    <!-- Deuxième carte (Verso) pour plus de professionnalisme -->
+    <div class="license-container" style="margin-top: 20px; background: #1a365d; color: white; border: none;">
+        <div class="content" style="padding: 20px; text-align: center;">
+            <div style="font-size: 10px; font-weight: bold; margin-bottom: 10px; color: #ff6b00; text-transform: uppercase;">Informations Importantes</div>
+            <div style="font-size: 7px; line-height: 1.4; color: #e2e8f0; text-align: justify;">
+                Cette licence est strictement personnelle et doit être présentée sur demande lors des compétitions officielles. 
+                Le titulaire s'engage à respecter le règlement de la Fédération La Roue Libre et les règles de sécurité en vigueur. 
+                En cas d'urgence, veuillez contacter les services de secours. 
+                Cette carte atteste que le titulaire a fourni un certificat médical valide pour la pratique du BMX en compétition.
+            </div>
+            
+            <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); pt: 10px;">
+                <div style="font-size: 8px; font-weight: bold;">www.larouelibre.fr</div>
+                <div style="font-size: 6px; opacity: 0.6;">© {{ "now"|date('Y') }} La Roue Libre - Tous droits réservés</div>
+            </div>
+        </div>
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #ff6b00;"></div>
+    </div>
+</body>
+</html>

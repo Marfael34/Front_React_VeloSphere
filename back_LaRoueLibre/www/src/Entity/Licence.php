@@ -2,24 +2,34 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\LicenceRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
+use Symfony\Component\Serializer\Attribute\Groups;
+
 #[ORM\Entity(repositoryClass: LicenceRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['licence:read']],
+    denormalizationContext: ['groups' => ['licence:write']]
+)]
+#[ORM\HasLifecycleCallbacks]
 class Licence
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['licence:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 25)]
+    #[Groups(['licence:read', 'licence:write', 'user:read'])]
     private ?string $nationaly = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['licence:read', 'licence:write'])]
     private ?string $country_resid = null;
 
     #[ORM\Column(length: 14)]
@@ -28,25 +38,114 @@ class Licence
         pattern: '/^[0-9]{2}\.[0-9]{2}\.[0-9]{2}\.[0-9]{2}\.[0-9]{2}$/',
         message: 'Le numéro de téléphone doit être au format xx.xx.xx.xx.xx'
     )]
+    #[Groups(['licence:read', 'licence:write'])]
     private ?string $phone = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['licence:read'])]
+    private ?string $identityCardPath = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['licence:read'])]
+    private ?string $medicalCertificatePath = null;
+
     #[ORM\Column]
+    #[Groups(['licence:read', 'user:read'])]
     private ?\DateTime $createdAt = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['licence:read'])]
     private ?\DateTime $updatedAt = null;
 
     #[ORM\Column]
+    #[Groups(['licence:read', 'user:read'])]
     private ?bool $isActive = null;
 
     #[ORM\ManyToOne(inversedBy: 'licences')]
+    #[Groups(['licence:read', 'licence:write'])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'licences')]
+    #[Groups(['licence:read', 'licence:write', 'user:read'])]
+    #[ApiProperty(readableLink: true)]
     private ?Etat $etat = null;
 
     #[ORM\ManyToOne(inversedBy: 'licences')]
+    #[Groups(['licence:read', 'licence:write', 'user:read'])]
+    #[ApiProperty(readableLink: true)]
     private ?PriceLicence $price_licence = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['licence:read', 'user:read'])]
+    private ?string $pdfPath = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['licence:read', 'user:read'])]
+    private ?string $photoPath = null;
+
+    public function getPdfPath(): ?string
+    {
+        return $this->pdfPath;
+    }
+
+    public function setPdfPath(?string $pdfPath): static
+    {
+        $this->pdfPath = $pdfPath;
+        return $this;
+    }
+
+    public function getPhotoPath(): ?string
+    {
+        return $this->photoPath;
+    }
+
+    public function setPhotoPath(?string $photoPath): static
+    {
+        $this->photoPath = $photoPath;
+        return $this;
+    }
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+        $this->isActive = false; // Par défaut, en attente de validation
+    }
+
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
+    {
+        if ($this->createdAt === null) {
+            $this->createdAt = new \DateTime();
+        }
+    }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedAt = new \DateTime();
+    }
+
+    public function getIdentityCardPath(): ?string
+    {
+        return $this->identityCardPath;
+    }
+
+    public function setIdentityCardPath(?string $identityCardPath): static
+    {
+        $this->identityCardPath = $identityCardPath;
+        return $this;
+    }
+
+    public function getMedicalCertificatePath(): ?string
+    {
+        return $this->medicalCertificatePath;
+    }
+
+    public function setMedicalCertificatePath(?string $medicalCertificatePath): static
+    {
+        $this->medicalCertificatePath = $medicalCertificatePath;
+        return $this;
+    }
 
     public function getId(): ?int
     {

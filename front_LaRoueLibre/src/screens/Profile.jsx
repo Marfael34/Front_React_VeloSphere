@@ -4,7 +4,7 @@ import { API_ROOT, IMAGE_URL } from '../constants/apiConstant';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom'; 
 import ButtonLoader from '../components/Loader/ButtonLoader';
-import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake, FaBoxOpen, FaEdit, FaPhone, FaHeart } from 'react-icons/fa';
+import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake, FaBoxOpen, FaEdit, FaPhone, FaHeart, FaFileInvoice } from 'react-icons/fa';
 import CustomButton from '../components/UI/CustomButton';
 import EditProfileForm from '../components/Market/EditProfileForm';
 import LocationCard from '../components/Card/LocationCard'; 
@@ -19,6 +19,7 @@ const Profile = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [showLicenceHistory, setShowLicenceHistory] = useState(false);
     
     const navigate = useNavigate(); 
 
@@ -141,9 +142,13 @@ const Profile = () => {
             case 'Livrées': return 'bg-green-500/20 text-green-400 border-green-500/30';
             case 'En attentes de paiement':
             case 'En attente de validation':
+            case 'En attentes de validation':
+            case 'Approuvée':
             case 'En cours de préparation':
             case 'En cours de livraison': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-            case 'Annulées': return 'bg-red-500/20 text-red-400 border-red-500/30';
+            case 'Annulées': 
+            case 'Rejetée':
+            case 'Rejetées': return 'bg-red-500/20 text-red-400 border-red-500/30';
             default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
         }
     };
@@ -229,6 +234,106 @@ const Profile = () => {
                     </div>
 
                     <div className="lg:col-span-2 space-y-8">
+                        {/* LICENCE BMX */}
+                        {fullUser?.licences && fullUser.licences.length > 0 && (
+                            <div className="bg-nigth-blue p-6 rounded-2xl shadow-lg border border-white/5">
+                                <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                                    <h2 className="text-xl font-bold flex items-center gap-3">
+                                        <FaFileInvoice className="text-orange" /> Ma Licence BMX
+                                    </h2>
+                                    {fullUser.licences.length > 1 && (
+                                        <button 
+                                            onClick={() => setShowLicenceHistory(!showLicenceHistory)}
+                                            className="text-xs font-bold text-orange hover:text-white transition-colors flex items-center gap-2 bg-orange/10 px-3 py-1.5 rounded-lg border border-orange/20"
+                                        >
+                                            <FaHistory /> {showLicenceHistory ? "Masquer l'historique" : `Voir l'historique (${fullUser.licences.length - 1})`}
+                                        </button>
+                                    )}
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    {/* On trie par date décroissante pour avoir la plus récente en premier */}
+                                    {[...fullUser.licences]
+                                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                                        .map((lic, idx) => {
+                                            const currentStatus = lic.etat?.label || "En attente";
+                                            const isActive = lic.isActive;
+                                            
+                                            // Par défaut on ne montre que la première, sauf si l'historique est activé
+                                            if (idx > 0 && !showLicenceHistory) return null;
+
+                                            return (
+                                                <div key={lic.id || idx} className={`p-5 rounded-xl border transition-all ${idx === 0 ? 'bg-black/40 border-white/10' : 'bg-black/20 border-white/5 opacity-60 hover:opacity-100'}`}>
+                                                    <div className="flex justify-between items-start mb-4">
+                                                        <div>
+                                                            <div className="flex items-center gap-2">
+                                                                <h3 className="font-bold text-lg text-white">Licence #{lic.id}</h3>
+                                                                {idx === 0 && <span className="text-[8px] bg-orange text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">Dernière demande</span>}
+                                                            </div>
+                                                            <p className="text-xs text-gray-400">Demandée le {formatDate(lic.createdAt)}</p>
+                                                        </div>
+                                                        <span className={`px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${getStatusStyle(currentStatus)}`}>
+                                                            {currentStatus}
+                                                        </span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                                        <div>
+                                                            <p className="text-gray-500 uppercase text-[10px] font-bold">Nationalité</p>
+                                                            <p className="text-white font-medium">{lic.nationaly}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-gray-500 uppercase text-[10px] font-bold">Formule</p>
+                                                            <p className="text-orange font-black italic">{lic.price_licence?.label}</p>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {/* Bouton de paiement si approuvée mais pas encore payée */}
+                                                    {!isActive && currentStatus === 'Approuvée' && (
+                                                        <button 
+                                                            onClick={() => navigate('/checkout', { state: { licenceId: lic.id, type: 'licence' } })}
+                                                            className="w-full mt-4 bg-orange text-white py-3 rounded-xl font-bold uppercase italic text-sm transition-all hover:scale-[1.02] shadow-lg shadow-orange/20"
+                                                        >
+                                                            Régler ma licence ⚡
+                                                        </button>
+                                                    )}
+
+                                                    {/* Message si rejetée */}
+                                                    {!isActive && (currentStatus === 'Rejetée' || currentStatus === 'Rejetées') && (
+                                                        <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs italic text-center">
+                                                            ⚠️ Votre demande a été rejetée. Veuillez vérifier vos documents ou contacter le support.
+                                                        </div>
+                                                    )}
+
+                                                    {lic.pdfPath && (
+                                                        <div className="mt-4 pt-4 border-t border-white/5 flex flex-col gap-3">
+                                                            <div className="flex items-center gap-2 text-green-400 text-sm font-bold italic uppercase">
+                                                                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                                                {isActive ? "Permis Officiel Actif" : "Permis Disponible"}
+                                                            </div>
+                                                            <a 
+                                                                href={`${API_ROOT}${lic.pdfPath}`} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white py-2 rounded-lg border border-white/10 transition-all text-xs font-bold"
+                                                            >
+                                                                <FaFileInvoice /> Télécharger mon permis (PDF)
+                                                            </a>
+                                                        </div>
+                                                    )}
+
+                                                    {isActive && !lic.pdfPath && (
+                                                        <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-2 text-green-400 text-sm font-bold italic uppercase">
+                                                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                                            Permis Officiel Actif
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+                            </div>
+                        )}
+
                         {/* PANIER */}
                         <div className="bg-nigth-blue p-6 rounded-2xl shadow-lg border border-white/5">
                             <h2 className="text-xl font-bold flex items-center gap-3 mb-6 border-b border-white/10 pb-4"><FaShoppingBag className="text-orange" /> Mon Panier</h2>
@@ -270,10 +375,22 @@ const Profile = () => {
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <div className="w-full sm:w-auto mt-2 sm:mt-0">
-                                                    <Link to={`/profile/order/${order.id}`} state={{ order }} className="bg-orange hover:bg-orange/80 text-black font-bold py-2.5 px-6 rounded-lg transition-colors text-sm w-full sm:w-auto block text-center shadow-lg">
-                                                        Suivre la commande
+                                                <div className="w-full sm:w-auto mt-2 sm:mt-0 flex flex-col sm:flex-row gap-3">
+                                                    <Link 
+                                                        to={`/profile/order/${order.id}`} 
+                                                        state={{ order }} 
+                                                        className="bg-orange hover:bg-orange/80 text-black font-bold py-2.5 px-6 rounded-lg transition-colors text-sm w-full sm:w-auto block text-center shadow-lg whitespace-nowrap"
+                                                    >
+                                                        {currentStatus === 'Livrées' ? 'Voir la commande' : 'Suivre la commande'}
                                                     </Link>
+                                                    {currentStatus === 'Livrées' && (
+                                                        <Link 
+                                                            to={`/invoice/${order.id}`} 
+                                                            className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-6 rounded-lg transition-colors text-sm w-full sm:w-auto border border-white/20 shadow-lg whitespace-nowrap flex items-center justify-center gap-2"
+                                                        >
+                                                            <FaFileInvoice /> Facture
+                                                        </Link>
+                                                    )}
                                                 </div>
                                             </div>
                                         );

@@ -7,8 +7,10 @@ import PageLoader from '../components/Loader/PageLoader';
 import { 
     FaArrowLeft, FaMapMarkerAlt, FaMountain, FaWalking, 
     FaRulerHorizontal, FaLayerGroup, FaCalendarAlt, FaInfoCircle,
-    FaHeart, FaRegHeart, FaCheckCircle, FaTimesCircle
+    FaHeart, FaRegHeart, FaCheckCircle, FaTimesCircle, FaEdit
 } from 'react-icons/fa';
+import PlaceFormModal from '../components/admin/PlaceFormModal';
+import FormattedDescription from '../components/UI/FormattedDescription';
 
 const LocationDetail = () => {
     const { id } = useParams();
@@ -19,6 +21,7 @@ const LocationDetail = () => {
     const [isFavorite, setIsFavorite] = useState(false);
     const [loading, setLoading] = useState(true);
     const [etatFavorisId, setEtatFavorisId] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,8 +70,26 @@ const LocationDetail = () => {
         }
     };
 
+    const getRolesFromToken = (token) => {
+        if (!token) return [];
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            const decoded = JSON.parse(jsonPayload);
+            return decoded.roles || [];
+        } catch (error) { return []; }
+    };
+
     if (loading) return <PageLoader />;
     if (!place) return <div className="text-white text-center py-20">Lieu introuvable.</div>;
+
+    const userRoles = getRolesFromToken(user?.token);
+    const isAdmin = userRoles.includes("ROLE_ADMIN");
+    const isOwner = user && (place.user === `/api/users/${user.id}` || place.user?.id === user.id);
+    const canEdit = isAdmin || isOwner;
 
     // Logique de vérification ultra-robuste (bool, int ou string) pour corriger ton bug d'affichage
     const isPlaceActive = place.isActive === true || place.isActive === 1 || place.isActive === "1" || place.active === true || place.active === 1;
@@ -78,7 +99,7 @@ const LocationDetail = () => {
             {/* Header Image */}
             <div className="relative h-112.5 w-full">
                 <img 
-                    src={place.path ? `${API_ROOT}${place.path}` : `${IMAGE_URL}/default/default_location.png`} 
+                    src={place.path ? (place.path.startsWith('/') ? `${API_ROOT}${place.path}` : `${API_ROOT}/images/places/${place.path}`) : `${IMAGE_URL}/default/default_location.png`} 
                     className="w-full h-full object-cover"
                     alt={place.name}
                 />
@@ -122,8 +143,19 @@ const LocationDetail = () => {
                                 <span className="text-sm font-medium">{place.coordinates || 'Coordonnées GPS'}</span>
                             </div>
                         </div>
-                        <div className="px-6 py-2 bg-orange text-black font-black rounded-full uppercase text-sm">
-                            {place.difficulty}
+                        <div className="flex flex-col sm:flex-row gap-4 items-center">
+                            <div className="px-6 py-2 bg-orange text-black font-black rounded-full uppercase text-sm">
+                                {place.difficulty}
+                            </div>
+                            {canEdit && (
+                                <button 
+                                    onClick={() => setIsEditing(true)}
+                                    className="p-3 bg-white/10 hover:bg-orange hover:text-black rounded-full transition-all border border-white/20"
+                                    title="Modifier le lieu"
+                                >
+                                    <FaEdit size={20} />
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -155,12 +187,20 @@ const LocationDetail = () => {
                         <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                             <FaInfoCircle className="text-orange" /> Description
                         </h3>
-                        <p className="text-gray-300 leading-relaxed text-lg bg-white/5 p-6 rounded-2xl border border-white/5">
-                            {place.description}
-                        </p>
+                        <div className="text-gray-300 leading-relaxed text-lg bg-white/5 p-6 rounded-2xl border border-white/5">
+                            <FormattedDescription text={place.description} />
+                        </div>
                     </div>
                 </div>
             </div>
+            {/* MODAL D'ÉDITION */}
+            {isEditing && (
+                <PlaceFormModal 
+                    initialPlace={place} 
+                    onClose={() => setIsEditing(false)} 
+                    onSuccess={() => { setIsEditing(false); window.location.reload(); }} 
+                />
+            )}
         </div>
     );
 };

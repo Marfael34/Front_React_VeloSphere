@@ -33,27 +33,27 @@ class Adress
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?string $number = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?string $complement = null;
 
     #[ORM\Column(length: 20)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?string $type = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?string $label = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?string $city = null;
 
     #[ORM\Column]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?int $cp = null;
 
     /**

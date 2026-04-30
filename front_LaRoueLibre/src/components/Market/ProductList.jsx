@@ -23,6 +23,16 @@ const ProductList = () => {
   const [maxPrice, setMaxPrice] = useState("");
   const [sortOrder, setSortOrder] = useState("default");
 
+  // Filtres réellement appliqués
+  const [appliedFilters, setAppliedFilters] = useState({
+    searchTerm: "",
+    mainFilter: "all",
+    subFilter: "all",
+    minPrice: "",
+    maxPrice: "",
+    sortOrder: "default"
+  });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -58,11 +68,13 @@ const ProductList = () => {
 
   // --- 2. FILTRAGE ET TRI DES PRODUITS ---
   const filteredProducts = useMemo(() => {
+    const { searchTerm: s, mainFilter: m, subFilter: sub, minPrice: min, maxPrice: max, sortOrder: so } = appliedFilters;
+    
     let result = allProducts.filter(product => {
       
-      // Filtre Recherche textuelle (Nom ET Marque/Caractéristiques)
-      if (searchTerm.trim() !== "") {
-        const term = searchTerm.toLowerCase();
+      // Filtre Recherche textuelle
+      if (s.trim() !== "") {
+        const term = s.toLowerCase();
         const productName = product.name ? String(product.name).toLowerCase() : "";
         const matchesName = productName.includes(term);
         const productBrand = product.brand ? String(product.brand).toLowerCase() : "";
@@ -77,24 +89,24 @@ const ProductList = () => {
       }
 
       // Filtre Type Principal
-      if (mainFilter !== "all") {
-        const hasMainType = product.characteristics?.some(char => char.type === mainFilter);
+      if (m !== "all") {
+        const hasMainType = product.characteristics?.some(char => char.type === m);
         if (!hasMainType) return false;
       }
 
       // Filtre Sous-Catégorie
-      if (subFilter !== "all") {
-        const hasSub = product.characteristics?.some(char => char.value === subFilter);
+      if (sub !== "all") {
+        const hasSub = product.characteristics?.some(char => char.value === sub);
         if (!hasSub) return false;
       }
 
-      // Filtre Prix Minimum
-      if (minPrice !== "" && product.price < parseFloat(minPrice)) {
+      // Filtre Prix Minimum (Attention : prix stocké en centimes)
+      if (min !== "" && product.price < parseFloat(min) * 100) {
         return false;
       }
 
-      // Filtre Prix Maximum
-      if (maxPrice !== "" && product.price > parseFloat(maxPrice)) {
+      // Filtre Prix Maximum (Attention : prix stocké en centimes)
+      if (max !== "" && product.price > parseFloat(max) * 100) {
         return false;
       }
 
@@ -102,14 +114,14 @@ const ProductList = () => {
     });
 
     // Tri
-    if (sortOrder === "asc") {
+    if (so === "asc") {
       result.sort((a, b) => a.price - b.price);
-    } else if (sortOrder === "desc") {
+    } else if (so === "desc") {
       result.sort((a, b) => b.price - a.price);
     }
 
     return result;
-  }, [allProducts, searchTerm, mainFilter, subFilter, minPrice, maxPrice, sortOrder]);
+  }, [allProducts, appliedFilters]);
 
   // --- 3. PAGINATION ---
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
@@ -123,26 +135,50 @@ const ProductList = () => {
   const handleMainChange = (e) => {
     setMainFilter(e.target.value);
     setSubFilter("all");
-    setCurrentPage(1);
   };
 
   const handleFilterChange = (setter) => (e) => {
     setter(e.target.value);
-    setCurrentPage(1);
   };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      applyFilters();
+    }
+  };
+
+  const applyFilters = () => {
+    setAppliedFilters({
+      searchTerm,
+      mainFilter,
+      subFilter,
+      minPrice,
+      maxPrice,
+      sortOrder
+    });
     setCurrentPage(1);
   };
 
   const resetFilters = () => {
+    const defaultFilters = {
+      searchTerm: "",
+      mainFilter: "all",
+      subFilter: "all",
+      minPrice: "",
+      maxPrice: "",
+      sortOrder: "default"
+    };
     setSearchTerm("");
     setMainFilter("all");
     setSubFilter("all");
     setMinPrice("");
     setMaxPrice("");
     setSortOrder("default");
+    setAppliedFilters(defaultFilters);
     setCurrentPage(1);
   };
 
@@ -211,6 +247,7 @@ const ProductList = () => {
                 className="bg-gray-900 text-white px-4 py-2.5 rounded-xl border border-gray-700 focus:border-blue-500 outline-none w-full placeholder-gray-600"
                 value={minPrice}
                 onChange={handleFilterChange(setMinPrice)}
+                onKeyDown={handleKeyDown}
                 min="0"
               />
             </div>
@@ -222,6 +259,7 @@ const ProductList = () => {
                 className="bg-gray-900 text-white px-4 py-2.5 rounded-xl border border-gray-700 focus:border-blue-500 outline-none w-full placeholder-gray-600"
                 value={maxPrice}
                 onChange={handleFilterChange(setMaxPrice)}
+                onKeyDown={handleKeyDown}
                 min="0"
               />
             </div>
@@ -243,20 +281,55 @@ const ProductList = () => {
             </select>
           </div>
 
-          {/* Bouton de réinitialisation */}
-          <div className="flex flex-col gap-2 grow min-w-35 md:grow-0">
-           <button 
-              onClick={resetFilters}
-              className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white px-4 py-2.5 rounded-xl border border-gray-700 hover:border-gray-500 transition-all text-sm font-medium h-11.5 flex items-center gap-2"
-              title="Réinitialiser tous les filtres"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Reinitialiser
+          {/* Boutons d'action */}
+          <div className="flex gap-3 grow min-w-full lg:min-w-0 lg:grow-0">
+            <button 
+                onClick={applyFilters}
+                className="flex-1 lg:flex-none bg-orange hover:bg-orange/80 text-black px-8 py-2.5 rounded-xl transition-all text-sm font-black h-11.5 flex items-center justify-center gap-2 shadow-lg shadow-orange/20 group"
+              >
+                <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                Rechercher
+            </button>
+            <button 
+                onClick={resetFilters}
+                className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white px-4 py-2.5 rounded-xl border border-gray-700 hover:border-gray-500 transition-all text-sm font-medium h-11.5 flex items-center gap-2"
+                title="Réinitialiser tous les filtres"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span className="hidden sm:inline">Réinitialiser</span>
             </button>
           </div>
         </div>
+
+        {/* RÉSUMÉ DES FILTRES ACTIFS */}
+        {(appliedFilters.mainFilter !== 'all' || appliedFilters.searchTerm !== '' || appliedFilters.minPrice !== '' || appliedFilters.maxPrice !== '') && (
+          <div className="flex flex-wrap items-center gap-3 mb-8 animate-fade-in">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mr-2">Filtres actifs :</span>
+            {appliedFilters.searchTerm && (
+              <span className="bg-orange/10 text-orange border border-orange/20 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2">
+                "{appliedFilters.searchTerm}"
+              </span>
+            )}
+            {appliedFilters.mainFilter !== 'all' && (
+              <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-full text-xs font-bold">
+                {appliedFilters.mainFilter === 'Catégorie vélo' ? 'Vélos' : 'Pièces Détachées'}
+                {appliedFilters.subFilter !== 'all' && ` > ${appliedFilters.subFilter}`}
+              </span>
+            )}
+            {(appliedFilters.minPrice || appliedFilters.maxPrice) && (
+              <span className="bg-green-500/10 text-green-400 border border-green-500/20 px-3 py-1 rounded-full text-xs font-bold">
+                {appliedFilters.minPrice ? `${appliedFilters.minPrice}€` : '0€'} - {appliedFilters.maxPrice ? `${appliedFilters.maxPrice}€` : '∞'}
+              </span>
+            )}
+            <button onClick={resetFilters} className="text-xs text-gray-400 hover:text-orange transition-colors underline decoration-dotted underline-offset-4">
+              Tout effacer
+            </button>
+          </div>
+        )}
         
         {/* CONTENU PRINCIPAL */}
         {isLoading ? (

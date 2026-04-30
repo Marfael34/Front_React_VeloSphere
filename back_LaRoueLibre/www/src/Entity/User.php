@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Patch;
@@ -41,7 +42,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user:read', 'user:write', 'order:read'])]
+    #[Groups(['user:read', 'user:write', 'order:read', 'licence:read'])]
     private ?string $email = null;
 
     /**
@@ -61,23 +62,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $plainPassword = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['user:read', 'user:write', 'order:read'])]
+    #[Groups(['user:read', 'user:write', 'order:read', 'licence:read'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['user:read', 'user:write', 'order:read'])]
+    #[Groups(['user:read', 'user:write', 'order:read', 'licence:read'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 150)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?string $pseudo = null;
 
     #[ORM\Column]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?\DateTime $birthday = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?string $avatar = null;
 
     #[ORM\Column]
@@ -101,10 +102,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Competition::class, mappedBy: 'user')]
     private Collection $competitions;
 
-    /**
-     * @var Collection<int, Licence>
-     */
     #[ORM\OneToMany(targetEntity: Licence::class, mappedBy: 'user')]
+    #[Groups(['user:read'])]
+    #[ApiProperty(readableLink: true)]
     private Collection $licences;
 
     /**
@@ -123,11 +123,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Adress>
      */
     #[ORM\ManyToMany(targetEntity: Adress::class, cascade:['persist', 'remove'])]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'licence:read'])]
     private Collection $adresses;
 
     #[ORM\Column(length: 100, nullable: true)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'licence:read'])]
     #[Assert\Regex(
         pattern: '/^[0-9]{2}\.[0-9]{2}\.[0-9]{2}\.[0-9]{2}\.[0-9]{2}$/',
         message: 'Le numéro de téléphone doit être au format xx.xx.xx.xx.xx'

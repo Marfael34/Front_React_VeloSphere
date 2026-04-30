@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="background-color: #000; margin: 0; padding: 20px;">
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #111; color: #fff; padding: 40px; border-radius: 20px; border: 1px solid #333;">
+        <h1 style="color: #ff6b00; text-transform: uppercase; font-style: italic;">Félicitations {{ user.firstname }} !</h1>
+        
+        <p>Votre demande de permis BMX pour la formule <strong>{{ licence.priceLicence.label ?? 'N/A' }}</strong> a été approuvée par nos administrateurs.</p>
+        
+        <div style="background: #222; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 5px solid #ff6b00;">
+            <p style="margin: 0;">Il ne vous reste plus qu'une étape : le règlement de votre licence pour l'activer définitivement.</p>
+        </div>
+        
+        <p>Vous pouvez dès maintenant procéder au paiement sécurisé via Stripe depuis votre espace personnel ou en cliquant sur le bouton ci-dessous :</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="http://localhost:5173/licence" style="background: #ff6b00; color: #fff; padding: 15px 30px; text-decoration: none; border-radius: 10px; font-weight: bold; text-transform: uppercase; display: inline-block;">Payer ma licence</a>
+        </div>
+        
+        <p style="color: #888; font-size: 12px; margin-top: 40px; border-top: 1px solid #333; pt-20">
+            Si vous avez des questions, n'hésitez pas à nous contacter.<br>
+            L'équipe La Roue Libre.
+        </p>
+    </div>
+</body>
+</html>

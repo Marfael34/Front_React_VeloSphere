@@ -34,8 +34,81 @@ class StripeWebhookController extends AbstractController
         if ($event && $event->type === 'payment_intent.succeeded') {
             $paymentIntent = $event->data->object;
             $panierId = $paymentIntent->metadata->panier_id ?? null;
+            $licenceId = $paymentIntent->metadata->licence_id ?? null;
+            $type = $paymentIntent->metadata->type ?? 'panier';
 
-            $logger->info("Paiement réussi pour le panier ID : " . $panierId);
+            if ($type === 'licence' && $licenceId) {
+                $logger->info("Paiement réussi pour la licence ID : " . $licenceId);
+                $licence = $em->getRepository(\App\Entity\Licence::class)->find($licenceId);
+                if ($licence) {
+                    $etatValide = $em->getRepository(Etat::class)->findOneBy(['label' => 'Validées']);
+                    $licence->setEtat($etatValide);
+                    $licence->setIsActive(true);
+
+                    // --- GÉNÉRATION DU PDF DE LA LICENCE ---
+                    try {
+                        $logger->info("Génération du PDF de la licence ID " . $licenceId . " en cours...");
+                        $pdfOptions = new Options();
+                        $pdfOptions->set('defaultFont', 'Arial');
+                        $pdfOptions->set('isRemoteEnabled', true);
+                        $dompdf = new Dompdf($pdfOptions);
+
+                        $logoPath = $params->get('kernel.project_dir') . '/public/images/logo.png';
+                        $logoData = null;
+                        if (file_exists($logoPath)) {
+                            $typeLogo = pathinfo($logoPath, PATHINFO_EXTENSION);
+                            $dataLogo = file_get_contents($logoPath);
+                            $logoData = 'data:image/' . $typeLogo . ';base64,' . base64_encode($dataLogo);
+                        }
+
+                        // --- RÉCUPÉRATION DE LA PHOTO (Priorité à la photo de licence, sinon avatar) ---
+                        $user = $licence->getUser();
+                        $photoPathForPdf = $licence->getPhotoPath() ?: ($user ? $user->getAvatar() : null);
+                        $photoData = null;
+
+                        if ($photoPathForPdf) {
+                            $fullPhotoPath = $params->get('kernel.project_dir') . '/public' . $photoPathForPdf;
+                            if (file_exists($fullPhotoPath)) {
+                                $typePhoto = pathinfo($fullPhotoPath, PATHINFO_EXTENSION);
+                                $dataPhoto = file_get_contents($fullPhotoPath);
+                                $photoData = 'data:image/' . $typePhoto . ';base64,' . base64_encode($dataPhoto);
+                            }
+                        }
+                        // -------------------------------------------------------------------------------
+
+                        $html = $twig->render('licence/licence_pdf.html.twig', [
+                            'licence' => $licence,
+                            'user' => $user,
+                            'logo' => $logoData,
+                            'avatar' => $photoData
+                        ]);
+
+                        $dompdf->loadHtml($html);
+                        $dompdf->setPaper('A4', 'portrait');
+                        $dompdf->render();
+
+                        $fileName = 'licence_' . $licenceId . '_' . uniqid() . '.pdf';
+                        $pdfDirectory = $params->get('kernel.project_dir') . '/public/uploads/licences/official';
+
+                        if (!is_dir($pdfDirectory)) {
+                            mkdir($pdfDirectory, 0777, true);
+                        }
+
+                        $pdfPath = $pdfDirectory . '/' . $fileName;
+                        file_put_contents($pdfPath, $dompdf->output());
+
+                        $licence->setPdfPath('/uploads/licences/official/' . $fileName);
+                        $logger->info("PDF de licence généré : " . $fileName);
+                    } catch (\Exception $e) {
+                        $logger->error("Erreur génération PDF licence : " . $e->getMessage());
+                    }
+                    // ---------------------------------------
+
+                    $em->flush();
+                    $logger->info("SUCCÈS : Licence ID " . $licenceId . " activée et PDF généré.");
+                }
+                return new Response('Licence payée', 200);
+            }
 
             if ($panierId) {
                 try {

@@ -7,7 +7,7 @@ import { AuthContext } from "../contexts/AuthContext";
 import { API_ROOT } from "../constants/apiConstant";
 import axios from "axios";
 import ButtonLoader from "../components/Loader/ButtonLoader";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 // Ajout d'icônes pour rassurer l'utilisateur
 import { FaLock, FaShieldAlt } from "react-icons/fa"; 
 
@@ -17,8 +17,11 @@ const stripePromise = loadStripe("pk_test_51TLQCEGyXLZ1k1lnmyigtun4AQIvMKhL3hj86
 const Checkout = () => {
     const [clientSecret, setClientSecret] = useState("");
     const { user } = useContext(AuthContext);
-    const [isLoading, setIsLoading] = useState(true);
+    const location = useLocation();
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(true);
+    const licenceId = location.state?.licenceId;
+    const type = location.state?.type;
 
     useEffect(() => {
         if (!user || !user.token) {
@@ -26,8 +29,12 @@ const Checkout = () => {
             return;
         }
 
+        const endpoint = type === 'licence' && licenceId 
+            ? `${API_ROOT}/api/create-licence-payment-intent/${licenceId}`
+            : `${API_ROOT}/api/create-payment-intent`;
+
         // On appelle Symfony pour générer l'intention de paiement
-        axios.post(`${API_ROOT}/api/create-payment-intent`, {}, {
+        axios.post(endpoint, {}, {
             headers: { Authorization: `Bearer ${user.token}` }
         })
         .then((res) => {
@@ -38,7 +45,7 @@ const Checkout = () => {
             console.error("Erreur Stripe:", err);
             setIsLoading(false);
         });
-    }, [user, navigate]);
+    }, [user, navigate, licenceId, type]);
 
     // Personnalisation poussée des inputs Stripe pour matcher ton CSS Tailwind
     const appearance = {
@@ -85,7 +92,7 @@ const Checkout = () => {
                 
                 {/* En-tête de la page */}
                 <div className="text-center mb-10">
-                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-orange/20 to-orange/5 border border-orange/20 text-orange mb-6 shadow-lg shadow-orange/10">
+                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-linear-to-br from-orange/20 to-orange/5 border border-orange/20 text-orange mb-6 shadow-lg shadow-orange/10">
                         <FaShieldAlt size={36} />
                     </div>
                     <h1 className="title-h1 mb-3">Paiement Sécurisé</h1>

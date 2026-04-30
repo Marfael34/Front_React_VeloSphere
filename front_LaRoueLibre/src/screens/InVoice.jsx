@@ -35,10 +35,10 @@ const Invoice = () => {
     const pdfUrl = order?.path ? `${API_ROOT}${order.path}` : null;
 
     return (
-        <div className="bg-gray-100 min-h-screen py-10 px-4">
+        <div className="bg-dark-nigth-blue min-h-screen py-10 px-4">
             <div className="max-w-4xl mx-auto">
                 <div className="flex justify-between mb-6">
-                    <button onClick={() => navigate(-1)} className="flex items-center gap-2 font-bold text-gray-600 hover:text-orange transition">
+                    <button onClick={() => navigate(-1)} className="flex items-center gap-2 font-bold text-white/60 hover:text-orange transition">
                         <FaArrowLeft /> Retour
                     </button>
                     {pdfUrl && (
@@ -48,7 +48,7 @@ const Invoice = () => {
                     )}
                 </div>
 
-                <div className="bg-white shadow-2xl rounded-xl overflow-hidden h-[80vh] border border-gray-200">
+                <div className="bg-nigth-blue shadow-2xl rounded-xl overflow-hidden h-[80vh] border border-white/5">
                     {pdfUrl ? (
                         <iframe src={pdfUrl} width="100%" height="100%" title="Facture" className="border-none" />
                     ) : (

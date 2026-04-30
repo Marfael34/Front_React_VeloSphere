@@ -21,6 +21,8 @@ import PlacesManagement from "../screens/admin/PlacesManagement";
 import OrdersManagement from "../screens/admin/OrdersManagement";
 import AdminLayout from "../screens/admin/AdminLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
+import LicenceForm from "../screens/LicenceForm";
+import LicenceManagement from "../screens/admin/LicenceManagement";
 
 const Router = createBrowserRouter([
     {
@@ -54,6 +56,10 @@ const Router = createBrowserRouter([
             {
                 path: "/profile",
                 element: <Profile/>
+            },
+            {
+                path: "/licence",
+                element: <LicenceForm/>
             },
             {
                 path: "/location",
@@ -104,6 +110,10 @@ const Router = createBrowserRouter([
                             {
                                 path: "/admin/places",
                                 element: <PlacesManagement/>
+                            },
+                            {
+                                path: "/admin/licences",
+                                element: <LicenceManagement/>
                             },
                             {
                                 path: "/admin/orders",

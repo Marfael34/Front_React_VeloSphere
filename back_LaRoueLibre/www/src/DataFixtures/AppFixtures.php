@@ -713,7 +713,19 @@ class AppFixtures extends Fixture
 
     public function loadEtat(ObjectManager $manager)
     {
-        $arrayEtat = ['En attentes de paiement', 'Payées', 'En attente de validation', 'Validées', 'Annulées', 'En cours de préparation', 'En cours de livraison', 'Livrées', 'Favoris'];
+        $arrayEtat = [
+            'En attentes de paiement', 
+            'Payées', 
+            'En attente de validation', 
+            'Validées', 
+            'Annulées', 
+            'En cours de préparation', 
+            'En cours de livraison', 
+            'Livrées', 
+            'Favoris',
+            'Approuvée',
+            'Rejetée'
+        ];
 
         foreach ($arrayEtat as $value) {
             $etat = new Etat();
@@ -787,25 +799,24 @@ class AppFixtures extends Fixture
         $arrayPriceLicence = [
             [
                 'label' => "FFC Jeunesse",
-                'price' => "65",
+                'price' => "6500",
             ],
             [
                 'label' => "FFC Pass Découverte",
-                'price' => "50",
+                'price' => "5000",
             ],
             [
                 'label' => "FFC Access (Compétition régionale)",
-                'price' => "95",
+                'price' => "9500",
             ],
             [
                 'label' => "FFC Open (Compétition nationale)",
-                'price' => "165",
+                'price' => "16500",
             ],
             [
                 'label' => "FFC Élite",
-                'price' => "240",
+                'price' => "24000",
             ],
-
         ];
 
         foreach ($arrayPriceLicence as $value) {

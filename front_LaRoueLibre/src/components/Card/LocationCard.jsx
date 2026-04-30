@@ -3,19 +3,22 @@ import { AuthContext } from '../../contexts/AuthContext';
 import axios from 'axios';
 import { API_ROOT, IMAGE_URL } from '../../constants/apiConstant';
 import ButtonLoader from '../Loader/ButtonLoader';
-import { FaEdit, FaMapMarkerAlt, FaRoute, FaHeart, FaRegHeart, FaEye } from 'react-icons/fa'; // Ajout de FaEye
-import { Link, useNavigate } from 'react-router-dom'; // Ajout de useNavigate
+import { FaEdit, FaMapMarkerAlt, FaRoute, FaHeart, FaRegHeart, FaEye, FaPlus } from 'react-icons/fa'; // Ajout de FaPlus
+import { Link, useNavigate } from 'react-router-dom';
+import PlaceFormModal from '../admin/PlaceFormModal';
+import FormattedDescription from '../UI/FormattedDescription';
 
 const LocationCard = ({ data = null }) => { // Ajout de la prop "data" pour le mode profil
     const [places, setPlaces] = useState([]);
     const [wishlist, setWishlist] = useState([]);
-    const placeId = places?.id;
+
     const [etatFavorisId, setEtatFavorisId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [editingPlace, setEditingPlace] = useState(null);
     
     const navigate = useNavigate(); // Initialisation du hook de navigation
-    const { user } = useContext(AuthContext);
+    const { user, setUser } = useContext(AuthContext);
 
     const getRolesFromToken = (token) => {
         if (!token) return [];
@@ -90,7 +93,15 @@ const LocationCard = ({ data = null }) => { // Ajout de la prop "data" pour le m
 
             } catch (err) {
                 console.error("Erreur de chargement:", err);
-                setError("Impossible de charger les données.");
+                if (err.response?.status === 401) {
+                    setError("Session expirée. Veuillez vous reconnecter.");
+                    // Si on a un token mais qu'il est invalide/expiré, on déconnecte l'user
+                    if (user?.token) {
+                        setUser(null);
+                    }
+                } else {
+                    setError("Impossible de charger les données.");
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -109,10 +120,29 @@ const LocationCard = ({ data = null }) => { // Ajout de la prop "data" pour le m
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-10 text-white">
-            <h1 className="title-h1 mb-10 flex items-center gap-4">
-                <FaRoute className="text-orange" />
-                Itinéraires & Lieux
-            </h1>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6">
+                <h1 className="title-h1 flex items-center gap-4 m-0!">
+                    <FaRoute className="text-orange" />
+                    Itinéraires & Lieux
+                </h1>
+                {user && (
+                    <button 
+                        onClick={() => setEditingPlace({
+                            name: '',
+                            description: '',
+                            coordinates: '',
+                            elevation: 0,
+                            distance: 0,
+                            difficulty: 'Facile',
+                            floor: '',
+                            path: ''
+                        })}
+                        className="w-full sm:w-auto bg-orange hover:bg-orange/80 text-black px-6 py-3 rounded-xl font-black flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange/20"
+                    >
+                        <FaPlus /> Ajouter un lieu
+                    </button>
+                )}
+            </div>
 
             {places && places.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -128,28 +158,29 @@ const LocationCard = ({ data = null }) => { // Ajout de la prop "data" pour le m
 
                                 <div className="relative h-48 w-full overflow-hidden">
                                     <img 
-                                        src={place.path_img ? `${API_ROOT}${place.path_img.startsWith('/') ? '' : '/'}${place.path_img}` : `${IMAGE_URL}/default/default_location.png`} 
+                                        src={place.path ? (place.path.startsWith('/') ? `${API_ROOT}${place.path}` : `${API_ROOT}/images/places/${place.path}`) : `${IMAGE_URL}/default/default_location.png`} 
                                         alt={place.name} 
                                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                     />
                                     
-                                    {isAdmin && (
-                                        <Link 
-                                            to={`/admin/edit-location/${place.id}`}
-                                            onClick={(e) => e.stopPropagation()} // Empêche la redirection vers le détail
+                                    {(isAdmin || (user && place.user === `/api/users/${user.id}`)) && (
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); setEditingPlace(place); }}
                                             className="absolute top-4 right-4 bg-orange hover:bg-white text-black p-3 rounded-full shadow-lg transition-colors duration-300 z-20"
                                         >
                                             <FaEdit size={18} />
-                                        </Link>
+                                        </button>
                                     )}
                                 </div>
 
                                 <div className="p-6 flex-1">
                                     <h2 className="text-xl font-bold mb-2 text-white group-hover:text-orange transition-colors">{place.name}</h2>
-                                    <p className="text-gray-400 text-sm mb-4 line-clamp-3">{place.description}</p>
+                                    <div className="text-gray-400 text-sm mb-4 line-clamp-3">
+                                        <FormattedDescription text={place.description} />
+                                    </div>
                                     <div className="flex items-center gap-2 text-orange text-sm mb-4 ">
                                         <Link
-                                            to={`/location/${placeId}`}
+                                            to={`/location/${place.id}`}
                                             className="group-hover:animate-slideup2 bg-orange hover:bg-orange/80 text-black px-4 py-2 w-full text-center font-bold rounded-full shadow-lg transition-colors duration-200"
                                         >
                                             Voir
@@ -164,6 +195,14 @@ const LocationCard = ({ data = null }) => { // Ajout de la prop "data" pour le m
                 <div className="text-center py-20 bg-black/20 rounded-2xl border border-white/10">
                     <p className="text-gray-400 italic">Aucun lieu disponible.</p>
                 </div>
+            )}
+            {/* MODAL D'ÉDITION */}
+            {editingPlace && (
+                <PlaceFormModal 
+                    initialPlace={editingPlace} 
+                    onClose={() => setEditingPlace(null)} 
+                    onSuccess={() => { setEditingPlace(null); window.location.reload(); }} 
+                />
             )}
         </div>
     );

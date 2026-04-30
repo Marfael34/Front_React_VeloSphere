@@ -80,4 +80,47 @@ class StripeController extends AbstractController
             return new JsonResponse(['error' => $e->getMessage()], 500);
         }
     }
+
+    #[Route('/api/create-licence-payment-intent/{id}', name: 'api_create_licence_payment_intent', methods: ['POST'])]
+    public function createLicencePaymentIntent(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            return new JsonResponse(['error' => 'Utilisateur non connecté'], 401);
+        }
+
+        $licence = $em->getRepository(\App\Entity\Licence::class)->find($id);
+
+        if (!$licence || $licence->getUser() !== $user) {
+            return new JsonResponse(['error' => 'Licence non trouvée ou accès refusé'], 404);
+        }
+
+        $priceLicence = $licence->getPriceLicence();
+        if (!$priceLicence) {
+            return new JsonResponse(['error' => 'Tarif de licence non défini'], 400);
+        }
+
+        $amountInCents = $priceLicence->getPrice();
+
+        Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+
+        try {
+            $paymentIntent = PaymentIntent::create([
+                'amount' => $amountInCents,
+                'currency' => 'eur',
+                'payment_method_types' => ['card'],
+                'metadata' => [
+                    'licence_id' => $licence->getId(),
+                    'type' => 'licence',
+                    'Email' => $user->getUserIdentifier()
+                ]
+            ]);
+
+            return new JsonResponse([
+                'clientSecret' => $paymentIntent->client_secret,
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 500);
+        }
+    }
 }

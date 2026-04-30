@@ -35,6 +35,10 @@ const PlaceFormModal = ({ initialPlace, onClose, onSuccess }) => {
         setUpdateError(null);
 
         try {
+            if (!user?.id) {
+                throw new Error("Utilisateur non identifié. Veuillez vous reconnecter.");
+            }
+
             const payload = {
                 name: editingPlace.name,
                 description: editingPlace.description,
@@ -43,7 +47,8 @@ const PlaceFormModal = ({ initialPlace, onClose, onSuccess }) => {
                 distance: parseFloat(editingPlace.distance) || 0,
                 difficulty: editingPlace.difficulty || 'Facile',
                 floor: editingPlace.floor,
-                path: editingPlace.path
+                path: editingPlace.path,
+                user: `/api/users/${user.id}` // Liaison avec l'utilisateur créateur
             };
 
             let placeId = editingPlace.id;

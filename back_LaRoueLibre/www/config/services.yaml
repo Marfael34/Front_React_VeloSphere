@@ -25,3 +25,7 @@ services:
     App\EventListener\AuthenticationSuccessListener:
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: onAuthenticationSuccessResponse }
+    
+    Mailtrap\Bridge\Transport\MailtrapSdkTransportFactory:
+        tags:
+            - { name: 'mailer.transport_factory' }

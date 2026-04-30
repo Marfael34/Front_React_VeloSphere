@@ -58,8 +58,11 @@ export const OnlinedataUserNav = [
   {
     title: "Panier",
     path: "/panier", icon: RiShoppingBasket2Line
+  },
+  {
+    title: "Permis",
+    path: "/licence", icon: MdDirectionsBike
   }
-
 ]
 
 
