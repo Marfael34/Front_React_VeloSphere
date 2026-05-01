@@ -8,105 +8,111 @@
             font-family: 'Helvetica', 'Arial', sans-serif; 
             margin: 0; 
             padding: 0; 
-            background-color: #f0f2f5;
+            background-color: #ffffff;
             color: #1a202c;
         }
         .license-container {
-            width: 85.6mm; /* ID-1 format width */
-            height: 54mm;  /* ID-1 format height */
+            width: 90mm; 
+            height: 58mm;
             margin: 50px auto;
             background: #ffffff;
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
             border: 1px solid #e2e8f0;
             position: relative;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         .top-stripe {
-            height: 5px;
+            height: 6px;
             background: #ff6b00;
         }
         .header {
             background: #1a365d;
-            padding: 8px 12px;
+            padding: 10px 12px;
             color: white;
             text-align: center;
             border-bottom: 2px solid #ff6b00;
         }
         .header h1 {
             margin: 0;
-            font-size: 14px;
+            font-size: 16px;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 900;
         }
         .header p {
             margin: 0;
-            font-size: 8px;
+            font-size: 9px;
             text-transform: uppercase;
             opacity: 0.8;
             letter-spacing: 0.5px;
         }
         .content {
-            padding: 10px;
+            padding: 12px;
         }
         .main-table {
             width: 100%;
             border-collapse: collapse;
         }
         .photo-area {
-            width: 60px;
-            height: 75px;
-            background: #edf2f7;
-            border: 1px solid #cbd5e0;
+            width: 65px;
+            height: 80px;
+            background: transparent;
+            border: none;
             text-align: center;
             vertical-align: middle;
-            font-size: 8px;
-            color: #a0aec0;
-            border-radius: 4px;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        .photo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         .user-details {
-            padding-left: 12px;
+            padding-left: 15px;
             vertical-align: top;
         }
         .name {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: bold;
             color: #1a365d;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
             text-transform: uppercase;
         }
         .sub-info {
-            font-size: 8px;
+            font-size: 9px;
             color: #4a5568;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
         .info-grid {
             width: 100%;
-            margin-top: 5px;
+            margin-top: 8px;
         }
         .info-item {
             width: 50%;
-            padding-bottom: 4px;
+            padding-bottom: 6px;
         }
         .label {
-            font-size: 6px;
+            font-size: 7px;
             text-transform: uppercase;
             color: #718096;
             font-weight: bold;
             display: block;
+            margin-bottom: 1px;
         }
         .value {
-            font-size: 9px;
+            font-size: 10px;
             font-weight: bold;
             color: #2d3748;
         }
         .qr-code {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 35px;
-            height: 35px;
+            bottom: 12px;
+            right: 12px;
+            width: 40px;
+            height: 40px;
             background: #fff;
             border: 1px solid #e2e8f0;
             padding: 2px;
@@ -119,10 +125,10 @@
         }
         .watermark {
             position: absolute;
-            top: 50%;
+            top: 55%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 40px;
+            font-size: 45px;
             font-weight: 900;
             color: rgba(26, 54, 93, 0.03);
             white-space: nowrap;
@@ -131,29 +137,42 @@
         }
         .logo-small {
             position: absolute;
-            top: 8px;
-            left: 10px;
-            height: 20px;
+            top: 10px;
+            left: 12px;
+            height: 24px;
             z-index: 2;
         }
         .signature-area {
             position: absolute;
-            bottom: 10px;
-            left: 12px;
-            width: 100px;
+            bottom: 12px;
+            left: 15px;
+            width: 110px;
         }
         .signature-line {
             border-top: 0.5px solid #a0aec0;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
         }
         .signature-text {
-            font-size: 5px;
+            font-size: 6px;
             text-transform: uppercase;
             color: #718096;
         }
     </style>
 </head>
 <body>
+    {# Calcul de la validité selon les règles de la FFC #}
+    {% set emissionDate = "now"|date('d/m/Y') %}
+    {% set currentMonth = "now"|date('n') %}
+    {% set currentYear = "now"|date('Y') %}
+    
+    {# Si souscription à partir de septembre (mois 9), valable jusqu'à la fin de l'année suivante #}
+    {% if currentMonth >= 9 %}
+        {% set expiryYear = currentYear + 1 %}
+    {% else %}
+        {% set expiryYear = currentYear %}
+    {% endif %}
+    {% set expiryDate = "31/12/" ~ expiryYear %}
+
     <div class="license-container">
         <div class="top-stripe"></div>
         <div class="header">
@@ -171,9 +190,9 @@
                 <tr>
                     <td class="photo-area">
                         {% if avatar %}
-                            <img src="{{ avatar }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" alt="Avatar">
+                            <div style="width: 65px; height: 80px; background-image: url('{{ avatar }}'); background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
                         {% else %}
-                            <div style="padding-top: 25px;">PHOTO</div>
+                            <div style="padding-top: 30px; font-size: 8px; color: #a0aec0;">PHOTO</div>
                         {% endif %}
                     </td>
                     <td class="user-details">
@@ -184,7 +203,7 @@
                             <tr>
                                 <td class="info-item">
                                     <span class="label">ID Licence</span>
-                                    <span class="value">LR-{{ "now"|date('Y') }}-{{ licence.id|format('%05d') }}</span>
+                                    <span class="value">LR-{{ currentYear }}-{{ licence.id|format('%05d') }}</span>
                                 </td>
                                 <td class="info-item">
                                     <span class="label">Catégorie</span>
@@ -194,11 +213,11 @@
                             <tr>
                                 <td class="info-item">
                                     <span class="label">Émis le</span>
-                                    <span class="value">{{ "now"|date('d/m/Y') }}</span>
+                                    <span class="value">{{ emissionDate }}</span>
                                 </td>
                                 <td class="info-item">
                                     <span class="label">Validité</span>
-                                    <span class="value">31/12/{{ "now"|date('Y') }}</span>
+                                    <span class="value">{{ expiryDate }}</span>
                                 </td>
                             </tr>
                         </table>
@@ -217,23 +236,23 @@
         </div>
     </div>
 
-    <!-- Deuxième carte (Verso) pour plus de professionnalisme -->
+    <!-- Deuxième carte (Verso) -->
     <div class="license-container" style="margin-top: 20px; background: #1a365d; color: white; border: none;">
-        <div class="content" style="padding: 20px; text-align: center;">
-            <div style="font-size: 10px; font-weight: bold; margin-bottom: 10px; color: #ff6b00; text-transform: uppercase;">Informations Importantes</div>
-            <div style="font-size: 7px; line-height: 1.4; color: #e2e8f0; text-align: justify;">
+        <div class="content" style="padding: 25px; text-align: center;">
+            <div style="font-size: 11px; font-weight: bold; margin-bottom: 12px; color: #ff6b00; text-transform: uppercase;">Informations Importantes</div>
+            <div style="font-size: 8px; line-height: 1.5; color: #e2e8f0; text-align: justify;">
                 Cette licence est strictement personnelle et doit être présentée sur demande lors des compétitions officielles. 
                 Le titulaire s'engage à respecter le règlement de la Fédération La Roue Libre et les règles de sécurité en vigueur. 
                 En cas d'urgence, veuillez contacter les services de secours. 
                 Cette carte atteste que le titulaire a fourni un certificat médical valide pour la pratique du BMX en compétition.
             </div>
             
-            <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); pt: 10px;">
-                <div style="font-size: 8px; font-weight: bold;">www.larouelibre.fr</div>
-                <div style="font-size: 6px; opacity: 0.6;">© {{ "now"|date('Y') }} La Roue Libre - Tous droits réservés</div>
+            <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                <div style="font-size: 10px; font-weight: bold;">www.larouelibre.fr</div>
+                <div style="font-size: 7px; opacity: 0.6;">© {{ currentYear }} La Roue Libre - Tous droits réservés</div>
             </div>
         </div>
-        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #ff6b00;"></div>
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: #ff6b00;"></div>
     </div>
 </body>
 </html>

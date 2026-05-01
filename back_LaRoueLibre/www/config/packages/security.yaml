@@ -67,6 +67,7 @@ security:
         - { path: ^/api/places, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/place, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/price_licences, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/competitions, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/stripe/webhook, roles: PUBLIC_ACCESS }
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }

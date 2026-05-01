@@ -388,7 +388,7 @@ const LicenceForm = () => {
                                 <span className="text-gray-500 text-xs mb-4">Format portrait (pour la carte)</span>
 
                                 {previews.photo && (
-                                    <div className="mb-4 w-20 h-24 rounded-lg overflow-hidden border border-white/10">
+                                    <div className="mb-4 w-16 h-20 rounded-lg overflow-hidden border border-white/10 mx-auto">
                                         <img src={previews.photo} className="w-full h-full object-cover" alt="Photo Preview" />
                                     </div>
                                 )}

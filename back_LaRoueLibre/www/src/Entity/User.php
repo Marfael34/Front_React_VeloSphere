@@ -141,6 +141,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinTable(name: "user_wishlist")]
     private Collection $wishlist;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: CompetitionRegistration::class, orphanRemoval: true)]
+    #[Groups(['user:read'])]
+    private Collection $competitionRegistrations;
+
     public function __construct()
     {
         $this->places = new ArrayCollection();
@@ -150,8 +154,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->orders = new ArrayCollection();
         $this->adresses = new ArrayCollection();
         $this->wishlist = new ArrayCollection();
+        $this->competitionRegistrations = new ArrayCollection();
         $this->createdAt = new \DateTime();
         $this->isActive = true;
+    }
+
+    /**
+     * @return Collection<int, CompetitionRegistration>
+     */
+    public function getCompetitionRegistrations(): Collection
+    {
+        return $this->competitionRegistrations;
+    }
+
+    public function addCompetitionRegistration(CompetitionRegistration $registration): static
+    {
+        if (!$this->competitionRegistrations->contains($registration)) {
+            $this->competitionRegistrations->add($registration);
+            $registration->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCompetitionRegistration(CompetitionRegistration $registration): static
+    {
+        if ($this->competitionRegistrations->removeElement($registration)) {
+            // set the owning side to null (unless already changed)
+            if ($registration->getUser() === $this) {
+                $registration->setUser(null);
+            }
+        }
+
+        return $this;
     }
 
     public function getId(): ?int

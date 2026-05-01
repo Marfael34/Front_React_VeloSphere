@@ -23,6 +23,7 @@ import AdminLayout from "../screens/admin/AdminLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
 import LicenceForm from "../screens/LicenceForm";
 import LicenceManagement from "../screens/admin/LicenceManagement";
+import Competitions from "../screens/Competitions";
 
 const Router = createBrowserRouter([
     {
@@ -60,6 +61,10 @@ const Router = createBrowserRouter([
             {
                 path: "/licence",
                 element: <LicenceForm/>
+            },
+            {
+                path: "/competitions",
+                element: <Competitions/>
             },
             {
                 path: "/location",

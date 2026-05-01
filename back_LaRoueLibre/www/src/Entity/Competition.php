@@ -4,47 +4,117 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\CompetitionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CompetitionRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['competition:read']],
+    denormalizationContext: ['groups' => ['competition:write']]
+)]
 class Competition
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['competition:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['competition:read', 'registration:read'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['competition:read'])]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(['competition:read'])]
     private ?int $maxPeople = null;
 
     #[ORM\Column]
+    #[Groups(['competition:read'])]
     private ?\DateTime $createdAt = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['competition:read'])]
     private ?\DateTime $updatedAt = null;
 
     #[ORM\Column]
+    #[Groups(['competition:read'])]
     private ?\DateTime $startAt = null;
 
     #[ORM\Column]
+    #[Groups(['competition:read'])]
     private ?\DateTime $endAt = null;
 
     #[ORM\Column]
+    #[Groups(['competition:read'])]
     private ?bool $isActive = null;
 
     #[ORM\ManyToOne(inversedBy: 'competitions')]
     private ?User $user = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['competition:read'])]
     private ?string $path = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['competition:read'])]
+    private ?string $location = null;
+
+    #[ORM\OneToMany(mappedBy: 'competition', targetEntity: CompetitionRegistration::class, orphanRemoval: true)]
+    private Collection $registrations;
+
+    public function __construct()
+    {
+        $this->registrations = new ArrayCollection();
+        $this->createdAt = new \DateTime();
+    }
+
+    /**
+     * @return Collection<int, CompetitionRegistration>
+     */
+    public function getRegistrations(): Collection
+    {
+        return $this->registrations;
+    }
+
+    public function addRegistration(CompetitionRegistration $registration): static
+    {
+        if (!$this->registrations->contains($registration)) {
+            $this->registrations->add($registration);
+            $registration->setCompetition($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRegistration(CompetitionRegistration $registration): static
+    {
+        if ($this->registrations->removeElement($registration)) {
+            // set the owning side to null (unless already changed)
+            if ($registration->getCompetition() === $this) {
+                $registration->setCompetition(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getLocation(): ?string
+    {
+        return $this->location;
+    }
+
+    public function setLocation(?string $location): static
+    {
+        $this->location = $location;
+        return $this;
+    }
 
     public function getId(): ?int
     {

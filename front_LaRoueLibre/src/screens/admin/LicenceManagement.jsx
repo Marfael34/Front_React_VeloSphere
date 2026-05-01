@@ -41,7 +41,11 @@ const LicenceManagement = () => {
     }, [user.token]);
 
     const handleStatusUpdate = async (id, type) => {
-        const label = type === 'approve' ? 'Approuvée' : 'Rejetée';
+        let label;
+        if (type === 'approve') label = 'Approuvée';
+        else if (type === 'cancel') label = 'Annulées';
+        else label = 'Rejetée';
+
         const targetEtat = etats.find(e => e.label === label);
 
         if (!targetEtat) {
@@ -101,6 +105,7 @@ const LicenceManagement = () => {
                                     lic.isActive ? 'bg-green-500/10 border-green-500/20 text-green-500' : 
                                     lic.etat?.label === 'Approuvée' ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
                                     lic.etat?.label === 'Rejetée' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                                    lic.etat?.label === 'Annulées' ? 'bg-gray-500/10 border-gray-500/20 text-gray-400' :
                                     'bg-orange/10 border-orange/20 text-orange'
                                 }`}>
                                     {lic.isActive ? 'Actif' : lic.etat?.label || 'En attente'}
@@ -154,6 +159,7 @@ const LicenceManagement = () => {
 
                         {/* Actions */}
                         <div className="flex flex-col gap-2">
+                            {/* Bouton Valider : Uniquement si en attente */}
                             {!lic.isActive && (
                                 lic.etat?.label?.toLowerCase().trim() === 'en attente' || 
                                 lic.etat?.label?.toLowerCase().trim() === 'en attente de validation'
@@ -165,12 +171,26 @@ const LicenceManagement = () => {
                                     <FaCheck /> Valider
                                 </button>
                             )}
-                            <button 
-                                onClick={() => handleStatusUpdate(lic.id, 'reject')}
-                                className="bg-white/5 hover:bg-red-500/20 text-red-500 px-6 py-2 rounded-xl font-bold border border-white/10 transition-all flex items-center gap-2"
-                            >
-                                <FaTimes /> {lic.isActive ? 'Annuler' : 'Refuser'}
-                            </button>
+                            
+                            {/* Bouton Annuler : Si Active OU déjà Approuvée */}
+                            {(lic.isActive || lic.etat?.label === 'Approuvée') ? (
+                                <button 
+                                    onClick={() => handleStatusUpdate(lic.id, 'cancel')}
+                                    className="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white px-6 py-2 rounded-xl font-bold border border-red-600/30 transition-all flex items-center gap-2"
+                                >
+                                    <FaTimes /> Annuler la licence
+                                </button>
+                            ) : (
+                                /* Bouton Refuser : Uniquement pour les autres états (sauf déjà rejeté/annulé) */
+                                lic.etat?.label !== 'Rejetée' && lic.etat?.label !== 'Annulées' && (
+                                    <button 
+                                        onClick={() => handleStatusUpdate(lic.id, 'reject')}
+                                        className="bg-white/5 hover:bg-red-500/20 text-red-500 px-6 py-2 rounded-xl font-bold border border-white/10 transition-all flex items-center gap-2"
+                                    >
+                                        <FaTimes /> Refuser
+                                    </button>
+                                )
+                            )}
                         </div>
                     </div>
                 )) : (

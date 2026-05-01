@@ -267,7 +267,7 @@ const Profile = () => {
                                                     <div className="flex justify-between items-start mb-4">
                                                         <div>
                                                             <div className="flex items-center gap-2">
-                                                                <h3 className="font-bold text-lg text-white">Licence #{lic.id}</h3>
+                                                                 <h3 className="font-bold text-lg text-white">Licence #{lic.id}</h3>
                                                                 {idx === 0 && <span className="text-[8px] bg-orange text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">Dernière demande</span>}
                                                             </div>
                                                             <p className="text-xs text-gray-400">Demandée le {formatDate(lic.createdAt)}</p>
@@ -282,8 +282,15 @@ const Profile = () => {
                                                             <p className="text-white font-medium">{lic.nationaly}</p>
                                                         </div>
                                                         <div>
-                                                            <p className="text-gray-500 uppercase text-[10px] font-bold">Formule</p>
-                                                            <p className="text-orange font-black italic">{lic.price_licence?.label}</p>
+                                                            <p className="text-gray-500 uppercase text-[10px] font-bold">Formule / Validité</p>
+                                                            <p className="text-orange font-black italic">
+                                                                {lic.price_licence?.label}
+                                                                {lic.validUntil && (
+                                                                    <span className="text-white font-normal ml-2 opacity-60">
+                                                                        (jusqu'au {formatDate(lic.validUntil)})
+                                                                    </span>
+                                                                )}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                     
@@ -297,10 +304,10 @@ const Profile = () => {
                                                         </button>
                                                     )}
 
-                                                    {/* Message si rejetée */}
-                                                    {!isActive && (currentStatus === 'Rejetée' || currentStatus === 'Rejetées') && (
+                                                    {/* Message si rejetée ou annulée */}
+                                                    {!isActive && (currentStatus === 'Rejetée' || currentStatus === 'Rejetées' || currentStatus === 'Annulées') && (
                                                         <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs italic text-center">
-                                                            ⚠️ Votre demande a été rejetée. Veuillez vérifier vos documents ou contacter le support.
+                                                            ⚠️ {currentStatus === 'Annulées' ? 'Votre licence a été annulée par un administrateur.' : 'Votre demande a été rejetée. Veuillez vérifier vos documents ou contacter le support.'}
                                                         </div>
                                                     )}
 

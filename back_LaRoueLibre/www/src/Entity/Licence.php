@@ -83,6 +83,21 @@ class Licence
     #[Groups(['licence:read', 'user:read'])]
     private ?string $photoPath = null;
 
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    #[Groups(['licence:read', 'user:read'])]
+    private ?\DateTimeInterface $validUntil = null;
+
+    public function getValidUntil(): ?\DateTimeInterface
+    {
+        return $this->validUntil;
+    }
+
+    public function setValidUntil(?\DateTimeInterface $validUntil): static
+    {
+        $this->validUntil = $validUntil;
+        return $this;
+    }
+
     public function getPdfPath(): ?string
     {
         return $this->pdfPath;

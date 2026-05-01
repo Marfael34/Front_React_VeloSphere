@@ -42,10 +42,20 @@ class StripeWebhookController extends AbstractController
                 $licence = $em->getRepository(\App\Entity\Licence::class)->find($licenceId);
                 if ($licence) {
                     $etatValide = $em->getRepository(Etat::class)->findOneBy(['label' => 'Validées']);
-                    $licence->setEtat($etatValide);
-                    $licence->setIsActive(true);
+                    
+                    if ($etatValide) {
+                        $licence->setEtat($etatValide);
+                        $licence->setIsActive(true);
 
-                    // --- GÉNÉRATION DU PDF DE LA LICENCE ---
+                        // --- CALCUL DE LA VALIDITÉ (Règles FFC) ---
+                        $now = new \DateTime();
+                        $currentMonth = (int)$now->format('n');
+                        $currentYear = (int)$now->format('Y');
+                        $expiryYear = ($currentMonth >= 9) ? ($currentYear + 1) : $currentYear;
+                        $validUntil = new \DateTime($expiryYear . '-12-31 23:59:59');
+                        $licence->setValidUntil($validUntil);
+                    }
+
                     try {
                         $logger->info("Génération du PDF de la licence ID " . $licenceId . " en cours...");
                         $pdfOptions = new Options();
@@ -120,7 +130,6 @@ class StripeWebhookController extends AbstractController
                     }
 
                     // --- RÉCUPÉRATION DES ÉTATS OPTIMISÉE ---
-                    // On récupère "Payées" et "En attente de validation" en une seule requête
                     $etats = $em->getRepository(Etat::class)
                         ->createQueryBuilder('e')
                         ->where('e.label LIKE :paye OR e.label LIKE :validation')
@@ -132,7 +141,6 @@ class StripeWebhookController extends AbstractController
                     $etatPaye = null;
                     $etatValidation = null;
 
-                    // Tri des états récupérés
                     foreach ($etats as $etat) {
                         if (stripos($etat->getLabel(), 'payées') !== false) {
                             $etatPaye = $etat;
@@ -141,26 +149,20 @@ class StripeWebhookController extends AbstractController
                         }
                     }
 
-                    // Vérification que les DEUX états existent bien
                     if (!$etatPaye || !$etatValidation) {
                         $logger->error("ERREUR : L'état 'Payées' ou 'En attente de validation' est introuvable en BDD.");
                         return new Response('Etats manquants', 404);
                     }
 
-                    // 1. CRÉATION DE L'ORDER
                     $order = new Order();
                     $order->setUser($panier->getUser());
-
-                    // Ajout de la relation ManyToMany pour les états
                     $order->addEtat($etatPaye);
                     $order->addEtat($etatValidation);
-
                     $order->setCreatedAt(new \DateTime());
 
                     $totalPrice = 0;
                     $invoiceLines = [];
 
-                    // 2. TRANSFERT ET DÉCRÉMENTATION DU STOCK
                     foreach ($panier->getItems() as $item) {
                         $product = $item->getProduct();
                         if (!$product) continue;
@@ -177,7 +179,6 @@ class StripeWebhookController extends AbstractController
                         ];
 
                         $order->addProduct($product);
-
                         $currentQuantity = $product->getQuantity();
                         $product->setQuantity(max(0, $currentQuantity - $qtyBought));
 
@@ -185,15 +186,12 @@ class StripeWebhookController extends AbstractController
                         $em->remove($item);
                     }
 
-                    // 3. GÉNÉRATION DU PDF ET TRAITEMENT DE L'IMAGE
                     $logger->info("Génération du PDF en cours...");
                     $pdfOptions = new Options();
                     $pdfOptions->set('defaultFont', 'Arial');
                     $pdfOptions->set('isRemoteEnabled', true);
                     $dompdf = new Dompdf($pdfOptions);
 
-                    // --- AJOUT POUR LE LOGO ---
-                    // On va chercher l'image physique dans le dossier public/images/
                     $logoPath = $params->get('kernel.project_dir') . '/public/images/logo.png';
                     $logoData = null;
 
@@ -201,10 +199,7 @@ class StripeWebhookController extends AbstractController
                         $type = pathinfo($logoPath, PATHINFO_EXTENSION);
                         $data = file_get_contents($logoPath);
                         $logoData = 'data:image/' . $type . ';base64,' . base64_encode($data);
-                    } else {
-                        $logger->warning("Attention: Logo introuvable au chemin : " . $logoPath);
                     }
-                    // --------------------------
 
                     $html = $twig->render('invoice/invoice.html.twig', [
                         'order' => $order,
@@ -212,14 +207,13 @@ class StripeWebhookController extends AbstractController
                         'lines' => $invoiceLines,
                         'total' => $totalPrice,
                         'date' => clone $order->getCreatedAt(),
-                        'logo' => $logoData // On passe la variable logo à Twig ici
+                        'logo' => $logoData
                     ]);
 
                     $dompdf->loadHtml($html);
                     $dompdf->setPaper('A4', 'portrait');
                     $dompdf->render();
 
-                    // 4. SAUVEGARDE DU PDF SUR LE SERVEUR
                     $fileName = 'facture_' . uniqid() . '.pdf';
                     $pdfDirectory = $params->get('kernel.project_dir') . '/public/uploads/invoices';
 
@@ -230,10 +224,7 @@ class StripeWebhookController extends AbstractController
                     $pdfPath = $pdfDirectory . '/' . $fileName;
                     file_put_contents($pdfPath, $dompdf->output());
 
-                    // 5. MISE À JOUR DE L'ORDER ET ÉTAT DU PANIER
                     $order->setPath('/uploads/invoices/' . $fileName);
-
-                    // Le panier reste associé uniquement à l'état "Payées" (ManyToOne)
                     $panier->setEtat($etatPaye);
 
                     $em->persist($order);
