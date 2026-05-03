@@ -83,9 +83,24 @@ class Licence
     #[Groups(['licence:read', 'user:read'])]
     private ?string $photoPath = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['licence:read', 'user:read'])]
+    private ?string $signaturePath = null;
+
     #[ORM\Column(type: 'datetime', nullable: true)]
     #[Groups(['licence:read', 'user:read'])]
     private ?\DateTimeInterface $validUntil = null;
+
+    public function getSignaturePath(): ?string
+    {
+        return $this->signaturePath;
+    }
+
+    public function setSignaturePath(?string $signaturePath): static
+    {
+        $this->signaturePath = $signaturePath;
+        return $this;
+    }
 
     public function getValidUntil(): ?\DateTimeInterface
     {

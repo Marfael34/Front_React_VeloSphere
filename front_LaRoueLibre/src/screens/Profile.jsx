@@ -276,7 +276,7 @@ const Profile = () => {
                                                             {currentStatus}
                                                         </span>
                                                     </div>
-                                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                                    <div className="grid grid-cols-2 gap-4 text-sm mb-6">
                                                         <div>
                                                             <p className="text-gray-500 uppercase text-[10px] font-bold">Nationalité</p>
                                                             <p className="text-white font-medium">{lic.nationaly}</p>
@@ -293,6 +293,21 @@ const Profile = () => {
                                                             </p>
                                                         </div>
                                                     </div>
+
+                                                    {/* Signature Section */}
+                                                    {lic.signaturePath && (
+                                                        <div className="mt-4 pt-4 border-t border-white/5">
+                                                            <p className="text-gray-500 uppercase text-[10px] font-bold mb-2">Signature du titulaire</p>
+                                                            <div className="bg-white/5 rounded-xl p-2 w-fit">
+                                                                <img 
+                                                                    src={`${API_ROOT}${lic.signaturePath}`} 
+                                                                    alt="Signature" 
+                                                                    className="h-12 object-contain filter brightness-200 invert"
+                                                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                     
                                                     {/* Bouton de paiement si approuvée mais pas encore payée */}
                                                     {!isActive && currentStatus === 'Approuvée' && (
@@ -357,7 +372,7 @@ const Profile = () => {
                                             </div>
                                         ))}
                                     </div>
-                                    <Link to="/panier" className="main-button block text-center w-full !m-0 !py-3 text-sm">Finaliser l'achat</Link>
+                                    <Link to="/panier" className="main-button block text-center w-full m-0! py-3! text-sm">Finaliser l'achat</Link>
                                 </div>
                             ) : <p className="text-gray-400 italic text-center">Panier vide.</p>}
                         </div>

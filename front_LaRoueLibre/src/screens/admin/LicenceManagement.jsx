@@ -155,6 +155,13 @@ const LicenceManagement = () => {
                                 <div className="text-xl">📸</div>
                                 <span className="text-[10px] font-bold uppercase">Photo</span>
                             </button>
+                            <button 
+                                onClick={() => setSelectedFiles({ title: "Signature Digitale", path: lic.signaturePath })}
+                                className="flex flex-col items-center gap-2 p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-orange/20 transition-all"
+                            >
+                                <div className="text-xl">✍️</div>
+                                <span className="text-[10px] font-bold uppercase">Signature</span>
+                            </button>
                         </div>
 
                         {/* Actions */}

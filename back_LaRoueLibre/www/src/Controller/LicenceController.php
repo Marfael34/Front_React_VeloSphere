@@ -40,6 +40,8 @@ class LicenceController extends AbstractController
             $medFile = $request->files->get('medicalCertificate');
             /** @var UploadedFile $photoFile */
             $photoFile = $request->files->get('photo');
+            /** @var UploadedFile $sigFile */
+            $sigFile = $request->files->get('signature');
 
             $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/licences';
             
@@ -65,13 +67,20 @@ class LicenceController extends AbstractController
                 $licence->setPhotoPath('/uploads/licences/' . $photoFilename);
             }
 
+            if ($sigFile) {
+                $sigFilename = 'sig-' . $id . '-' . uniqid() . '.' . $sigFile->guessExtension();
+                $sigFile->move($uploadDir, $sigFilename);
+                $licence->setSignaturePath('/uploads/licences/' . $sigFilename);
+            }
+
             $entityManager->flush();
 
             return $this->json([
                 'message' => 'Pièces jointes mises à jour avec succès',
                 'identityCardPath' => $licence->getIdentityCardPath(),
                 'medicalCertificatePath' => $licence->getMedicalCertificatePath(),
-                'photoPath' => $licence->getPhotoPath()
+                'photoPath' => $licence->getPhotoPath(),
+                'signaturePath' => $licence->getSignaturePath()
             ]);
         } catch (\Exception $e) {
             return $this->json([

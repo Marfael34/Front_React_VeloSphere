@@ -25,6 +25,7 @@ import LicenceForm from "../screens/LicenceForm";
 import LicenceManagement from "../screens/admin/LicenceManagement";
 import Competitions from "../screens/Competitions";
 
+
 const Router = createBrowserRouter([
     {
         element: <App/>, // élément qui sera retourné sur toutes les vue

@@ -7,6 +7,8 @@ import ButtonLoader from '../components/Loader/ButtonLoader';
 import { FaIdCard, FaFileMedical, FaPhoneAlt, FaGlobe, FaCheckCircle } from 'react-icons/fa';
 import CustomInput from '../components/UI/CustomInput';
 
+import SignaturePad from '../components/UI/SignaturePad';
+
 const LicenceForm = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -23,7 +25,8 @@ const LicenceForm = () => {
     const [files, setFiles] = useState({
         identityCard: null,
         medicalCertificate: null,
-        photo: null
+        photo: null,
+        signature: null
     });
     const [previews, setPreviews] = useState({
         identityCard: null,
@@ -104,6 +107,11 @@ const LicenceForm = () => {
             return;
         }
 
+        if (!files.signature) {
+            setError("La signature est obligatoire pour valider votre demande.");
+            return;
+        }
+
         // Recherche souple (insensible à la casse, trim, et fallback)
         const findEtat = (label) => etats.find(e => e.label?.trim().toLowerCase() === label.toLowerCase());
 
@@ -152,6 +160,7 @@ const LicenceForm = () => {
             if (files.identityCard) fileData.append('identityCard', files.identityCard);
             if (files.medicalCertificate) fileData.append('medicalCertificate', files.medicalCertificate);
             if (files.photo) fileData.append('photo', files.photo);
+            if (files.signature) fileData.append('signature', files.signature, 'signature.png');
 
             await axios.post(`${API_ROOT}/api/licences/${licenceId}/files`, fileData, {
                 headers: {
@@ -398,6 +407,16 @@ const LicenceForm = () => {
                                     className="absolute inset-0 opacity-0 cursor-pointer"
                                 />
                                 <div className="bg-orange/20 text-orange px-4 py-2 rounded-lg text-xs font-black uppercase">Choisir une photo</div>
+                            </div>
+
+                            {/* Signature Digitale */}
+                            <div className="bg-white/5 border border-dashed border-white/20 p-6 rounded-2xl hover:border-orange transition-all flex flex-col items-center">
+                                <span className="text-white font-bold mb-1">Signature digitale</span>
+                                <span className="text-gray-500 text-xs mb-4">Signez à l'aide de votre souris ou doigt</span>
+                                <SignaturePad 
+                                    onSave={(blob) => setFiles(prev => ({ ...prev, signature: blob }))} 
+                                    onClear={() => setFiles(prev => ({ ...prev, signature: null }))} 
+                                />
                             </div>
                         </div>
                     </div>

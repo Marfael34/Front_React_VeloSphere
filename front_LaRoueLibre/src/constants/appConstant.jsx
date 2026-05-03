@@ -3,6 +3,7 @@ import { IMAGE_URL } from "./apiConstant";
 import { MdDirectionsBike, MdOutlinePedalBike } from "react-icons/md";
 import { BiLogIn } from "react-icons/bi";
 import { FaRegUserCircle, FaTrophy } from "react-icons/fa";
+
 import { RiShoppingBasket2Line } from "react-icons/ri";
 import { LuMapPin } from "react-icons/lu";
 
@@ -36,7 +37,7 @@ export const dataNav = [
   {
     title: "Compétitions",
     path: "/competitions", icon: FaTrophy
-  },
+  }
 
 ]
 
