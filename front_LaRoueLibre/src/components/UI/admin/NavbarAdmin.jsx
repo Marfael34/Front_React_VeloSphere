@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { RiCloseLine } from "react-icons/ri";
 import { HiOutlineMenu } from "react-icons/hi";
-import { FaChartLine, FaUsers, FaBicycle, FaMapMarkedAlt, FaShoppingBag, FaIdCard } from 'react-icons/fa';
+import { FaChartLine, FaUsers, FaBicycle, FaMapMarkedAlt, FaShoppingBag, FaIdCard, FaTrophy } from 'react-icons/fa';
 
 const NavbarAdmin = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -14,6 +14,7 @@ const NavbarAdmin = () => {
     { title: "Lieux", path: "/admin/places", icon: FaMapMarkedAlt },
     { title: "Commandes", path: "/admin/orders", icon: FaShoppingBag },
     { title: "Permis", path: "/admin/licences", icon: FaIdCard },
+    { title: "Compétitions", path: "/admin/competitions", icon: FaTrophy },
   ];
 
   const activeLinkStyle = ({ isActive }) =>

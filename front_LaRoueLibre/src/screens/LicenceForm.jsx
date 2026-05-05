@@ -324,16 +324,23 @@ const LicenceForm = () => {
                                 <label className="text-xs font-bold text-gray-500 uppercase ml-2 mb-1 block">Formule souhaitée</label>
                                 <div className="space-y-3">
                                     {prices.map((p) => (
-                                        <label key={p['@id']} className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${formData.priceLicence === p['@id'] ? 'bg-orange/20 border-orange' : 'bg-white/5 border-white/10 hover:border-white/30'}`}>
-                                            <div className="flex items-center gap-3">
-                                                <input
-                                                    type="radio" name="priceLicence" value={p['@id']}
-                                                    checked={formData.priceLicence === p['@id']} onChange={handleInputChange}
-                                                    className="hidden"
-                                                />
-                                                <span className="text-white font-bold">{p.label}</span>
+                                        <label key={p['@id']} className={`flex flex-col p-5 rounded-2xl border cursor-pointer transition-all ${formData.priceLicence === p['@id'] ? 'bg-orange/10 border-orange shadow-lg shadow-orange/10' : 'bg-white/5 border-white/10 hover:border-white/30'}`}>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="radio" name="priceLicence" value={p['@id']}
+                                                        checked={formData.priceLicence === p['@id']} onChange={handleInputChange}
+                                                        className="hidden"
+                                                    />
+                                                    <span className={`text-sm font-black uppercase italic tracking-tight ${formData.priceLicence === p['@id'] ? 'text-orange' : 'text-white'}`}>{p.label}</span>
+                                                </div>
+                                                <span className="text-orange font-black">{(p.price / 100).toFixed(2)} €</span>
                                             </div>
-                                            <span className="text-orange font-black">{(p.price / 100).toFixed(2)} €</span>
+                                            {p.description && (
+                                                <p className="text-[11px] text-gray-400 leading-relaxed pl-1 italic">
+                                                    {p.description}
+                                                </p>
+                                            )}
                                         </label>
                                     ))}
                                 </div>

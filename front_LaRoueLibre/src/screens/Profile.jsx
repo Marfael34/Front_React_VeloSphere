@@ -4,7 +4,7 @@ import { API_ROOT, IMAGE_URL } from '../constants/apiConstant';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom'; 
 import ButtonLoader from '../components/Loader/ButtonLoader';
-import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake, FaBoxOpen, FaEdit, FaPhone, FaHeart, FaFileInvoice } from 'react-icons/fa';
+import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake, FaBoxOpen, FaEdit, FaPhone, FaHeart, FaFileInvoice, FaTrophy } from 'react-icons/fa';
 import CustomButton from '../components/UI/CustomButton';
 import EditProfileForm from '../components/Market/EditProfileForm';
 import LocationCard from '../components/Card/LocationCard'; 
@@ -352,6 +352,64 @@ const Profile = () => {
                                                 </div>
                                             );
                                         })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* INSCRIPTIONS COMPÉTITIONS */}
+                        {fullUser?.competitionRegistrations && fullUser.competitionRegistrations.length > 0 && (
+                            <div className="bg-nigth-blue p-6 rounded-2xl shadow-lg border border-white/5">
+                                <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                                    <h2 className="text-xl font-bold flex items-center gap-3">
+                                        <FaTrophy className="text-orange" /> Mes Inscriptions aux Compétitions
+                                    </h2>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    {[...fullUser.competitionRegistrations]
+                                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                                        .map((reg, idx) => (
+                                            <div key={reg.id || idx} className="p-5 rounded-xl border bg-black/40 border-white/10 hover:border-orange/30 transition-all">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div>
+                                                        <h3 className="font-bold text-lg text-white">{reg.competition?.title || "Compétition inconnue"}</h3>
+                                                        <p className="text-xs text-gray-400">Inscrit le {formatDate(reg.createdAt)}</p>
+                                                    </div>
+                                                    <div className="flex flex-col items-end gap-2">
+                                                        <span className="px-3 py-1 rounded-full border border-orange/30 bg-orange/10 text-orange text-[10px] font-black uppercase tracking-widest">
+                                                            {reg.category}
+                                                        </span>
+                                                        <span className="px-2 py-0.5 rounded-md bg-green-500/20 text-green-400 border border-green-500/30 text-[8px] font-black uppercase tracking-tighter">
+                                                            {reg.status || 'Confirmé'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                                                    <div>
+                                                        <p className="text-gray-500 uppercase text-[10px] font-bold">Pilote</p>
+                                                        <p className="text-white font-medium">{reg.firstName} {reg.lastName}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500 uppercase text-[10px] font-bold">Club</p>
+                                                        <p className="text-white font-medium">{reg.club}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500 uppercase text-[10px] font-bold">Plaque</p>
+                                                        <p className="text-orange font-black italic">{reg.plateNumber}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-[10px] text-gray-500 italic">
+                                                    <div className="flex items-center gap-2">
+                                                        <FaPhone className="text-orange" size={10} />
+                                                        <span>Urgence : {reg.emergencyContactName} ({reg.emergencyContactPhone})</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 sm:justify-end">
+                                                        <FaMapMarkerAlt className="text-orange" size={10} />
+                                                        <span>{reg.competition?.location || "Lieu à confirmer"} • {formatDate(reg.competition?.startAt)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}

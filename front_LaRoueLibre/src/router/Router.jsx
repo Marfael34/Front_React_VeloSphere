@@ -24,6 +24,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import LicenceForm from "../screens/LicenceForm";
 import LicenceManagement from "../screens/admin/LicenceManagement";
 import Competitions from "../screens/Competitions";
+import CompetitionManagement from "../screens/admin/CompetitionManagement";
 
 
 const Router = createBrowserRouter([
@@ -124,6 +125,10 @@ const Router = createBrowserRouter([
                             {
                                 path: "/admin/orders",
                                 element: <OrdersManagement/>
+                            },
+                            {
+                                path: "/admin/competitions",
+                                element: <CompetitionManagement/>
                             }
                         ]
                     }

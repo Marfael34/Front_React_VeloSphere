@@ -798,24 +798,29 @@ class AppFixtures extends Fixture
     {
         $arrayPriceLicence = [
             [
-                'label' => "FFC Jeunesse",
-                'price' => "6500",
+                'label' => "FFC Baby Vélo",
+                'price' => 2400,
+                'description' => "Destinée aux enfants de moins de 5 ans débutant la pratique du vélo ou de la draisienne. Permet de découvrir les premières sensations d'équilibre sans enjeux de compétition."
             ],
             [
-                'label' => "FFC Pass Découverte",
-                'price' => "5000",
+                'label' => "FFC Jeunesse (U7 à U17)",
+                'price' => 6700,
+                'description' => "La licence de référence pour les jeunes pilotes (U7 à U17). Ouvre l'accès aux écoles de cyclisme, aux entraînements club et aux compétitions régionales."
             ],
             [
-                'label' => "FFC Access (Compétition régionale)",
-                'price' => "9500",
+                'label' => "FFC Sport / Loisir",
+                'price' => 6700,
+                'description' => "Idéale pour rouler pour le plaisir ou l'entretien physique, sans compétition officielle. Offre une couverture d'assurance complète pour vos sorties."
             ],
             [
-                'label' => "FFC Open (Compétition nationale)",
-                'price' => "16500",
+                'label' => "FFC Access (Compétition)",
+                'price' => 8500,
+                'description' => "Le premier pas vers la compétition pour les adultes. Permet de participer à des courses régionales et départementales officielles."
             ],
             [
-                'label' => "FFC Élite",
-                'price' => "24000",
+                'label' => "FFC Open (Compétition)",
+                'price' => 14500,
+                'description' => "Pour les pilotes confirmés souhaitant évoluer à un niveau national (Coupes de France, Championnats). Indispensable pour viser les sommets."
             ],
         ];
 
@@ -823,6 +828,7 @@ class AppFixtures extends Fixture
             $priceLicence = new PriceLicence();
             $priceLicence->setLabel($value['label']);
             $priceLicence->setPrice($value['price']);
+            $priceLicence->setDescription($value['description']);
 
             $manager->persist($priceLicence);
         }

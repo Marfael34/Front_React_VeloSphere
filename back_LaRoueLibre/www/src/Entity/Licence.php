@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\LicenceRepository;
@@ -15,6 +17,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
     normalizationContext: ['groups' => ['licence:read']],
     denormalizationContext: ['groups' => ['licence:write']]
 )]
+#[ApiFilter(SearchFilter::class, properties: ['user' => 'exact'])]
 #[ORM\HasLifecycleCallbacks]
 class Licence
 {
@@ -62,7 +65,7 @@ class Licence
     private ?bool $isActive = null;
 
     #[ORM\ManyToOne(inversedBy: 'licences')]
-    #[Groups(['licence:read', 'licence:write'])]
+    #[Groups(['licence:write'])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'licences')]

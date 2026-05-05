@@ -2,6 +2,7 @@
 import React, { createContext, useState, useEffect } from "react";
 import Cookies from "js-cookie";
 
+import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
 export const AuthContext = createContext();
@@ -24,6 +25,21 @@ export const AuthProvider = ({ children }) => {
     }
     return null;
   });
+
+  // Intercepteur Axios pour gérer les 401 (token expiré) globalement
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        // Si 401 et que ce n'est pas une tentative de login, on déconnecte
+        if (error.response?.status === 401 && !error.config.url.includes('/login_check')) {
+          setUser(null);
+        }
+        return Promise.reject(error);
+      }
+    );
+    return () => axios.interceptors.response.eject(interceptor);
+  }, []);
 
   // Fonction pour mettre à jour l'utilisateur avec décodage auto du token
   const updateUser = (userData) => {

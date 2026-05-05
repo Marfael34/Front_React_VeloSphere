@@ -104,7 +104,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(targetEntity: Licence::class, mappedBy: 'user')]
     #[Groups(['user:read'])]
-    #[ApiProperty(readableLink: true)]
+    #[ApiProperty(readableLink: false)]
     private Collection $licences;
 
     /**
@@ -142,7 +142,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $wishlist;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: CompetitionRegistration::class, orphanRemoval: true)]
-    #[Groups(['user:read'])]
     private Collection $competitionRegistrations;
 
     public function __construct()

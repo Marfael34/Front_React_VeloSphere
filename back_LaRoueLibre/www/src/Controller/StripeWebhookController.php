@@ -84,13 +84,25 @@ class StripeWebhookController extends AbstractController
                                 $photoData = 'data:image/' . $typePhoto . ';base64,' . base64_encode($dataPhoto);
                             }
                         }
-                        // -------------------------------------------------------------------------------
+
+                        // --- RÉCUPÉRATION DE LA SIGNATURE ---
+                        $signaturePath = $licence->getSignaturePath();
+                        $signatureData = null;
+                        if ($signaturePath) {
+                            $fullSignaturePath = $params->get('kernel.project_dir') . '/public' . $signaturePath;
+                            if (file_exists($fullSignaturePath)) {
+                                $typeSig = pathinfo($fullSignaturePath, PATHINFO_EXTENSION);
+                                $dataSig = file_get_contents($fullSignaturePath);
+                                $signatureData = 'data:image/' . $typeSig . ';base64,' . base64_encode($dataSig);
+                            }
+                        }
 
                         $html = $twig->render('licence/licence_pdf.html.twig', [
                             'licence' => $licence,
                             'user' => $user,
                             'logo' => $logoData,
-                            'avatar' => $photoData
+                            'avatar' => $photoData,
+                            'signature' => $signatureData
                         ]);
 
                         $dompdf->loadHtml($html);

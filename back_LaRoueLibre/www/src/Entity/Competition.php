@@ -24,7 +24,7 @@ class Competition
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['competition:read', 'registration:read'])]
+    #[Groups(['competition:read', 'user:read'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -44,7 +44,7 @@ class Competition
     private ?\DateTime $updatedAt = null;
 
     #[ORM\Column]
-    #[Groups(['competition:read'])]
+    #[Groups(['competition:read', 'user:read'])]
     private ?\DateTime $startAt = null;
 
     #[ORM\Column]
@@ -63,7 +63,7 @@ class Competition
     private ?string $path = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['competition:read'])]
+    #[Groups(['competition:read', 'user:read'])]
     private ?string $location = null;
 
     #[ORM\OneToMany(mappedBy: 'competition', targetEntity: CompetitionRegistration::class, orphanRemoval: true)]
@@ -237,7 +237,14 @@ class Competition
     public function setPath(?string $path): static
     {
         $this->path = $path;
-
         return $this;
     }
+
+/*
+    #[Groups(['competition:read'])]
+    public function getRegistrationsCount(): int
+    {
+        return $this->registrations->count();
+    }
+*/
 }

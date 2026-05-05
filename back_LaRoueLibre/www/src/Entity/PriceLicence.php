@@ -31,6 +31,10 @@ class PriceLicence
     #[Groups(['price_licence:read', 'licence:read', 'user:read'])]
     private ?int $price = null;
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    #[Groups(['price_licence:read', 'licence:read', 'user:read'])]
+    private ?string $description = null;
+
     /**
      * @var Collection<int, Licence>
      */
@@ -67,6 +71,18 @@ class PriceLicence
     public function setPrice(int $price): static
     {
         $this->price = $price;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
 
         return $this;
     }
