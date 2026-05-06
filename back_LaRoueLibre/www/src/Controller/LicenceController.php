@@ -43,34 +43,40 @@ class LicenceController extends AbstractController
             /** @var UploadedFile $sigFile */
             $sigFile = $request->files->get('signature');
 
-            $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/licences';
-            
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
+            $uploadRootDir = $this->getParameter('kernel.project_dir') . '/public/uploads/licences';
+            $user = $licence->getUser();
+            $safeName = $user ? str_replace([' ', "'"], '_', strtoupper($user->getLastname()) . '_' . ucfirst($user->getFirstname())) : 'ANONYMOUS';
 
             if ($idFile) {
-                $idFilename = 'id-' . $id . '-' . uniqid() . '.' . $idFile->guessExtension();
-                $idFile->move($uploadDir, $idFilename);
-                $licence->setIdentityCardPath('/uploads/licences/' . $idFilename);
+                $subDir = $uploadRootDir . '/identite';
+                if (!file_exists($subDir)) mkdir($subDir, 0777, true);
+                $idFilename = 'ID_' . $safeName . '_' . $id . '.' . $idFile->guessExtension();
+                $idFile->move($subDir, $idFilename);
+                $licence->setIdentityCardPath('/uploads/licences/identite/' . $idFilename);
             }
 
             if ($medFile) {
-                $medFilename = 'med-' . $id . '-' . uniqid() . '.' . $medFile->guessExtension();
-                $medFile->move($uploadDir, $medFilename);
-                $licence->setMedicalCertificatePath('/uploads/licences/' . $medFilename);
+                $subDir = $uploadRootDir . '/medical';
+                if (!file_exists($subDir)) mkdir($subDir, 0777, true);
+                $medFilename = 'MED_' . $safeName . '_' . $id . '.' . $medFile->guessExtension();
+                $medFile->move($subDir, $medFilename);
+                $licence->setMedicalCertificatePath('/uploads/licences/medical/' . $medFilename);
             }
 
             if ($photoFile) {
-                $photoFilename = 'photo-' . $id . '-' . uniqid() . '.' . $photoFile->guessExtension();
-                $photoFile->move($uploadDir, $photoFilename);
-                $licence->setPhotoPath('/uploads/licences/' . $photoFilename);
+                $subDir = $uploadRootDir . '/photos';
+                if (!file_exists($subDir)) mkdir($subDir, 0777, true);
+                $photoFilename = 'PHOTO_' . $safeName . '_' . $id . '.' . $photoFile->guessExtension();
+                $photoFile->move($subDir, $photoFilename);
+                $licence->setPhotoPath('/uploads/licences/photos/' . $photoFilename);
             }
 
             if ($sigFile) {
-                $sigFilename = 'sig-' . $id . '-' . uniqid() . '.' . $sigFile->guessExtension();
-                $sigFile->move($uploadDir, $sigFilename);
-                $licence->setSignaturePath('/uploads/licences/' . $sigFilename);
+                $subDir = $uploadRootDir . '/signatures';
+                if (!file_exists($subDir)) mkdir($subDir, 0777, true);
+                $sigFilename = 'SIG_' . $safeName . '_' . $id . '.' . $sigFile->guessExtension();
+                $sigFile->move($subDir, $sigFilename);
+                $licence->setSignaturePath('/uploads/licences/signatures/' . $sigFilename);
             }
 
             $entityManager->flush();

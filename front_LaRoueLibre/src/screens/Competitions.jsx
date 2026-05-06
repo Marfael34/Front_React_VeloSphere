@@ -26,7 +26,15 @@ const Competitions = () => {
         try {
             const response = await axios.get(`${API_ROOT}/api/competitions`);
             const data = response.data['hydra:member'] || response.data.member || response.data;
-            setCompetitions(data);
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            
+            const activeCompetitions = data.filter(comp => {
+                const isActive = Number(comp.is_active ?? comp.isActive ?? 1) !== 0;
+                const isRecent = !comp.endAt || new Date(comp.endAt) > oneWeekAgo;
+                return isActive && isRecent;
+            });
+            setCompetitions(activeCompetitions);
 
             if (user) {
                 try {

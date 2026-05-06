@@ -109,8 +109,10 @@ class StripeWebhookController extends AbstractController
                         $dompdf->setPaper('A4', 'portrait');
                         $dompdf->render();
 
-                        $fileName = 'licence_' . $licenceId . '_' . uniqid() . '.pdf';
-                        $pdfDirectory = $params->get('kernel.project_dir') . '/public/uploads/licences/official';
+                        $currentYear = (new \DateTime())->format('Y');
+                        $safeName = $user ? str_replace([' ', "'"], '_', strtoupper($user->getLastname()) . '_' . ucfirst($user->getFirstname())) : 'ANONYMOUS';
+                        $fileName = 'LICENCE_' . $currentYear . '_' . $safeName . '.pdf';
+                        $pdfDirectory = $params->get('kernel.project_dir') . '/public/uploads/licences/pdf_officiels';
 
                         if (!is_dir($pdfDirectory)) {
                             mkdir($pdfDirectory, 0777, true);
@@ -119,7 +121,7 @@ class StripeWebhookController extends AbstractController
                         $pdfPath = $pdfDirectory . '/' . $fileName;
                         file_put_contents($pdfPath, $dompdf->output());
 
-                        $licence->setPdfPath('/uploads/licences/official/' . $fileName);
+                        $licence->setPdfPath('/uploads/licences/pdf_officiels/' . $fileName);
                         $logger->info("PDF de licence généré : " . $fileName);
                     } catch (\Exception $e) {
                         $logger->error("Erreur génération PDF licence : " . $e->getMessage());

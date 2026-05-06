@@ -14,16 +14,19 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
+use ApiPlatform\Metadata\Patch;
 
 #[ORM\Entity(repositoryClass: ProductsRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['product:read']],
+    denormalizationContext: ['groups' => ['product:write']],
     operations: [
         new Get(), // Lecture d'un produit (publique)
         new GetCollection(), // Lecture de tous les produits (publique)
         new Post(security: "is_granted('ROLE_ADMIN')"), // Création (protégée)
         new Put(security: "is_granted('ROLE_ADMIN')"), // Modification (protégée)
-        new Delete(security: "is_granted('ROLE_ADMIN')") // Suppression (protégée)
+        new Patch(security: "is_granted('ROLE_ADMIN')") // Désactivation/Modification partielle (protégée)
     ],
     // Cette ligne permet à React de dire "donne moi tout" avec ?pagination=false
     paginationClientEnabled: true,
@@ -41,23 +44,23 @@ class Products
     private ?int $id = null;
 
     #[ORM\Column(length: 200)]
-    #[Groups(['product:read', 'panier:read', 'order:read'])]
+    #[Groups(['product:read', 'product:write', 'panier:read', 'order:read'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['product:read', 'panier:read'])]
+    #[Groups(['product:read', 'product:write', 'panier:read'])]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['product:read', 'panier:read', 'order:read'])]
+    #[Groups(['product:read', 'product:write', 'panier:read', 'order:read'])]
     private ?float $price = null;
 
     #[ORM\Column(length: 150)]
-    #[Groups(['product:read', 'panier:read'])]
+    #[Groups(['product:read', 'product:write', 'panier:read'])]
     private ?string $brand = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['product:read', 'panier:read', 'order:read'])]
+    #[Groups(['product:read', 'product:write', 'panier:read', 'order:read'])]
     private ?string $imagePath = null;
 
     #[ORM\Column]
@@ -67,6 +70,7 @@ class Products
     private ?\DateTime $updatedAt = null;
 
     #[ORM\Column]
+    #[Groups(['product:read', 'product:write'])]
     private ?bool $isActive = null;
 
     /**
@@ -83,7 +87,7 @@ class Products
     private Collection $characteristics;
 
     #[ORM\Column]
-    #[Groups(['product:read'])]
+    #[Groups(['product:read', 'product:write'])]
     private ?int $quantity = null;
 
     public function __construct()
@@ -194,11 +198,15 @@ class Products
         return $this;
     }
 
-    public function isActive(): ?bool
+    #[Groups(['product:read'])]
+    #[SerializedName('is_active')]
+    public function getIsActive(): ?bool
     {
         return $this->isActive;
     }
 
+    #[Groups(['product:write'])]
+    #[SerializedName('is_active')]
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;

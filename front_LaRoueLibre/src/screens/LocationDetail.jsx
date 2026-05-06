@@ -91,8 +91,8 @@ const LocationDetail = () => {
     const isOwner = user && (place.user === `/api/users/${user.id}` || place.user?.id === user.id);
     const canEdit = isAdmin || isOwner;
 
-    // Logique de vérification ultra-robuste (bool, int ou string) pour corriger ton bug d'affichage
-    const isPlaceActive = place.isActive === true || place.isActive === 1 || place.isActive === "1" || place.active === true || place.active === 1;
+    // Logique de vérification ultra-robuste (bool, int ou string) incluant is_active
+    const isPlaceActive = place.is_active === true || place.is_active === 1 || place.is_active === "1" || place.isActive === true || place.isActive === 1 || place.active === true || place.active === 1;
 
     return (
         <div className="bg-dark-nigth-blue min-h-screen text-white">

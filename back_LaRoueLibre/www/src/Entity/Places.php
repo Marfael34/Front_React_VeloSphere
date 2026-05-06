@@ -14,16 +14,19 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Entity(repositoryClass: PlacesRepository::class)]
 #[ApiResource(
+    normalizationContext: ['groups' => ['place:read']],
+    denormalizationContext: ['groups' => ['place:write']],
     operations: [
         new Get(),
         new GetCollection(),
-        new Post(),
-        new Put(),
-        new Patch(),
-        new Delete()
+        new Post(security: "is_granted('ROLE_ADMIN')"),
+        new Put(security: "is_granted('ROLE_ADMIN')"),
+        new Patch(security: "is_granted('ROLE_ADMIN')")
     ]
 )]
 #[ORM\HasLifecycleCallbacks]
@@ -32,27 +35,35 @@ class Places
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['place:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 200)]
+    #[Groups(['place:read', 'place:write'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['place:read', 'place:write'])]
     private ?string $description = null;
 
     #[ORM\Column(length:225, nullable: true)]
+    #[Groups(['place:read', 'place:write'])]
     private ?string $coordinates = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['place:read', 'place:write'])]
     private ?int $elevation = null;
 
     #[ORM\Column]
+    #[Groups(['place:read', 'place:write'])]
     private ?float $distance = null;
 
     #[ORM\Column]
+    #[Groups(['place:read', 'place:write'])]
     private ?string $difficulty = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(['place:read', 'place:write'])]
     private ?string $floor = null;
 
     #[ORM\Column]
@@ -62,13 +73,19 @@ class Places
     private ?\DateTime $updatedAt = null;
 
     #[ORM\Column]
+    #[Groups(['place:read', 'place:write'])]
     private ?bool $isActive = null;
 
     #[ORM\ManyToOne(inversedBy: 'places')]
     private ?User $user = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['place:read', 'place:write'])]
     private ?string $path = null;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    #[Groups(['place:read', 'place:write'])]
+    private ?array $trajet = null;
 
     /**
      * @var Collection<int, Wishlist>
@@ -213,11 +230,15 @@ class Places
         return $this;
     }
 
-    public function isActive(): ?bool
+    #[Groups(['place:read'])]
+    #[SerializedName('is_active')]
+    public function getIsActive(): ?bool
     {
         return $this->isActive;
     }
 
+    #[Groups(['place:write'])]
+    #[SerializedName('is_active')]
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;
@@ -245,6 +266,18 @@ class Places
     public function setPath(?string $path): static
     {
         $this->path = $path;
+
+        return $this;
+    }
+
+    public function getTrajet(): ?array
+    {
+        return $this->trajet;
+    }
+
+    public function setTrajet(?array $trajet): static
+    {
+        $this->trajet = $trajet;
 
         return $this;
     }

@@ -137,6 +137,14 @@
                     <span class="label">Facturé à :</span>
                     <div class="value">{{ user.firstname }} {{ user.lastname }}</div>
                     <div class="value">{{ user.email }}</div>
+                    {% if user.adresses|length > 0 %}
+                        {% set addr = user.adresses|first %}
+                        <div class="value" style="margin-top: 5px; font-size: 13px; color: #666;">
+                            {{ addr.number }} {{ addr.type }} {{ addr.label }}<br>
+                            {% if addr.complement %}{{ addr.complement }}<br>{% endif %}
+                            {{ addr.cp }} {{ addr.city }}
+                        </div>
+                    {% endif %}
                 </td>
                 <td class="text-right">
                     <span class="label">Détails :</span>

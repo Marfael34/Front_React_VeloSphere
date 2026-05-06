@@ -24,6 +24,7 @@ const UsersManagement = () => {
             });
             // On gère plusieurs formats possibles de réponse
             const data = response.data['hydra:member'] || response.data['member'] || response.data || [];
+            console.log("Données utilisateurs reçues:", data);
             setUsers(Array.isArray(data) ? data : []);
 
         } catch (err) {
@@ -53,22 +54,29 @@ const UsersManagement = () => {
         });
     };
 
-    const handleDelete = async (id) => {
+    const handleToggleActive = async (id, currentStatus) => {
         if (id === currentUser.id) {
-            alert("Vous ne pouvez pas supprimer votre propre compte.");
+            alert("Vous ne pouvez pas désactiver votre propre compte.");
             return;
         }
 
-        if (!window.confirm("Voulez-vous vraiment supprimer cet utilisateur ? Cette action est irréversible.")) return;
+        const action = currentStatus ? "désactiver" : "réactiver";
+        if (!window.confirm(`Voulez-vous vraiment ${action} cet utilisateur ?`)) return;
 
         try {
-            await axios.delete(`${API_ROOT}/api/users/${id}`, {
-                headers: { Authorization: `Bearer ${currentUser.token}` }
-            });
+            await axios.patch(`${API_ROOT}/api/users/${id}`, 
+                { is_active: !currentStatus },
+                { 
+                    headers: { 
+                        Authorization: `Bearer ${currentUser.token}`,
+                        'Content-Type': 'application/merge-patch+json'
+                    } 
+                }
+            );
             fetchUsers();
         } catch (err) {
-            console.error("Erreur suppression utilisateur:", err);
-            alert("Impossible de supprimer l'utilisateur. " + (err.response?.data?.['hydra:description'] || err.message));
+            console.error("Erreur statut utilisateur:", err);
+            alert("Impossible de modifier le statut de l'utilisateur. " + (err.response?.data?.['hydra:description'] || err.message));
         }
     };
 
@@ -94,6 +102,7 @@ const UsersManagement = () => {
                         <tr className="bg-white/5 border-b border-white/10">
                             <th className="px-6 py-4 font-bold text-gray-300">Nom / Prénom</th>
                             <th className="px-6 py-4 font-bold text-gray-300">Email</th>
+                            <th className="px-6 py-4 font-bold text-gray-300">Statut</th>
                             <th className="px-6 py-4 font-bold text-gray-300">Rôles</th>
                             <th className="px-6 py-4 font-bold text-gray-300 text-right">Actions</th>
                         </tr>
@@ -121,6 +130,11 @@ const UsersManagement = () => {
                                 </td>
                                 <td className="px-6 py-4 text-gray-400">{u.email}</td>
                                 <td className="px-6 py-4">
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${Number(u.is_active ?? u.isActive ?? 1) === 0 ? 'bg-red-500/20 text-red-500 border border-red-500/20' : 'bg-green-500/20 text-green-500 border border-green-500/20'}`}>
+                                        {Number(u.is_active ?? u.isActive ?? 1) === 0 ? 'Inactif' : 'Actif'}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4">
                                     <div className="flex flex-wrap gap-2">
                                         {u.roles?.map(role => (
                                             <span key={role} className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 uppercase font-black">
@@ -138,8 +152,9 @@ const UsersManagement = () => {
                                             <FaUserEdit size={18} />
                                         </button>
                                         <button 
-                                            onClick={() => handleDelete(u.id)}
-                                            className="p-2 hover:bg-red-500/20 text-red-500 rounded-lg transition-all" title="Supprimer"
+                                            onClick={() => handleToggleActive(u.id, Number(u.is_active ?? u.isActive ?? 1) !== 0)}
+                                            className={`p-2 rounded-lg transition-all ${Number(u.is_active ?? u.isActive ?? 1) === 0 ? 'hover:bg-green-500/20 text-green-500' : 'hover:bg-red-500/20 text-red-500'}`} 
+                                            title={Number(u.is_active ?? u.isActive ?? 1) === 0 ? "Réactiver" : "Désactiver"}
                                             disabled={u.id === currentUser.id}
                                         >
                                             <FaTrashAlt size={18} />

@@ -20,7 +20,8 @@ const Location = () => {
             try {
                 const response = await axios.get(`${API_ROOT}/api/places`);
                 const data = response.data['hydra:member'] || response.data.member || response.data || [];
-                setPlaces(data);
+                const activePlaces = data.filter(p => Number(p.is_active ?? p.isActive ?? 1) !== 0);
+                setPlaces(activePlaces);
             } catch (err) {
                 console.error("Erreur de chargement des lieux:", err);
             } finally {

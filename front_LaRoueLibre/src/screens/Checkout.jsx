@@ -8,18 +8,30 @@ import { API_ROOT } from "../constants/apiConstant";
 import axios from "axios";
 import ButtonLoader from "../components/Loader/ButtonLoader";
 import { useNavigate, useLocation } from "react-router-dom";
-// Ajout d'icônes pour rassurer l'utilisateur
-import { FaLock, FaShieldAlt } from "react-icons/fa"; 
+import CustomInput from "../components/UI/CustomInput";
+import AddressAutocomplete from "../components/UI/AddressAutocomplete";
+import { FaLock, FaShieldAlt, FaMapMarkerAlt, FaCreditCard } from "react-icons/fa"; 
 
 // Ta vraie clé publique Stripe
 const stripePromise = loadStripe("pk_test_51TLQCEGyXLZ1k1lnmyigtun4AQIvMKhL3hj86EjlvDvTHzUw4iLm7upHNkiAafJ48v0viIyTn2eag9Nbr2PhDRG700Od83tAKg");
 
 const Checkout = () => {
     const [clientSecret, setClientSecret] = useState("");
-    const { user } = useContext(AuthContext);
+    const { user, setUser } = useContext(AuthContext);
     const location = useLocation();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
+    const [isSavingAddress, setIsSavingAddress] = useState(false);
+    const [step, setStep] = useState(1); // 1: Adresse, 2: Paiement
+    
+    // States pour l'adresse
+    const [number, setNumber] = useState("");
+    const [typeVoie, setTypeVoie] = useState("");
+    const [label, setLabel] = useState("");
+    const [complement, setComplement] = useState("");
+    const [city, setCity] = useState("");
+    const [cp, setCp] = useState("");
+
     const licenceId = location.state?.licenceId;
     const type = location.state?.type;
 
@@ -29,47 +41,80 @@ const Checkout = () => {
             return;
         }
 
-        const endpoint = type === 'licence' && licenceId 
-            ? `${API_ROOT}/api/create-licence-payment-intent/${licenceId}`
-            : `${API_ROOT}/api/create-payment-intent`;
+        // Pré-remplir l'adresse si elle existe déjà dans le profil (optionnel mais sympa)
+        if (user.adresses && user.adresses.length > 0) {
+            const addr = user.adresses[0];
+            setNumber(addr.number || "");
+            setTypeVoie(addr.type || "");
+            setLabel(addr.label || "");
+            setComplement(addr.complement || "");
+            setCity(addr.city || "");
+            setCp(addr.cp?.toString() || "");
+        }
 
-        // On appelle Symfony pour générer l'intention de paiement
-        axios.post(endpoint, {}, {
-            headers: { Authorization: `Bearer ${user.token}` }
-        })
-        .then((res) => {
+        setIsLoading(false);
+    }, [user, navigate]);
+
+    const handleAddressSubmit = async (e) => {
+        e.preventDefault();
+        setIsSavingAddress(true);
+
+        try {
+            // 1. On met à jour l'utilisateur avec son adresse
+            // Note: API Platform attend un tableau d'adresses ou un objet selon la config
+            const addressData = {
+                number: number,
+                type: typeVoie,
+                label: label,
+                complement: complement.trim() === "" ? null : complement,
+                city: city,
+                cp: parseInt(cp)
+            };
+
+            const patchRes = await axios.patch(`${API_ROOT}/api/users/${user.id}`, {
+                adresses: [addressData]
+            }, {
+                headers: { 
+                    Authorization: `Bearer ${user.token}`,
+                    'Content-Type': 'application/merge-patch+json'
+                }
+            });
+
+            // Mettre à jour l'utilisateur dans le contexte avec la nouvelle adresse
+            setUser({
+                ...user,
+                adresses: patchRes.data.adresses
+            });
+
+            // 2. On génère l'intention de paiement seulement après validation de l'adresse
+            const endpoint = type === 'licence' && licenceId 
+                ? `${API_ROOT}/api/create-licence-payment-intent/${licenceId}`
+                : `${API_ROOT}/api/create-payment-intent`;
+
+            const res = await axios.post(endpoint, {}, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+
             setClientSecret(res.data.clientSecret);
-            setIsLoading(false);
-        })
-        .catch((err) => {
-            console.error("Erreur Stripe:", err);
-            setIsLoading(false);
-        });
-    }, [user, navigate, licenceId, type]);
+            setStep(2); // On passe au paiement
+        } catch (err) {
+            console.error("Erreur lors de la sauvegarde de l'adresse ou du paiement:", err);
+            alert("Une erreur est survenue lors de la validation de vos informations.");
+        } finally {
+            setIsSavingAddress(false);
+        }
+    };
 
-    // Personnalisation poussée des inputs Stripe pour matcher ton CSS Tailwind
     const appearance = {
         theme: 'night', 
         variables: {
-            colorPrimary: '#f28c33', // Ton orange
-            colorBackground: '#132136', // Légèrement plus clair que bg-dark-nigth-blue pour ressortir
+            colorPrimary: '#f28c33',
+            colorBackground: '#132136',
             colorText: '#ffffff',
-            colorDanger: '#ef4444', // red-500 Tailwind
+            colorDanger: '#ef4444',
             fontFamily: 'ui-sans-serif, system-ui, sans-serif',
-            borderRadius: '12px', // Bords arrondis modernes
+            borderRadius: '12px',
             spacingGridRow: '20px'
-        },
-        rules: {
-            '.Input': {
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: 'none',
-                backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                padding: '12px 16px',
-            },
-            '.Input:focus': {
-                border: '1px solid #f28c33', // Focus en orange
-                boxShadow: '0 0 0 1px #f28c33',
-            }
         }
     };
 
@@ -77,15 +122,13 @@ const Checkout = () => {
         return (
             <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-dark-nigth-blue space-y-4">
                 <ButtonLoader size={60} />
-                <p className="text-slate-grey_06 animate-pulse font-medium">Connexion sécurisée en cours...</p>
+                <p className="text-slate-grey_06 animate-pulse font-medium">Initialisation...</p>
             </div>
         );
     }
 
     return (
         <div className="bg-dark-nigth-blue min-h-[calc(100vh-4rem)] text-white flex flex-col items-center justify-center py-12 px-4 relative overflow-hidden">
-            
-            {/* Effet de lumière subtil en arrière-plan (Glow effect) */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange/5 blur-[120px] rounded-full pointer-events-none"></div>
 
             <div className="w-full max-w-lg z-10 animate-slideup">
@@ -93,38 +136,119 @@ const Checkout = () => {
                 {/* En-tête de la page */}
                 <div className="text-center mb-10">
                     <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-linear-to-br from-orange/20 to-orange/5 border border-orange/20 text-orange mb-6 shadow-lg shadow-orange/10">
-                        <FaShieldAlt size={36} />
+                        {step === 1 ? <FaMapMarkerAlt size={36} /> : <FaCreditCard size={36} />}
                     </div>
-                    <h1 className="title-h1 mb-3">Paiement Sécurisé</h1>
+                    <h1 className="title-h1 mb-3">
+                        {step === 1 ? "Adresse de facturation" : "Paiement Sécurisé"}
+                    </h1>
                     <p className="text-gray-400 text-sm flex items-center justify-center gap-2 font-medium">
-                        <FaLock className="text-orange/70" /> 
-                        Vos informations sont chiffrées de bout en bout
+                        <FaShieldAlt className="text-orange/70" /> 
+                        {step === 1 ? "Étape 1 sur 2 : Vos coordonnées" : "Étape 2 sur 2 : Informations de paiement"}
                     </p>
                 </div>
             
                 {/* Carte contenant le formulaire */}
                 <div className="bg-black/50 backdrop-blur-2xl border border-white/10 p-8 sm:p-10 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-                    {clientSecret ? (
-                        <Elements options={{ clientSecret, appearance }} stripe={stripePromise}>
-                            <CheckoutForm />
-                        </Elements>
-                    ) : (
-                        <div className="text-center py-8">
-                            <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-8">
-                                <p className="font-semibold">Une erreur est survenue.</p>
-                                <p className="text-sm mt-1 opacity-80">Impossible de joindre le serveur de paiement.</p>
+                    {step === 1 ? (
+                        <form onSubmit={handleAddressSubmit} className="space-y-6">
+                            <AddressAutocomplete onAddressSelect={(addr) => {
+                                setNumber(addr.number);
+                                setTypeVoie(addr.type);
+                                setLabel(addr.label);
+                                setCity(addr.city);
+                                setCp(addr.cp);
+                            }} />
+
+                            <div className="pt-4 border-t border-white/5">
+                                <p className="text-xs text-gray-500 mb-4 italic">Vérifiez ou complétez vos informations :</p>
+                                <div className="space-y-4">
+                                    <div className="flex gap-4">
+                                        <div className="w-24">
+                                            <CustomInput
+                                                label="N°"
+                                                type="text"
+                                                placeholder="12"
+                                                state={number}
+                                                callable={(e) => setNumber(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="flex-1">
+                                            <CustomInput
+                                                label="Type de voie"
+                                                type="text"
+                                                placeholder="Rue, Avenue..."
+                                                state={typeVoie}
+                                                callable={(e) => setTypeVoie(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    <CustomInput
+                                        label="Nom de la voie"
+                                        type="text"
+                                        placeholder="de la Paix"
+                                        state={label}
+                                        callable={(e) => setLabel(e.target.value)}
+                                        required
+                                    />
+                                    <CustomInput
+                                        label="Complément"
+                                        type="text"
+                                        placeholder="Appartement, Bâtiment..."
+                                        state={complement}
+                                        callable={(e) => setComplement(e.target.value)}
+                                    />
+                                    <div className="flex gap-4">
+                                        <div className="flex-1">
+                                            <CustomInput
+                                                label="Ville"
+                                                type="text"
+                                                placeholder="Paris"
+                                                state={city}
+                                                callable={(e) => setCity(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="w-32">
+                                            <CustomInput
+                                                label="Code Postal"
+                                                type="text"
+                                                placeholder="75000"
+                                                state={cp}
+                                                callable={(e) => setCp(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <button onClick={() => navigate('/panier')} className="main-button">
-                                Retour au panier
+
+                            <button 
+                                type="submit" 
+                                className="main-button w-full mt-2"
+                                disabled={isSavingAddress}
+                            >
+                                {isSavingAddress ? <ButtonLoader size={20} /> : "Continuer vers le paiement"}
                             </button>
-                        </div>
+                        </form>
+                    ) : (
+                        clientSecret ? (
+                            <Elements options={{ clientSecret, appearance }} stripe={stripePromise}>
+                                <CheckoutForm />
+                            </Elements>
+                        ) : (
+                            <div className="text-center py-8">
+                                <p className="text-red-400">Erreur lors de l'initialisation du paiement.</p>
+                                <button onClick={() => setStep(1)} className="main-button mt-4">Retour</button>
+                            </div>
+                        )
                     )}
                 </div>
 
                 {/* Footer de réassurance */}
                 <div className="mt-8 text-center flex items-center justify-center gap-4 text-xs text-gray-500 font-medium">
-                    <span>Propulsé par</span>
-                    <span className="font-bold text-gray-400 text-base tracking-wider">stripe</span>
+                    <FaLock /> Paiement crypté SSL
                 </div>
 
             </div>

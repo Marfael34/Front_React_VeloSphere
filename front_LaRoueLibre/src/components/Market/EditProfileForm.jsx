@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
 import axios from 'axios';
 import CustomInput from '../UI/CustomInput';
 import CustomButton from '../UI/CustomButton';
@@ -6,6 +8,8 @@ import { API_ROOT, IMAGE_URL } from '../../constants/apiConstant';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 
 const EditProfileForm = ({ user, fullUser, onCancel, onSuccess }) => {
+    const { setUser } = useContext(AuthContext);
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         firstname: fullUser?.firstname || "",
         lastname: fullUser?.lastname || "",
@@ -112,6 +116,33 @@ const EditProfileForm = ({ user, fullUser, onCancel, onSuccess }) => {
             setIsSubmitting(false);
         }
     };
+    const handleDeactivate = async () => {
+        const confirm = window.confirm("ATTENTION : Êtes-vous sûr de vouloir désactiver votre compte ? Vous serez immédiatement déconnecté et ne pourrez plus accéder à vos données.");
+        if (!confirm) return;
+
+        setIsSubmitting(true);
+        try {
+            await axios.patch(`${API_ROOT}/api/users/${user.id}`, 
+                { is_active: false },
+                { 
+                    headers: { 
+                        Authorization: `Bearer ${user.token}`,
+                        'Content-Type': 'application/merge-patch+json' 
+                    } 
+                }
+            );
+            
+            // Déconnexion propre
+            localStorage.removeItem('user');
+            setUser(null);
+            navigate('/login');
+        } catch (err) {
+            console.error("Erreur désactivation:", err);
+            alert("Une erreur est survenue lors de la désactivation du compte.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
@@ -172,6 +203,17 @@ const EditProfileForm = ({ user, fullUser, onCancel, onSuccess }) => {
             <div className="flex gap-4 pt-4 sticky bottom-0 bg-dark-nigth-blue py-2">
                 <CustomButton type="submit" className="flex-1" bgColor="bg-green-600">Enregistrer</CustomButton>
                 <CustomButton type="button" onClick={onCancel} className="flex-1" bgColor="bg-red-600">Annuler</CustomButton>
+            </div>
+
+            <div className="mt-10 pt-6 border-t border-red-500/20 text-center">
+                <p className="text-[10px] text-gray-500 uppercase mb-3">Zone de danger</p>
+                <button 
+                    type="button" 
+                    onClick={handleDeactivate}
+                    className="text-red-500 hover:text-white border border-red-500/30 hover:bg-red-500 px-4 py-2 rounded-xl text-xs font-black uppercase transition-all duration-300 italic tracking-widest"
+                >
+                    Désactiver mon profil
+                </button>
             </div>
         </form>
     );

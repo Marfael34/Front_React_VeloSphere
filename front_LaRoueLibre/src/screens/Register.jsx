@@ -13,24 +13,15 @@ const Register = () => {
   const [firstname, setFirstName] = useState("");
   const [birthday, setBirthday] = useState("");
   const [pseudo, setPseudo] = useState("");
-  const [nbAdress, setNbAdress] = useState("");
-  const [typeVoie, setTypeVoie] = useState("");
-  const [label, setLabel] = useState("");
-  const [complement, setComplement] = useState("");
-  const [city, setCity] = useState("");
-  const [cp, setCp] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
-  // 2. On récupère la mémoire globale au lieu d'un state local
   const { user, setUser } = useContext(AuthContext);
-
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Si l'utilisateur est déjà connecté, on le redirige vers l'accueil
     if (user) {
       navigate("/");
     }
@@ -41,15 +32,9 @@ const Register = () => {
     setIsLoading(true);
     setErrorMessage("");
 
-    // Génération de l'avatar aléatoire ---
-    // Math.random() génère un nombre entre 0 et 0.99
-    // 5 donne un nombre entre 0 et 4.99
-    // Math.floor arrondit à l'entier inférieur (0 à 4)
-    // + 1 décale le tout pour avoir un nombre entre 1 et 5
     const randomAvatarNumber = Math.floor(Math.random() * 5) + 1;
     const randomAvatarPath = `/images/avatar/default/default-avatar-${randomAvatarNumber}.png`;
 
-    // On structure les données : on groupe les champs de l'adresse dans un sous-objet
     const userData = {
       lastName: lastname,
       firstName: firstname,
@@ -57,32 +42,18 @@ const Register = () => {
       pseudo: pseudo,
       email: email,
       password: password,
-      avatar: randomAvatarPath, // <-- Ajout du chemin de l'avatar aléatoire ici
-      address: {
-        nbAdress: nbAdress,
-        typeVoie: typeVoie,
-        label: label,
-        // Si complement est vide (""), on envoie null, sinon on envoie la valeur
-        complement: complement.trim() === "" ? null : complement, 
-        city: city,
-        cp: cp
-      }
+      avatar: randomAvatarPath
     };
 
     try {
-      // On envoie tout en une seule requête POST vers votre route de création d'utilisateur
       await axios.post(`${API_ROOT}/api/register`, userData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
-
-      // Si succès, on redirige l'utilisateur vers le login
       navigate("/login");
-
     } catch (error) {
       console.error("Erreur d'inscription:", error);
-      // Gestion basique des erreurs
       if (error.response && error.response.status === 400) {
         setErrorMessage("Certains champs sont invalides ou l'email existe déjà.");
       } else {
@@ -95,8 +66,6 @@ const Register = () => {
 
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-[calc(100vh-4rem)] px-4 sm:px-6 py-8 bg-dark-nigth-blue">
-      
-      {/* J'ai mis lg:w-[700px] pour laisser de la place aux champs côte à côte */}
       <div className="w-full md:w-2xl lg:w-175 animate-slideup2">
         <div className="text-center mb-8">
           <h1 className="title-h1">Créez votre compte</h1>
@@ -105,7 +74,6 @@ const Register = () => {
           </p>
         </div>
 
-        {/* formulaire */}
         <form
           onSubmit={handleSubmit}
           className="w-full rounded-2xl bg-black/60 backdrop-blur-xl border border-white/10 p-8 sm:p-10 shadow-2xl shadow-black_05"
@@ -138,7 +106,7 @@ const Register = () => {
               placeholder="" 
               state={birthday}
               callable={(event) => setBirthday(event.target.value)}
-              
+              required
             />
             <CustomInput
               label={"Saisir votre email"}
@@ -161,66 +129,6 @@ const Register = () => {
               state={pseudo}
               callable={(event) => setPseudo(event.target.value)}
             />
-          </div>
-
-          <div className="space-y-1 mt-6">
-            <h2 className="flex justify-center pb-2 text-3xl font-bold underline mb-4">Adresse</h2>
-            <div className="flex flex-wrap gap-5 md:flex-row">
-              <div className="w-20 md:w-20">
-                <CustomInput
-                  label={"N°"}
-                  type={"text"}
-                  placeholder="18 bis" 
-                  state={nbAdress}
-                  callable={(event) => setNbAdress(event.target.value)}
-                />
-              </div>
-              <div className="w-68 md:w-32 lg:w-35 ">
-                <CustomInput
-                  label={"Type de voie"}
-                  type={"text"}
-                  placeholder="Allées, Rue, ..." 
-                  state={typeVoie}
-                  callable={(event) => setTypeVoie(event.target.value)}
-                />
-              </div>
-              <div className="w-full md:w-85 lg:w-89.5">
-                <CustomInput
-                  label={"Nom de la voie"}
-                  type={"text"}
-                  placeholder="Jean Datacenter" 
-                  state={label}
-                  callable={(event) => setLabel(event.target.value)}
-                />
-              </div>
-            </div>
-            <CustomInput
-              label={"Complément d'adresse"}
-              type={"text"}
-              placeholder="Apprt. 404, Résidence du Bug" 
-              state={complement}
-              callable={(event) => setComplement(event.target.value)}
-            />
-            <div className="flex flex-row gap-5">
-              <div className="w-1/2">
-                <CustomInput
-                  label={"Ville"}
-                  type={"text"}
-                  placeholder="Perpignan" 
-                  state={city}
-                  callable={(event) => setCity(event.target.value)}
-                />
-              </div>
-              <div className="w-1/2">
-                <CustomInput
-                  label={"Code postal"}
-                  type={"number"}
-                  placeholder="66000" 
-                  state={cp}
-                  callable={(event) => setCp(event.target.value)}
-                />
-              </div>
-            </div>
           </div>
 
           {errorMessage && <ErrorMessage message={errorMessage} />}

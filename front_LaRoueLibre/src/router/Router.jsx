@@ -13,6 +13,7 @@ import EditProduct from "../screens/EditProduct";
 import Checkout from "../screens/Checkout";
 import Invoice from "../screens/InVoice";
 import OrderTracking from "../screens/OrderTracking";
+import ParticipationTracking from "../screens/ParticipationTracking";
 import LocationDetail from "../screens/LocationDetail";
 import Dashboard from "../screens/admin/Dashboard";
 import UsersManagement from "../screens/admin/UsersManagement";
@@ -91,6 +92,10 @@ const Router = createBrowserRouter([
             {
                 path: "/profile/order/:id",
                 element: <OrderTracking/>
+            },
+            {
+                path: "/profile/registration/:id",
+                element: <ParticipationTracking/>
             },
             {
                 path: "/location/:id",

@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Entity(repositoryClass: CompetitionRepository::class)]
 #[ApiResource(
@@ -24,15 +25,15 @@ class Competition
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['competition:read', 'user:read'])]
+    #[Groups(['competition:read', 'user:read', 'competition:write'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['competition:read'])]
+    #[Groups(['competition:read', 'competition:write'])]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['competition:read'])]
+    #[Groups(['competition:read', 'competition:write'])]
     private ?int $maxPeople = null;
 
     #[ORM\Column]
@@ -44,26 +45,25 @@ class Competition
     private ?\DateTime $updatedAt = null;
 
     #[ORM\Column]
-    #[Groups(['competition:read', 'user:read'])]
+    #[Groups(['competition:read', 'user:read', 'competition:write'])]
     private ?\DateTime $startAt = null;
 
     #[ORM\Column]
-    #[Groups(['competition:read'])]
+    #[Groups(['competition:read', 'user:read', 'competition:write'])]
     private ?\DateTime $endAt = null;
 
     #[ORM\Column]
-    #[Groups(['competition:read'])]
     private ?bool $isActive = null;
 
     #[ORM\ManyToOne(inversedBy: 'competitions')]
     private ?User $user = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['competition:read'])]
+    #[Groups(['competition:read', 'competition:write'])]
     private ?string $path = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['competition:read', 'user:read'])]
+    #[Groups(['competition:read', 'user:read', 'competition:write'])]
     private ?string $location = null;
 
     #[ORM\OneToMany(mappedBy: 'competition', targetEntity: CompetitionRegistration::class, orphanRemoval: true)]
@@ -205,11 +205,14 @@ class Competition
         return $this;
     }
 
+    #[Groups(['competition:read', 'registration:read'])]
+    #[SerializedName('is_active')]
     public function isActive(): ?bool
     {
         return $this->isActive;
     }
 
+    #[Groups(['competition:write'])]
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;

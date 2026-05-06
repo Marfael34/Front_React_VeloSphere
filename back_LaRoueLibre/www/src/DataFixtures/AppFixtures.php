@@ -739,43 +739,50 @@ class AppFixtures extends Fixture
     {
         $arrayPlaces = [
             [
-                'name' => "Canal de la Robine",
-                'description' => " Narbonne vers Port-la-Nouvelle.
-                Vous longez le canal classé à l'UNESCO, traversez les étangs de Bages-Sigean avec souvent des flamants roses en spectacle.",
-                'coordinates' => "43.1833° N, 3.0041° E",
-                'elevation' => "10",
-                'distance' => "15",
-                'difficulty' => "Très facile",
-                'floor' => "Gravier stabilisé"
-            ],
-            [
-                'name' => "Lido de Sète",
-                'description' => "De Marseillan-Plage à Sète. Une piste cyclable rectiligne entre le lido (la plage) et les vignes de Listel. Idéal pour s'arrêter se baigner.",
-                'coordinates' => "43.3508° N, 3.5552° E",
-                'elevation' => "5",
-                'distance' => "12",
-                'difficulty' => "Très facile",
-                'floor' => "Bitume lisse"
-            ],
-            [
-                'name' => "Coulée Verte du Sud Parisien",
-                'description' => "De Paris à Massy. Un aménagement paysager qui suit le tracé du TGV Atlantique. Jardins, aires de jeux et verdure sans voitures.",
-                'coordinates' => "48.8358° N, 2.3194° E",
-                'elevation' => "80",
-                'distance' => "14",
-                'difficulty' => "Facile",
+                'name' => "Gorges du Tarn",
+                'description' => "Un itinéraire spectaculaire au cœur des falaises calcaires. Idéal pour le cyclotourisme avec des routes sinueuses et peu de trafic.",
+                'coordinates' => "44.3661, 3.4106",
+                'elevation' => "450",
+                'distance' => "35",
+                'difficulty' => "Moyen",
                 'floor' => "Bitume"
             ],
             [
-                'name' => "Bord du Lac d'Annecy (Nord)",
-                'description' => "D'Annecy à Duingt. Longe la rive ouest du lac. Passage par un ancien tunnel ferroviaire avec vue imprenable sur les montagnes et l'eau turquoise.",
-                'coordinates' => "45.8976° N, 6.1272° E",
-                'elevation' => "5",
+                'name' => "Cirque de Navacelles",
+                'description' => "Un méandre géant classé à l'UNESCO. Une descente mythique vers le village au fond du cirque.",
+                'coordinates' => "43.8999, 3.5205",
+                'elevation' => "300",
                 'distance' => "12",
-                'difficulty' => "Très facile",
-                'floor' => "Bitume haute qualité"
+                'difficulty' => "Difficile",
+                'floor' => "Bitume"
+            ],
+            [
+                'name' => "Canal du Midi (Béziers)",
+                'description' => "Le site majestueux des 9 Écluses de Fonseranes à Béziers. Un chef-d'œuvre d'ingénierie classé à l'UNESCO, idéal pour une balade au fil de l'eau.",
+                'coordinates' => "43.3308, 3.1997",
+                'elevation' => "20",
+                'distance' => "15",
+                'difficulty' => "Facile",
+                'floor' => "Terre battue / Bitume"
+            ],
+            [
+                'name' => "Massif du Caroux",
+                'description' => "Surnommé la Montagne de Lumière, c'est le paradis du VTT technique dans l'Hérault.",
+                'coordinates' => "43.5732, 2.9681",
+                'elevation' => "1000",
+                'distance' => "25",
+                'difficulty' => "Très difficile",
+                'floor' => "Roche / Sentier"
+            ],
+            [
+                'name' => "Pic du Midi de Bigorre",
+                'description' => "L'ascension géante des Pyrénées avec un panorama unique sur la chaîne pyrénéenne.",
+                'coordinates' => "42.9103, 0.1794",
+                'elevation' => "1400",
+                'distance' => "20",
+                'difficulty' => "Expert",
+                'floor' => "Bitume"
             ]
-
         ];
 
         foreach ($arrayPlaces as $value) {

@@ -22,6 +22,7 @@ const ProductsManagement = () => {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             const data = response.data['hydra:member'] || response.data['member'] || response.data || [];
+            console.log("Données produits reçues:", data);
             setProducts(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error("Erreur fetching products:", err);
@@ -50,17 +51,24 @@ const ProductsManagement = () => {
         });
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Voulez-vous vraiment supprimer ce produit ?")) return;
+    const handleToggleActive = async (id, currentStatus) => {
+        const action = currentStatus ? "désactiver" : "réactiver";
+        if (!window.confirm(`Voulez-vous vraiment ${action} ce produit ?`)) return;
 
         try {
-            await axios.delete(`${API_ROOT}/api/products/${id}`, {
-                headers: { Authorization: `Bearer ${user.token}` }
-            });
+            await axios.patch(`${API_ROOT}/api/products/${id}`, 
+                { is_active: !currentStatus },
+                { 
+                    headers: { 
+                        Authorization: `Bearer ${user.token}`,
+                        'Content-Type': 'application/merge-patch+json'
+                    } 
+                }
+            );
             fetchProducts();
         } catch (err) {
-            console.error("Erreur suppression produit:", err);
-            alert("Impossible de supprimer le produit.");
+            console.error("Erreur statut produit:", err);
+            alert("Impossible de modifier le statut du produit.");
         }
     };
 
@@ -86,6 +94,7 @@ const ProductsManagement = () => {
                         <tr className="bg-white/5 border-b border-white/10">
                             <th className="px-6 py-4 font-bold text-gray-300">Produit</th>
                             <th className="px-6 py-4 font-bold text-gray-300">Prix</th>
+                            <th className="px-6 py-4 font-bold text-gray-300">Statut</th>
                             <th className="px-6 py-4 font-bold text-gray-300">Stock</th>
                             <th className="px-6 py-4 font-bold text-gray-300">Marque</th>
                             <th className="px-6 py-4 font-bold text-gray-300 text-right">Actions</th>
@@ -112,6 +121,11 @@ const ProductsManagement = () => {
                                 </td>
                                 <td className="px-6 py-4 font-black text-orange">{(p.price / 100).toFixed(2)} €</td>
                                 <td className="px-6 py-4">
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${Number(p.is_active ?? p.isActive ?? 1) === 0 ? 'bg-red-500/20 text-red-500 border border-red-500/20' : 'bg-green-500/20 text-green-500 border border-green-500/20'}`}>
+                                        {Number(p.is_active ?? p.isActive ?? 1) === 0 ? 'Inactif' : 'Actif'}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4">
                                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${p.quantity > 0 ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
                                         {p.quantity > 0 ? `${p.quantity} en stock` : 'Rupture'}
                                     </span>
@@ -130,8 +144,9 @@ const ProductsManagement = () => {
                                             <FaEdit size={18} />
                                         </button>
                                         <button 
-                                            onClick={() => handleDelete(p.id)}
-                                            className="p-2 hover:bg-red-500/20 text-red-500 rounded-lg transition-all" title="Supprimer"
+                                            onClick={() => handleToggleActive(p.id, Number(p.is_active ?? p.isActive ?? 1) !== 0)}
+                                            className={`p-2 rounded-lg transition-all ${Number(p.is_active ?? p.isActive ?? 1) === 0 ? 'hover:bg-green-500/20 text-green-500' : 'hover:bg-red-500/20 text-red-500'}`} 
+                                            title={Number(p.is_active ?? p.isActive ?? 1) === 0 ? "Réactiver" : "Désactiver"}
                                         >
                                             <FaTrashAlt size={18} />
                                         </button>

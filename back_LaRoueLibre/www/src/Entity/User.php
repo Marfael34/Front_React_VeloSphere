@@ -16,6 +16,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -29,8 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Patch(
             processor: UserProcessor::class, // <-- On utilise le nouveau processeur ici
             security: "is_granted('ROLE_ADMIN') or object == user"
-        ),
-        new Delete(security: "is_granted('ROLE_ADMIN')")
+        )
     ]
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -104,7 +104,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(targetEntity: Licence::class, mappedBy: 'user')]
     #[Groups(['user:read'])]
-    #[ApiProperty(readableLink: false)]
+    #[ApiProperty(readableLink: true)]
     private Collection $licences;
 
     /**
@@ -142,6 +142,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $wishlist;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: CompetitionRegistration::class, orphanRemoval: true)]
+    #[Groups(['user:read'])]
+    #[ApiProperty(readableLink: true)]
     private Collection $competitionRegistrations;
 
     public function __construct()
@@ -364,11 +366,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function isActive(): ?bool
+    #[Groups(['user:read'])]
+    #[SerializedName('is_active')]
+    public function getIsActive(): ?bool
     {
         return $this->isActive;
     }
 
+    #[Groups(['user:write'])]
+    #[SerializedName('is_active')]
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;

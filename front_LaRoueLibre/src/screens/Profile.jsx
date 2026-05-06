@@ -136,21 +136,19 @@ const Profile = () => {
     };
 
     const getStatusStyle = (status) => {
-        switch (status) {
-            case 'Payées': 
-            case 'Validées':
-            case 'Livrées': return 'bg-green-500/20 text-green-400 border-green-500/30';
-            case 'En attentes de paiement':
-            case 'En attente de validation':
-            case 'En attentes de validation':
-            case 'Approuvée':
-            case 'En cours de préparation':
-            case 'En cours de livraison': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-            case 'Annulées': 
-            case 'Rejetée':
-            case 'Rejetées': return 'bg-red-500/20 text-red-400 border-red-500/30';
-            default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+        if (!status) return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+        const s = status.toLowerCase();
+        
+        if (s.includes('payées') || s.includes('validées') || s.includes('livrées')) {
+            return 'bg-green-500/20 text-green-400 border-green-500/30';
         }
+        if (s.includes('en attente') || s.includes('approuvée') || s.includes('préparation') || s.includes('livraison') || s.includes('paiement')) {
+            return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+        }
+        if (s.includes('annulée') || s.includes('rejetée')) {
+            return 'bg-red-500/20 text-red-400 border-red-500/30';
+        }
+        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     };
 
     return (
@@ -404,8 +402,13 @@ const Profile = () => {
                                                         <span>Urgence : {reg.emergencyContactName} ({reg.emergencyContactPhone})</span>
                                                     </div>
                                                     <div className="flex items-center gap-2 sm:justify-end">
-                                                        <FaMapMarkerAlt className="text-orange" size={10} />
-                                                        <span>{reg.competition?.location || "Lieu à confirmer"} • {formatDate(reg.competition?.startAt)}</span>
+                                                        <Link 
+                                                            to={`/profile/registration/${reg.id}`} 
+                                                            state={{ registration: reg }}
+                                                            className="bg-orange/20 hover:bg-orange/40 text-orange px-4 py-2 rounded-lg font-black uppercase tracking-widest transition-all border border-orange/20"
+                                                        >
+                                                            Suivre ma participation
+                                                        </Link>
                                                     </div>
                                                 </div>
                                             </div>

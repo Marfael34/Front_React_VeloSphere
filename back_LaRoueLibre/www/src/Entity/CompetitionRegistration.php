@@ -29,7 +29,7 @@ class CompetitionRegistration
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['registration:read'])]
+    #[Groups(['registration:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: "App\Entity\User", inversedBy: "competitionRegistrations")]
@@ -39,40 +39,40 @@ class CompetitionRegistration
 
     #[ORM\ManyToOne(targetEntity: "App\Entity\Competition", inversedBy: "registrations")]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['registration:read', 'registration:write'])]
+    #[Groups(['registration:read', 'registration:write', 'user:read'])]
     private ?Competition $competition = null;
 
     #[ORM\Column(type: "datetime")]
-    #[Groups(['registration:read'])]
+    #[Groups(['registration:read', 'user:read'])]
     private ?\DateTime $createdAt = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['registration:read', 'registration:write'])]
+    #[Groups(['registration:read', 'registration:write', 'user:read'])]
     private ?string $category = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['registration:read', 'registration:write'])]
+    #[Groups(['registration:read', 'registration:write', 'user:read'])]
     private ?string $club = null;
 
     #[ORM\Column(length: 50, nullable: true)]
-    #[Groups(['registration:read', 'registration:write'])]
+    #[Groups(['registration:read', 'registration:write', 'user:read'])]
     private ?string $plateNumber = null;
 
     #[ORM\Column(length: 100, nullable: true)]
-    #[Groups(['registration:read', 'registration:write'])]
+    #[Groups(['registration:read', 'registration:write', 'user:read'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 100, nullable: true)]
-    #[Groups(['registration:read', 'registration:write'])]
+    #[Groups(['registration:read', 'registration:write', 'user:read'])]
     private ?string $lastName = null;
 
     #[ORM\ManyToOne(targetEntity: "App\Entity\Licence")]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['registration:read', 'registration:write'])]
+    #[Groups(['registration:read', 'registration:write', 'user:read'])]
     private ?Licence $licence = null;
 
     #[ORM\Column(length: 50, nullable: true)]
-    #[Groups(['registration:read', 'registration:write'])]
+    #[Groups(['registration:read', 'registration:write', 'user:read'])]
     private ?string $status = 'En attente';
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -80,11 +80,11 @@ class CompetitionRegistration
     private ?string $licencePath = null;
 
     #[ORM\Column(length: 100, nullable: true)]
-    #[Groups(['registration:read', 'registration:write'])]
+    #[Groups(['registration:read', 'registration:write', 'user:read'])]
     private ?string $emergencyContactName = null;
 
     #[ORM\Column(length: 20, nullable: true)]
-    #[Groups(['registration:read', 'registration:write'])]
+    #[Groups(['registration:read', 'registration:write', 'user:read'])]
     private ?string $emergencyContactPhone = null;
 
     public function __construct()

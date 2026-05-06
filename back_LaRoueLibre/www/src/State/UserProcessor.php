@@ -15,7 +15,8 @@ final class UserProcessor implements ProcessorInterface
         #[Autowire(service: 'api_platform.doctrine.orm.state.persist_processor')]
         private ProcessorInterface $persistProcessor,
         private UserPasswordHasherInterface $passwordHasher,
-        private AdressRepository $adressRepository // Ajout du repository pour chercher les adresses
+        private AdressRepository $adressRepository,
+        private \Doctrine\ORM\EntityManagerInterface $entityManager
     ) {
     }
 
@@ -36,25 +37,49 @@ final class UserProcessor implements ProcessorInterface
             $data->eraseCredentials();
         }
 
-        // 2. Déduplication des adresses
-        foreach ($data->getAdresses() as $adress) {
-            // Si l'adresse n'a pas d'ID, c'est qu'elle vient d'être créée par le payload JSON de React
-            if ($adress->getId() === null) {
-                // On cherche si une adresse avec exactement les mêmes champs existe déjà en BDD
-                $existingAdress = $this->adressRepository->findOneBy([
-                    'number' => $adress->getNumber(),
-                    'type' => $adress->getType(),
-                    'label' => $adress->getLabel(),
-                    'complement' => $adress->getComplement(),
-                    'cp' => $adress->getCp(),
-                    'city' => $adress->getCity(),
-                ]);
+        // 2. Logique de remplacement d'adresse (Suppression de l'ancienne)
+        $newAdresses = $data->getAdresses();
+        if (!$newAdresses->isEmpty()) {
+            // On récupère toutes les adresses actuelles en BDD pour cet utilisateur avant le flush
+            $currentUser = $this->adressRepository->createQueryBuilder('a')
+                ->select('u')
+                ->from(User::class, 'u')
+                ->where('u.id = :id')
+                ->setParameter('id', $data->getId())
+                ->getQuery()
+                ->getOneOrNullResult();
 
-                if ($existingAdress) {
-                    // Si elle existe, on retire la nouvelle adresse générée
-                    $data->removeAdress($adress);
-                    // Et on associe l'utilisateur à l'adresse existante à la place
-                    $data->addAdress($existingAdress);
+            $oldAdresses = $currentUser ? $currentUser->getAdresses()->toArray() : [];
+
+            foreach ($newAdresses as $adress) {
+                if ($adress->getId() === null) {
+                    // L'utilisateur a saisi une nouvelle adresse (ou modifié l'existante)
+                    
+                    // 1. On commence par supprimer les anciennes adresses de l'utilisateur
+                    foreach ($oldAdresses as $old) {
+                        if ($old->getId() !== null) {
+                            $data->removeAdress($old);
+                            // On demande la suppression physique de l'ancienne adresse en BDD
+                            $this->entityManager->remove($old);
+                        }
+                    }
+
+                    // 2. On vérifie si la "nouvelle" adresse existe déjà ailleurs en BDD (Deduplication)
+                    $existingAdress = $this->adressRepository->findOneBy([
+                        'number' => $adress->getNumber(),
+                        'type' => $adress->getType(),
+                        'label' => $adress->getLabel(),
+                        'complement' => $adress->getComplement(),
+                        'cp' => $adress->getCp(),
+                        'city' => $adress->getCity(),
+                    ]);
+
+                    if ($existingAdress) {
+                        // Si elle existe, on utilise l'existante au lieu de créer un doublon
+                        $data->removeAdress($adress);
+                        $data->addAdress($existingAdress);
+                    }
+                    // Sinon, Doctrine créera la nouvelle adresse automatiquement
                 }
             }
         }

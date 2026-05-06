@@ -107,22 +107,6 @@
             font-weight: bold;
             color: #2d3748;
         }
-        .qr-code {
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            width: 40px;
-            height: 40px;
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            padding: 2px;
-        }
-        .qr-mock {
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(45deg, #000, #000 1px, #fff 1px, #fff 3px);
-            opacity: 0.8;
-        }
         .watermark {
             position: absolute;
             top: 55%;
@@ -234,9 +218,6 @@
             <div class="signature-text">Signature du titulaire</div>
         </div>
 
-        <div class="qr-code">
-            <div class="qr-mock"></div>
-        </div>
     </div>
 
     <!-- Deuxième carte (Verso) -->
@@ -251,6 +232,12 @@
             </div>
             
             <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                {% if user.adresses|length > 0 %}
+                    {% set addr = user.adresses|first %}
+                    <div style="font-size: 8px; margin-bottom: 8px; opacity: 0.9;">
+                        Titulaire domicilié au : {{ addr.number }} {{ addr.type }} {{ addr.label }} {{ addr.cp }} {{ addr.city }}
+                    </div>
+                {% endif %}
                 <div style="font-size: 10px; font-weight: bold;">www.larouelibre.fr</div>
                 <div style="font-size: 7px; opacity: 0.6;">© {{ currentYear }} La Roue Libre - Tous droits réservés</div>
             </div>

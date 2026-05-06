@@ -41,15 +41,17 @@ const LicenceManagement = () => {
     }, [user.token]);
 
     const handleStatusUpdate = async (id, type) => {
-        let label;
-        if (type === 'approve') label = 'Approuvée';
-        else if (type === 'cancel') label = 'Annulées';
-        else label = 'Rejetée';
+        let labelSearch;
+        if (type === 'approve') labelSearch = 'approuvée';
+        else if (type === 'cancel') labelSearch = 'annulée'; // Recherche souple
+        else labelSearch = 'rejetée';
 
-        const targetEtat = etats.find(e => e.label === label);
+        const targetEtat = etats.find(e => 
+            e.label?.toLowerCase().includes(labelSearch)
+        );
 
         if (!targetEtat) {
-            alert(`État '${label}' non trouvé dans la configuration.`);
+            alert(`État correspondant à '${labelSearch}' non trouvé dans la configuration.`);
             return;
         }
         
@@ -103,9 +105,9 @@ const LicenceManagement = () => {
                                 </div>
                                 <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase border ${
                                     lic.isActive ? 'bg-green-500/10 border-green-500/20 text-green-500' : 
-                                    lic.etat?.label === 'Approuvée' ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
-                                    lic.etat?.label === 'Rejetée' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                                    lic.etat?.label === 'Annulées' ? 'bg-gray-500/10 border-gray-500/20 text-gray-400' :
+                                    lic.etat?.label?.toLowerCase().includes('approuvée') ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
+                                    lic.etat?.label?.toLowerCase().includes('rejetée') ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                                    lic.etat?.label?.toLowerCase().includes('annulée') ? 'bg-gray-500/10 border-gray-500/20 text-gray-400' :
                                     'bg-orange/10 border-orange/20 text-orange'
                                 }`}>
                                     {lic.isActive ? 'Actif' : lic.etat?.label || 'En attente'}

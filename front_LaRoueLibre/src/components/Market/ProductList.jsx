@@ -43,9 +43,10 @@ const ProductList = () => {
         ]);
 
         const productsData = prodRes.data.member || prodRes.data['hydra:member'] || prodRes.data || [];
+        const activeProducts = productsData.filter(p => Number(p.is_active ?? p.isActive ?? 1) !== 0);
         const charsData = charRes.data.member || charRes.data['hydra:member'] || charRes.data || [];
 
-        setAllProducts(productsData);
+        setAllProducts(activeProducts);
         setAllCharacteristics(charsData);
       } catch (error) {
         console.error("Erreur API :", error);

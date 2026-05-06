@@ -51,17 +51,24 @@ const PlacesManagement = () => {
         });
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Voulez-vous vraiment supprimer ce lieu ?")) return;
+    const handleToggleActive = async (id, currentStatus) => {
+        const action = currentStatus ? "désactiver" : "réactiver";
+        if (!window.confirm(`Voulez-vous vraiment ${action} ce lieu ?`)) return;
 
         try {
-            await axios.delete(`${API_ROOT}/api/places/${id}`, {
-                headers: { Authorization: `Bearer ${user.token}` }
-            });
+            await axios.patch(`${API_ROOT}/api/places/${id}`, 
+                { is_active: !currentStatus },
+                { 
+                    headers: { 
+                        Authorization: `Bearer ${user.token}`,
+                        'Content-Type': 'application/merge-patch+json'
+                    } 
+                }
+            );
             fetchPlaces();
         } catch (err) {
-            console.error("Erreur suppression lieu:", err);
-            alert("Impossible de supprimer le lieu.");
+            console.error("Erreur statut lieu:", err);
+            alert("Impossible de modifier le statut du lieu.");
         }
     };
 
@@ -87,6 +94,7 @@ const PlacesManagement = () => {
                         <tr className="bg-white/5 border-b border-white/10">
                             <th className="px-6 py-4 font-bold text-gray-300">Lieu</th>
                             <th className="px-6 py-4 font-bold text-gray-300">Coordonnées</th>
+                            <th className="px-6 py-4 font-bold text-gray-300">Statut</th>
                             <th className="px-6 py-4 font-bold text-gray-300">Catégorie</th>
                             <th className="px-6 py-4 font-bold text-gray-300 text-right">Actions</th>
                         </tr>
@@ -112,6 +120,11 @@ const PlacesManagement = () => {
                                 </td>
                                 <td className="px-6 py-4 text-gray-400">{p.coordinates || "N/A"}</td>
                                 <td className="px-6 py-4">
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${Number(p.is_active ?? p.isActive ?? 1) === 0 ? 'bg-red-500/20 text-red-500 border border-red-500/20' : 'bg-green-500/20 text-green-500 border border-green-500/20'}`}>
+                                        {Number(p.is_active ?? p.isActive ?? 1) === 0 ? 'Inactif' : 'Actif'}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4">
                                     <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-bold">
                                         {p.category || "Découverte"}
                                     </span>
@@ -125,8 +138,9 @@ const PlacesManagement = () => {
                                             <FaEdit size={18} />
                                         </button>
                                         <button 
-                                            onClick={() => handleDelete(p.id)}
-                                            className="p-2 hover:bg-red-500/20 text-red-500 rounded-lg transition-all" title="Supprimer"
+                                            onClick={() => handleToggleActive(p.id, Number(p.is_active ?? p.isActive ?? 1) !== 0)}
+                                            className={`p-2 rounded-lg transition-all ${Number(p.is_active ?? p.isActive ?? 1) === 0 ? 'hover:bg-green-500/20 text-green-500' : 'hover:bg-red-500/20 text-red-500'}`} 
+                                            title={Number(p.is_active ?? p.isActive ?? 1) === 0 ? "Réactiver" : "Désactiver"}
                                         >
                                             <FaTrashAlt size={18} />
                                         </button>
