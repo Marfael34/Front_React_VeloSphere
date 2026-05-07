@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        @page { margin: 0; }
+        @page { margin: 1cm; }
         body { 
             font-family: 'Helvetica', 'Arial', sans-serif; 
             margin: 0; 
             padding: 0; 
-            background-color: #ffffff;
+            background-color: #f0f0f0; /* Fond gris clair pour faire ressortir la carte blanche */
             color: #1a202c;
         }
         .license-container {
             width: 90mm; 
             height: 58mm;
-            margin: 50px auto;
+            margin: 40px auto;
             background: #ffffff;
-            border-radius: 12px;
+            border-radius: 15px;
             overflow: hidden;
             border: 1px solid #e2e8f0;
             position: relative;
@@ -28,7 +28,7 @@
         }
         .header {
             background: #1a365d;
-            padding: 10px 12px;
+            padding: 12px 15px;
             color: white;
             text-align: center;
             border-bottom: 2px solid #ff6b00;
@@ -48,7 +48,7 @@
             letter-spacing: 0.5px;
         }
         .content {
-            padding: 12px;
+            padding: 15px;
         }
         .main-table {
             width: 100%;
@@ -57,18 +57,11 @@
         .photo-area {
             width: 65px;
             height: 80px;
-            background: transparent;
-            border: none;
+            background: #f7fafc;
             text-align: center;
             vertical-align: middle;
-            border-radius: 6px;
+            border-radius: 8px;
             overflow: hidden;
-            position: relative;
-        }
-        .photo-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
         .user-details {
             padding-left: 15px;
@@ -84,7 +77,7 @@
         .sub-info {
             font-size: 9px;
             color: #4a5568;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
         .info-grid {
             width: 100%;
@@ -100,10 +93,10 @@
             color: #718096;
             font-weight: bold;
             display: block;
-            margin-bottom: 1px;
+            margin-bottom: 2px;
         }
         .value {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: bold;
             color: #2d3748;
         }
@@ -117,14 +110,12 @@
             color: rgba(26, 54, 93, 0.03);
             white-space: nowrap;
             z-index: 0;
-            pointer-events: none;
         }
         .logo-small {
             position: absolute;
             top: 10px;
             left: 12px;
             height: 24px;
-            z-index: 2;
         }
         .signature-area {
             position: absolute;
@@ -174,7 +165,7 @@
                 <tr>
                     <td class="photo-area">
                         {% if avatar %}
-                            <div style="width: 65px; height: 80px; background-image: url('{{ avatar }}'); background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
+                            <img src="{{ avatar }}" style="width: 65px; height: 80px; object-fit: cover;" alt="Photo">
                         {% else %}
                             <div style="padding-top: 30px; font-size: 8px; color: #a0aec0;">PHOTO</div>
                         {% endif %}
@@ -217,29 +208,28 @@
             <div class="signature-line"></div>
             <div class="signature-text">Signature du titulaire</div>
         </div>
-
     </div>
 
     <!-- Deuxième carte (Verso) -->
-    <div class="license-container" style="margin-top: 20px; background: #1a365d; color: white; border: none;">
+    <div class="license-container" style="background: #1a365d; color: white; border: none; margin-top: 20px;">
         <div class="content" style="padding: 25px; text-align: center;">
             <div style="font-size: 11px; font-weight: bold; margin-bottom: 12px; color: #ff6b00; text-transform: uppercase;">Informations Importantes</div>
             <div style="font-size: 8px; line-height: 1.5; color: #e2e8f0; text-align: justify;">
                 Cette licence est strictement personnelle et doit être présentée sur demande lors des compétitions officielles. 
-                Le titulaire s'engage à respecter le règlement de la Fédération La Roue Libre et les règles de sécurité en vigueur. 
+                Le titulaire s'engage à respecter le règlement de la Fédération La Roue Libre. 
                 En cas d'urgence, veuillez contacter les services de secours. 
-                Cette carte atteste que le titulaire a fourni un certificat médical valide pour la pratique du BMX en compétition.
+                Cette carte atteste que le titulaire a fourni un certificat médical valide.
             </div>
             
             <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
                 {% if user.adresses|length > 0 %}
                     {% set addr = user.adresses|first %}
                     <div style="font-size: 8px; margin-bottom: 8px; opacity: 0.9;">
-                        Titulaire domicilié au : {{ addr.number }} {{ addr.type }} {{ addr.label }} {{ addr.cp }} {{ addr.city }}
+                        Titulaire : {{ addr.number }} {{ addr.type }} {{ addr.label }} {{ addr.cp }} {{ addr.city }}
                     </div>
                 {% endif %}
                 <div style="font-size: 10px; font-weight: bold;">www.larouelibre.fr</div>
-                <div style="font-size: 7px; opacity: 0.6;">© {{ currentYear }} La Roue Libre - Tous droits réservés</div>
+                <div style="font-size: 7px; opacity: 0.6;">© {{ currentYear }} La Roue Libre</div>
             </div>
         </div>
         <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: #ff6b00;"></div>

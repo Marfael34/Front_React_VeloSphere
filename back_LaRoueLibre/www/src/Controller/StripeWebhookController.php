@@ -62,6 +62,9 @@ class StripeWebhookController extends AbstractController
                         $pdfOptions->set('defaultFont', 'Arial');
                         $pdfOptions->set('isRemoteEnabled', true);
                         $dompdf = new Dompdf($pdfOptions);
+                        
+                        // Retour au format A4 avec la carte centrée
+                        $dompdf->setPaper('A4', 'portrait');
 
                         $logoPath = $params->get('kernel.project_dir') . '/public/images/logo.png';
                         $logoData = null;
@@ -71,17 +74,28 @@ class StripeWebhookController extends AbstractController
                             $logoData = 'data:image/' . $typeLogo . ';base64,' . base64_encode($dataLogo);
                         }
 
-                        // --- RÉCUPÉRATION DE LA PHOTO (Priorité à la photo de licence, sinon avatar) ---
+                        // --- RÉCUPÉRATION DE LA PHOTO ---
                         $user = $licence->getUser();
-                        $photoPathForPdf = $licence->getPhotoPath() ?: ($user ? $user->getAvatar() : null);
+                        $photoPath = $licence->getPhotoPath() ?: ($user ? $user->getAvatar() : null);
                         $photoData = null;
 
-                        if ($photoPathForPdf) {
-                            $fullPhotoPath = $params->get('kernel.project_dir') . '/public' . $photoPathForPdf;
+                        if ($photoPath) {
+                            $logger->info("Tentative de chargement de la photo : " . $photoPath);
+                            
+                            // Si c'est un chemin relatif commençant par /, on le préfixe par le répertoire public
+                            if (strpos($photoPath, '/') === 0) {
+                                $fullPhotoPath = $params->get('kernel.project_dir') . '/public' . $photoPath;
+                            } else {
+                                $fullPhotoPath = $params->get('kernel.project_dir') . '/public/' . $photoPath;
+                            }
+
                             if (file_exists($fullPhotoPath)) {
-                                $typePhoto = pathinfo($fullPhotoPath, PATHINFO_EXTENSION);
-                                $dataPhoto = file_get_contents($fullPhotoPath);
-                                $photoData = 'data:image/' . $typePhoto . ';base64,' . base64_encode($dataPhoto);
+                                $extension = strtolower(pathinfo($fullPhotoPath, PATHINFO_EXTENSION));
+                                $mimeType = ($extension === 'jpg' || $extension === 'jpeg') ? 'jpeg' : 'png';
+                                $photoData = 'data:image/' . $mimeType . ';base64,' . base64_encode(file_get_contents($fullPhotoPath));
+                                $logger->info("Photo chargée avec succès (mime: $mimeType)");
+                            } else {
+                                $logger->warning("Fichier photo introuvable sur le disque : " . $fullPhotoPath);
                             }
                         }
 
@@ -89,11 +103,19 @@ class StripeWebhookController extends AbstractController
                         $signaturePath = $licence->getSignaturePath();
                         $signatureData = null;
                         if ($signaturePath) {
-                            $fullSignaturePath = $params->get('kernel.project_dir') . '/public' . $signaturePath;
-                            if (file_exists($fullSignaturePath)) {
-                                $typeSig = pathinfo($fullSignaturePath, PATHINFO_EXTENSION);
-                                $dataSig = file_get_contents($fullSignaturePath);
-                                $signatureData = 'data:image/' . $typeSig . ';base64,' . base64_encode($dataSig);
+                            $logger->info("Tentative de chargement de la signature : " . $signaturePath);
+                            
+                            if (strpos($signaturePath, '/') === 0) {
+                                $fullSigPath = $params->get('kernel.project_dir') . '/public' . $signaturePath;
+                            } else {
+                                $fullSigPath = $params->get('kernel.project_dir') . '/public/' . $signaturePath;
+                            }
+
+                            if (file_exists($fullSigPath)) {
+                                $signatureData = 'data:image/png;base64,' . base64_encode(file_get_contents($fullSigPath));
+                                $logger->info("Signature chargée avec succès.");
+                            } else {
+                                $logger->warning("Fichier signature introuvable sur le disque : " . $fullSigPath);
                             }
                         }
 
@@ -111,7 +133,8 @@ class StripeWebhookController extends AbstractController
 
                         $currentYear = (new \DateTime())->format('Y');
                         $safeName = $user ? str_replace([' ', "'"], '_', strtoupper($user->getLastname()) . '_' . ucfirst($user->getFirstname())) : 'ANONYMOUS';
-                        $fileName = 'LICENCE_' . $currentYear . '_' . $safeName . '.pdf';
+                        // On ajoute l'ID de licence et un identifiant unique pour éviter les collisions
+                        $fileName = 'LICENCE_' . $currentYear . '_' . $safeName . '_ID' . $licence->getId() . '_' . uniqid() . '.pdf';
                         $pdfDirectory = $params->get('kernel.project_dir') . '/public/uploads/licences/pdf_officiels';
 
                         if (!is_dir($pdfDirectory)) {
@@ -123,6 +146,38 @@ class StripeWebhookController extends AbstractController
 
                         $licence->setPdfPath('/uploads/licences/pdf_officiels/' . $fileName);
                         $logger->info("PDF de licence généré : " . $fileName);
+
+                        // --- GÉNÉRATION DE LA FACTURE POUR LA LICENCE ---
+                        $logger->info("Génération de la facture pour la licence...");
+                        $invoiceDompdf = new Dompdf($pdfOptions);
+                        $invoiceLines = [[
+                            'title' => "Licence " . $licence->getPriceLicence()->getLabel(),
+                            'price' => $licence->getPriceLicence()->getPrice() / 100,
+                            'quantity' => 1,
+                            'subtotal' => $licence->getPriceLicence()->getPrice() / 100
+                        ]];
+
+                        $invoiceHtml = $twig->render('invoice/invoice.html.twig', [
+                            'order' => null, // Pas d'entité Order ici
+                            'user' => $user,
+                            'lines' => $invoiceLines,
+                            'total' => $licence->getPriceLicence()->getPrice() / 100,
+                            'date' => new \DateTime(),
+                            'logo' => $logoData
+                        ]);
+
+                        $invoiceDompdf->loadHtml($invoiceHtml);
+                        $invoiceDompdf->setPaper('A4', 'portrait');
+                        $invoiceDompdf->render();
+
+                        $invoiceFileName = 'facture_licence_' . uniqid() . '.pdf';
+                        $invoiceDirectory = $params->get('kernel.project_dir') . '/public/uploads/invoices';
+                        if (!is_dir($invoiceDirectory)) mkdir($invoiceDirectory, 0777, true);
+
+                        file_put_contents($invoiceDirectory . '/' . $invoiceFileName, $invoiceDompdf->output());
+                        $licence->setInvoicePath('/uploads/invoices/' . $invoiceFileName);
+                        $logger->info("Facture de licence générée : " . $invoiceFileName);
+
                     } catch (\Exception $e) {
                         $logger->error("Erreur génération PDF licence : " . $e->getMessage());
                     }
@@ -199,6 +254,9 @@ class StripeWebhookController extends AbstractController
                         $totalPrice += $subtotal;
                         $em->remove($item);
                     }
+
+                    // On enregistre le prix total en centimes dans l'entité Order
+                    // $order->setTotalPrice((int)($totalPrice * 100));
 
                     $logger->info("Génération du PDF en cours...");
                     $pdfOptions = new Options();

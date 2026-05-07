@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -49,13 +49,23 @@ const createCustomIcon = (color, iconType) => {
 const placeIcon = createCustomIcon('#ff9800', 'place'); // Orange pour les lieux
 const competitionIcon = createCustomIcon('#2196f3', 'competition'); // Bleu pour les compétitions
 
-const ChangeView = ({ center, zoom }) => {
+const ChangeView = ({ center, zoom, mobileView }) => {
     const map = useMap();
-    map.setView(center, zoom);
+    
+    useEffect(() => {
+        // On force le rafraîchissement dès que la vue change ou que le centre change
+        const timer = setTimeout(() => {
+            map.invalidateSize();
+            map.setView(center, zoom);
+        }, 300); // Un délai un peu plus long pour laisser le DOM se mettre à jour sur mobile
+        
+        return () => clearTimeout(timer);
+    }, [center, zoom, map, mobileView]);
+
     return null;
 };
 
-const MapComponent = ({ points = [], center = [46.603354, 1.888334], zoom = 6 }) => {
+const MapComponent = ({ points = [], center = [46.2276, 2.2137], zoom = 6, mobileView = 'map' }) => {
     return (
         <div className="h-full w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
             <MapContainer 
@@ -107,7 +117,7 @@ const MapComponent = ({ points = [], center = [46.603354, 1.888334], zoom = 6 })
                         </Marker>
                     );
                 })}
-                <ChangeView center={center} zoom={zoom} />
+                <ChangeView center={center} zoom={zoom} mobileView={mobileView} />
             </MapContainer>
         </div>
     );

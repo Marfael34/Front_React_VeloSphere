@@ -1,6 +1,6 @@
 import React from "react";
 
-const CustomInput = ({ label, state, type, placeholder = "", callable }) => {
+const CustomInput = ({ label, state, type, placeholder = "", callable, ...props }) => {
   return (
     <div className="mb-5">
       <label className="block text-white font-semibold mb-2 text-sm">
@@ -12,6 +12,7 @@ const CustomInput = ({ label, state, type, placeholder = "", callable }) => {
         placeholder={placeholder}
         value={state}
         onChange={callable}
+        {...props}
       />
     </div>
   );

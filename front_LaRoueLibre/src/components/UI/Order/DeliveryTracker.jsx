@@ -41,7 +41,7 @@ const DeliveryTracker = ({ order }) => {
         : "0%";
 
     return (
-        <div className="w-full mt-2 pt-2 pb-10 px-2">
+        <div className="w-full mt-2 pt-2 pb-10 px-2 sm:px-6">
 
             {/* AFFICHAGE DU STATUT ACTUEL EN GRAND */}
             <div className="mb-14 text-center">
@@ -59,9 +59,8 @@ const DeliveryTracker = ({ order }) => {
                 )}
             </div>
 
-            {/* LA BARRE DE PROGRESSION À 7 ÉTAPES */}
-            <div className="relative flex items-center justify-between w-full mt-4">
-
+            {/* VERSION DESKTOP : BARRE HORIZONTALE (cachée sur mobile) */}
+            <div className="hidden sm:flex relative items-center justify-between w-full mt-4">
                 {/* Ligne de fond (Grise) */}
                 <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1.5 bg-slate-grey_06 rounded-full z-0"></div>
 
@@ -79,20 +78,61 @@ const DeliveryTracker = ({ order }) => {
 
                     return (
                         <div key={step.id} className="relative z-10 flex flex-col items-center">
-                            {/* Le Cercle */}
-                            <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center border-4 transition-all duration-500
+                            <div className={`w-11 h-11 rounded-full flex items-center justify-center border-4 transition-all duration-500
                                 ${isCompleted
                                     ? (isAnnule ? 'bg-red-500 border-nigth-blue text-white' : 'bg-orange border-nigth-blue text-black shadow-[0_0_20px_rgba(242,140,51,0.4)] scale-110')
                                     : 'bg-dark-nigth-blue border-slate-grey_06 text-white_05'}`}
                             >
                                 {step.icon}
                             </div>
-
-                            {/* Le Label sous le cercle */}
-                            <span className={`mt-4 text-[8px] sm:text-[9px] uppercase tracking-tighter sm:tracking-normal font-black absolute top-10 sm:top-11 whitespace-nowrap transition-colors duration-300
+                            <span className={`mt-4 text-[9px] uppercase font-black absolute top-11 whitespace-nowrap transition-colors duration-300
                                 ${isCurrent ? (isAnnule ? 'text-red-500' : 'text-orange') : isCompleted ? 'text-white' : 'text-white_05'}`}>
                                 {step.label}
                             </span>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* VERSION MOBILE : LISTE VERTICALE (cachée sur desktop) */}
+            <div className="sm:hidden flex flex-col space-y-8 relative">
+                {/* Ligne verticale de fond */}
+                <div className="absolute left-[18px] top-4 bottom-4 w-1 bg-slate-grey_06 rounded-full"></div>
+                
+                {/* Ligne verticale de progression */}
+                <div 
+                    className={`absolute left-[18px] top-4 w-1 rounded-full transition-all duration-1000 ease-in-out
+                        ${status.includes('annulé') ? 'bg-red-500' : 'bg-orange'}`}
+                    style={{ 
+                        height: activeStep > 0 
+                            ? `${((activeStep - 1) / (steps.length - 1)) * 100}%` 
+                            : "0%" 
+                    }}
+                ></div>
+
+                {steps.map((step) => {
+                    const isCompleted = activeStep >= step.id;
+                    const isCurrent = activeStep === step.id;
+                    const isAnnule = status.includes('annulé');
+
+                    return (
+                        <div key={step.id} className="relative z-10 flex items-center gap-4">
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center border-4 transition-all duration-500 shrink-0
+                                ${isCompleted
+                                    ? (isAnnule ? 'bg-red-500 border-nigth-blue text-white' : 'bg-orange border-nigth-blue text-black shadow-[0_0_10px_rgba(242,140,51,0.3)]')
+                                    : 'bg-dark-nigth-blue border-slate-grey_06 text-white_05'}`}
+                            >
+                                {step.icon}
+                            </div>
+                            <div className="flex flex-col">
+                                <span className={`text-[10px] uppercase font-black tracking-widest
+                                    ${isCurrent ? (isAnnule ? 'text-red-500' : 'text-orange') : isCompleted ? 'text-white' : 'text-white_05'}`}>
+                                    {step.label}
+                                </span>
+                                {isCurrent && (
+                                    <span className="text-[8px] text-white_05 font-medium mt-0.5">Étape actuelle</span>
+                                )}
+                            </div>
                         </div>
                     );
                 })}

@@ -94,6 +94,21 @@ class Licence
     #[Groups(['licence:read', 'user:read'])]
     private ?\DateTimeInterface $validUntil = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['licence:read', 'user:read'])]
+    private ?string $invoicePath = null;
+
+    public function getInvoicePath(): ?string
+    {
+        return $this->invoicePath;
+    }
+
+    public function setInvoicePath(?string $invoicePath): static
+    {
+        $this->invoicePath = $invoicePath;
+        return $this;
+    }
+
     public function getSignaturePath(): ?string
     {
         return $this->signaturePath;

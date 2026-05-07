@@ -29,7 +29,8 @@ const AddressAutocomplete = ({ onAddressSelect }) => {
 
             setIsLoading(true);
             try {
-                const response = await axios.get(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5`);
+                const cleanQuery = query.replace(/[^\w\s,]/g, ''); // On garde les lettres, chiffres, espaces et virgules
+                const response = await axios.get(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(cleanQuery)}&limit=5`);
                 setSuggestions(response.data.features);
             } catch (error) {
                 console.error("Erreur API Adresse:", error);

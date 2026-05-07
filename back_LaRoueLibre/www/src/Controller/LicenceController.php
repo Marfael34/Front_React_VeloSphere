@@ -29,6 +29,10 @@ class LicenceController extends AbstractController
                 return $this->json(['message' => 'Licence non trouvée'], 404);
             }
 
+            // LOGGING DEBUG
+            error_log("Tentative d'upload pour licence ID: " . $id);
+            error_log("Fichiers reçus: " . implode(', ', array_keys($request->files->all())));
+
             // Vérification que l'utilisateur est le propriétaire ou admin
             if ($licence->getUser() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN')) {
                 return $this->json(['message' => 'Accès refusé'], 403);
@@ -42,6 +46,9 @@ class LicenceController extends AbstractController
             $photoFile = $request->files->get('photo');
             /** @var UploadedFile $sigFile */
             $sigFile = $request->files->get('signature');
+
+            if ($photoFile) error_log("Photo reçue: " . $photoFile->getClientOriginalName());
+            if ($sigFile) error_log("Signature reçue: " . $sigFile->getClientOriginalName());
 
             $uploadRootDir = $this->getParameter('kernel.project_dir') . '/public/uploads/licences';
             $user = $licence->getUser();
@@ -96,12 +103,20 @@ class LicenceController extends AbstractController
         }
     }
 
-    #[Route('/{id}/notify-validation', name: 'notify_validation', methods: ['POST'])]
+    #[Route('/{id}/notify-success', name: 'notify_validation', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function notifyValidation(
         int $id, 
         EntityManagerInterface $em, 
         \Symfony\Component\Mailer\MailerInterface $mailer
     ): JsonResponse {
+        $currentUser = $this->getUser();
+        if (!$currentUser) {
+            error_log("Tentative d'appel notifyValidation sans authentification");
+            return new JsonResponse(['message' => 'Unauthorized'], 401);
+        }
+        
+        error_log("Notification de validation pour licence ID: " . $id . " par " . $currentUser->getUserIdentifier());
         $licence = $em->getRepository(Licence::class)->find($id);
 
         if (!$licence) {
@@ -119,6 +134,7 @@ class LicenceController extends AbstractController
         }
 
         try {
+            error_log("Préparation de l'email pour : " . $targetUser->getEmail());
             $email = (new TemplatedEmail())
                 ->from('no-reply@larouelibre.fr')
                 ->to($targetUser->getEmail())
@@ -129,13 +145,16 @@ class LicenceController extends AbstractController
                     'licence' => $licence,
                 ]);
 
+            error_log("Envoi de l'email...");
             $mailer->send($email);
+            error_log("Email envoyé avec succès.");
 
             return new JsonResponse(['message' => 'Email de notification envoyé']);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            error_log("Erreur critique notifyValidation : " . $e->getMessage());
             return new JsonResponse([
                 'error' => 'Erreur lors de l\'envoi de l\'email : ' . $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'type' => get_class($e)
             ], 500);
         }
     }

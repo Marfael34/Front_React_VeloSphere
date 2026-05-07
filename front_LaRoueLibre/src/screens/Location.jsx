@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_ROOT } from '../constants/apiConstant';
 import MapComponent from '../components/MapComponent';
 import PageLoader from '../components/Loader/PageLoader';
-import { FaMapMarkedAlt, FaMapMarkerAlt, FaChevronRight, FaSearch, FaInfoCircle } from 'react-icons/fa';
+import { FaMapMarkedAlt, FaMapMarkerAlt, FaChevronRight, FaSearch, FaInfoCircle, FaListUl, FaMap, FaSyncAlt } from 'react-icons/fa';
 
 const Location = () => {
     const navigate = useNavigate();
@@ -12,8 +12,9 @@ const Location = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedPlaceId, setSelectedPlaceId] = useState(null);
-    const [mapCenter, setMapCenter] = useState([46.603354, 1.888334]);
+    const [mapCenter, setMapCenter] = useState([46.2276, 2.2137]); // Centre de la France
     const [mapZoom, setMapZoom] = useState(6);
+    const [mobileView, setMobileView] = useState('list'); // 'list' or 'map'
 
     useEffect(() => {
         const fetchData = async () => {
@@ -65,6 +66,15 @@ const Location = () => {
         setSelectedPlaceId(place.id);
         setMapCenter([place.lat, place.lng]);
         setMapZoom(13);
+        if (window.innerWidth < 1024) {
+            setMobileView('map');
+        }
+    };
+
+    const resetMapView = () => {
+        setSelectedPlaceId(null);
+        setMapCenter([46.2276, 2.2137]);
+        setMapZoom(6);
     };
 
     const handleViewDetail = (id) => {
@@ -74,22 +84,31 @@ const Location = () => {
     if (loading) return <PageLoader />;
 
     return (
-        <div className="bg-dark-nigth-blue min-h-screen pt-24 pb-12 px-4 md:px-8">
-            <div className="max-w-7xl mx-auto h-[calc(100vh-180px)] flex flex-col">
-                <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h1 className="text-4xl font-black italic uppercase text-white flex items-center gap-4 tracking-tighter">
+        <div className="bg-dark-nigth-blue min-h-screen pt-20 md:pt-24 pb-12 px-4 md:px-8">
+            <div className="max-w-7xl mx-auto h-[calc(100vh-140px)] md:h-[calc(100vh-180px)] flex flex-col relative">
+                
+                {/* EN-TÊTE */}
+                <div className="mb-4 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div className="flex-1">
+                        <h1 className="text-2xl md:text-4xl font-black italic uppercase text-white flex items-center gap-4 tracking-tighter">
                             <FaMapMarkedAlt className="text-orange" /> Itinéraires <span className="text-orange">& Lieux</span>
                         </h1>
-                        <p className="text-gray-400 mt-2 font-medium">
+                        <p className="hidden md:block text-gray-400 mt-2 font-medium">
                             Découvrez tous les spots de pratique référencés par la communauté.
                         </p>
                     </div>
+                    <button 
+                        onClick={resetMapView}
+                        className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all border border-white/10"
+                    >
+                        <FaSyncAlt /> Recentrer
+                    </button>
                 </div>
 
-                <div className="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden">
-                    {/* LISTE DES LIEUX (SIDEBAR) */}
-                    <div className="w-full lg:w-96 flex flex-col gap-4">
+                <div className="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden relative">
+                    
+                    {/* LISTE DES LIEUX */}
+                    <div className={`w-full lg:w-96 flex flex-col gap-4 ${mobileView === 'list' ? 'flex' : 'hidden lg:flex'}`}>
                         <div className="relative">
                             <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
                             <input 
@@ -130,7 +149,6 @@ const Location = () => {
                                             <FaChevronRight className={`text-xs transition-all ${selectedPlaceId === place.id ? 'text-orange translate-x-1' : 'text-gray-600'}`} />
                                         </div>
                                         
-                                        {/* Action Button Section - Toujours visible pour le lieu sélectionné ou au hover */}
                                         <div className={`px-4 pb-4 flex gap-2 transition-all duration-300 ${selectedPlaceId === place.id ? 'opacity-100 max-h-20' : 'opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-20'}`}>
                                             <button 
                                                 onClick={(e) => { e.stopPropagation(); handleViewDetail(place.id); }}
@@ -150,20 +168,37 @@ const Location = () => {
                     </div>
 
                     {/* CARTE */}
-                    <div className="flex-1 relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+                    <div className={`flex-1 relative rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 shadow-2xl ${mobileView === 'map' ? 'block' : 'hidden lg:block'}`}>
                         {mapPoints.length > 0 ? (
-                            <MapComponent points={mapPoints} center={mapCenter} zoom={mapZoom} />
+                            <MapComponent 
+                                points={mapPoints} 
+                                center={mapCenter} 
+                                zoom={mapZoom} 
+                                mobileView={mobileView} // On passe la vue mobile pour forcer le refresh
+                            />
                         ) : (
                             <div className="h-full w-full bg-black/20 flex flex-col items-center justify-center text-center p-8">
                                 <FaMapMarkedAlt className="text-6xl text-gray-700 mb-4" />
                                 <h2 className="text-2xl font-bold text-gray-500 italic">Aucun point à afficher</h2>
                                 <p className="text-gray-600 mt-2 max-w-md">
-                                    Ajoutez des coordonnées GPS (format: "lat, lng") aux lieux pour les voir apparaître sur la carte.
+                                    Ajoutez des coordonnées GPS (format: \"lat, lng\") aux lieux pour les voir apparaître sur la carte.
                                 </p>
                             </div>
                         )}
                     </div>
                 </div>
+
+                {/* BOUTON FLOTTANT MOBILE */}
+                <button 
+                    onClick={() => setMobileView(mobileView === 'list' ? 'map' : 'list')}
+                    className="lg:hidden fixed bottom-6 right-6 z-1000 bg-orange text-black px-6 py-4 rounded-full font-black uppercase italic tracking-widest shadow-2xl shadow-orange/30 flex items-center gap-3 border-2 border-black/10 active:scale-95 transition-transform"
+                >
+                    {mobileView === 'list' ? (
+                        <><FaMap /> Voir la Carte</>
+                    ) : (
+                        <><FaListUl /> Voir la Liste</>
+                    )}
+                </button>
             </div>
         </div>
     );

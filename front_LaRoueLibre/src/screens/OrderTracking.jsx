@@ -53,7 +53,7 @@ const OrderTracking = () => {
                 </button>
 
                 <div className="mb-8">
-                    <h1 className="title-h1 !mb-2">Suivi de commande</h1>
+                    <h1 className="title-h1 mb-2!">Suivi de commande</h1>
                     <p className="text-sm text-white_05">
                         ID : <span className="text-orange font-bold">#{order.id || id || "?"}</span> • 
                         Date : <span className="text-white">{getSafeDate()}</span>
@@ -61,21 +61,19 @@ const OrderTracking = () => {
                 </div>
 
                 <div className="bg-nigth-blue shadow-2xl rounded-2xl border border-slate-grey_06 overflow-hidden">
-                    <div className="p-8 sm:p-12">
+                    <div className="p-5 sm:p-12">
                         {/* Appel du tracker ultra sécurisé */}
                         <DeliveryTracker order={order} />
                     </div>
                     
                     {order.path && (
-                        <div className="bg-black/20 px-6 py-4 border-t border-slate-grey_06 flex justify-end">
-                            <a 
-                                href={`${API_ROOT}${order.path}`}
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-sm font-bold text-orange hover:text-white transition-colors"
+                        <div className="bg-black/20 px-6 py-4 border-t border-slate-grey_06 flex justify-center sm:justify-end">
+                            <button 
+                                onClick={() => navigate(`/invoice/${order.id}`)}
+                                className="text-xs sm:text-sm font-bold text-orange hover:text-white transition-colors"
                             >
-                                Télécharger la facture PDF
-                            </a>
+                                Voir et télécharger la facture
+                            </button>
                         </div>
                     )}
                 </div>

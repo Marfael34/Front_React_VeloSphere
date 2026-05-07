@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Facture #{{ order.id }}</title>
+    <title>Facture #{{ order ? order.id : 'LICENCE' }}</title>
     <style>
         body { 
             font-family: 'Helvetica', Arial, sans-serif; 
@@ -148,7 +148,7 @@
                 </td>
                 <td class="text-right">
                     <span class="label">Détails :</span>
-                    <div class="value">N° FAC-{{ date|date('Y') }}-{{ random(1000, 9999) }}</div>
+                    <div class="value">N° FAC-{{ date|date('Y') }}-{{ order ? order.id : random(10000, 99999) }}</div>
                     <div class="value">Date : {{ date|date('d/m/Y') }}</div>
                 </td>
             </tr>

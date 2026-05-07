@@ -14,7 +14,7 @@ const ProductCard = ({ product }) => {
     const imageUrl = product.imagePath ? (product.imagePath.startsWith('/') ? `${API_ROOT}${product.imagePath}` : `${API_ROOT}/images/products/${product.imagePath}`) : `${IMAGE_URL}/default/default_product.png`;
 
   return (
-    <div className='flex flex-col items-center w-65.5 p-4 bg-nigth-blue hover:bg-dark-nigth-blue_09 transition-all ease-in-out duration-500 animate-slideup rounded-lg cursor-pointer group'>
+    <div className='flex flex-col items-center w-full max-w-[320px] sm:max-w-[280px] p-4 bg-nigth-blue hover:bg-dark-nigth-blue_09 transition-all ease-in-out duration-500 animate-slideup rounded-lg cursor-pointer group shadow-md'>
         <div className="relative w-full flex flex-col">
             
             {/* Image du produit cliquable */}
@@ -22,7 +22,7 @@ const ProductCard = ({ product }) => {
                 <img 
                     src={imageUrl}
                     alt={`Image du produit ${productTitle}`} 
-                    className={`mx-auto rounded-lg object-cover h-52 w-52 bg-white/10 ${product.quantity <= 0 ? 'grayscale opacity-60' : ''}`}
+                    className={`mx-auto rounded-lg object-cover h-64 w-full sm:h-52 sm:w-52 bg-white/10 ${product.quantity <= 0 ? 'grayscale opacity-60' : ''}`}
                     onError={(e) => { e.target.src = `${IMAGE_URL}/default/default_product.png`; }}
                 />
                 {product.quantity <= 0 && (

@@ -32,7 +32,7 @@ class Adress
     #[Groups(['user:read'])]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?string $number = null;
 
@@ -40,19 +40,19 @@ class Adress
     #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?string $complement = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 20, nullable: true)]
     #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?string $type = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?string $label = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 50, nullable: true)]
     #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?string $city = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     #[Groups(['user:read', 'user:write', 'licence:read'])]
     private ?int $cp = null;
 

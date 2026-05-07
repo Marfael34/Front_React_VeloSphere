@@ -60,19 +60,29 @@ const Checkout = () => {
         setIsSavingAddress(true);
 
         try {
-            // 1. On met à jour l'utilisateur avec son adresse
-            // Note: API Platform attend un tableau d'adresses ou un objet selon la config
+            // 1. Création de l'adresse d'abord (plus robuste que le PATCH imbriqué)
             const addressData = {
                 number: number,
                 type: typeVoie,
                 label: label,
                 complement: complement.trim() === "" ? null : complement,
                 city: city,
-                cp: parseInt(cp)
+                cp: cp ? parseInt(cp) : 0
             };
 
+            const addrRes = await axios.post(`${API_ROOT}/api/adresses`, addressData, {
+                headers: { 
+                    Authorization: `Bearer ${user.token}`,
+                    'Content-Type': 'application/ld+json',
+                    'Accept': 'application/ld+json'
+                }
+            });
+
+            const addressIRI = addrRes.data['@id'] || `/api/adresses/${addrRes.data.id}`;
+
+            // 2. On lie l'adresse à l'utilisateur
             const patchRes = await axios.patch(`${API_ROOT}/api/users/${user.id}`, {
-                adresses: [addressData]
+                adresses: [addressIRI] // On envoie l'IRI
             }, {
                 headers: { 
                     Authorization: `Bearer ${user.token}`,
@@ -80,13 +90,13 @@ const Checkout = () => {
                 }
             });
 
-            // Mettre à jour l'utilisateur dans le contexte avec la nouvelle adresse
+            // Mettre à jour l'utilisateur dans le contexte
             setUser({
                 ...user,
                 adresses: patchRes.data.adresses
             });
 
-            // 2. On génère l'intention de paiement seulement après validation de l'adresse
+            // 3. On génère l'intention de paiement
             const endpoint = type === 'licence' && licenceId 
                 ? `${API_ROOT}/api/create-licence-payment-intent/${licenceId}`
                 : `${API_ROOT}/api/create-payment-intent`;
@@ -96,10 +106,11 @@ const Checkout = () => {
             });
 
             setClientSecret(res.data.clientSecret);
-            setStep(2); // On passe au paiement
+            setStep(2); 
         } catch (err) {
-            console.error("Erreur lors de la sauvegarde de l'adresse ou du paiement:", err);
-            alert("Une erreur est survenue lors de la validation de vos informations.");
+            console.error("Erreur détaillée:", err.response?.data || err.message);
+            const serverMsg = err.response?.data?.detail || err.response?.data?.error || err.message;
+            alert(`Une erreur est survenue : ${serverMsg}`);
         } finally {
             setIsSavingAddress(false);
         }

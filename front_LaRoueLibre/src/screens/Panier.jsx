@@ -184,51 +184,59 @@ const Panier = () => {
           <div className="flex flex-col md:flex-row gap-8">
             <div className="flex-1 space-y-4">
               {aggregatedCartItems.map((item) => (
-                <div key={item.product.id} className="flex items-center bg-gray-800 p-4 rounded-lg shadow border border-white/5 hover:border-orange/30 transition">
-                  <img 
-                    src={item.product?.imagePath ? (item.product.imagePath.startsWith('/') ? `${API_ROOT}${item.product.imagePath}` : `${API_ROOT}/images/products/${item.product.imagePath}`) : `${IMAGE_URL}/default/default_product.png`} 
-                    alt={item.product?.title} 
-                    onError={(e) => { e.target.onerror = null; e.target.src = `${IMAGE_URL}/default/default_product.png`; }}
-                    className="w-24 h-24 object-contain rounded-md mr-4 bg-white/5"
-                  />
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold">
-                      {item.product?.title || "Produit sans titre"}
-                    </h3>
-                    <p className="text-gray-400 text-sm mb-2">{item.product?.brand}</p>
-                    
-                    {/* Contrôleur de quantité aligné avec le prix */}
-                    <div className="flex items-center gap-6 mt-2">
-                      <p className="text-orange font-bold text-lg w-20">
+                <div key={item.product.id} className="bg-gray-800 p-4 rounded-2xl shadow border border-white/5 hover:border-orange/30 transition flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                  {/* Image */}
+                  <div className="w-full sm:w-24 h-40 sm:h-24 flex-shrink-0 bg-white/5 rounded-xl overflow-hidden">
+                    <img 
+                      src={item.product?.imagePath ? (item.product.imagePath.startsWith('/') ? `${API_ROOT}${item.product.imagePath}` : `${API_ROOT}/images/products/${item.product.imagePath}`) : `${IMAGE_URL}/default/default_product.png`} 
+                      alt={item.product?.title} 
+                      onError={(e) => { e.target.onerror = null; e.target.src = `${IMAGE_URL}/default/default_product.png`; }}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+
+                  {/* Infos */}
+                  <div className="flex-1 text-center sm:text-left w-full">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                      <div>
+                        <h3 className="text-lg font-bold line-clamp-1">
+                          {item.product?.title || "Produit sans titre"}
+                        </h3>
+                        <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">{item.product?.brand}</p>
+                      </div>
+                      <p className="text-orange font-black text-xl sm:text-lg">
                         {((parseFloat(item.product?.price || 0) / 100) * item.quantity).toFixed(2)} €
                       </p>
-
-                      <div className="flex items-center gap-2 bg-black/30 rounded-lg p-1 border border-white/5">
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
+                      {/* Contrôleur de quantité */}
+                      <div className="flex items-center gap-3 bg-black/40 rounded-xl p-1 border border-white/10">
                         <button 
                           onClick={() => handleUpdateQuantity(item, -1)}
-                          className="w-7 h-7 rounded bg-white/5 hover:bg-orange hover:text-black flex items-center justify-center font-bold transition-colors"
+                          className="w-8 h-8 rounded-lg bg-white/5 hover:bg-orange hover:text-black flex items-center justify-center font-black transition-all active:scale-90"
                         >
                           -
                         </button>
-                        <span className="font-bold w-8 text-center text-sm">{item.quantity}</span>
+                        <span className="font-bold w-10 text-center text-sm">{item.quantity}</span>
                         <button 
                           onClick={() => handleUpdateQuantity(item, 1)}
-                          className="w-7 h-7 rounded bg-white/5 hover:bg-orange hover:text-black flex items-center justify-center font-bold transition-colors"
+                          className="w-8 h-8 rounded-lg bg-white/5 hover:bg-orange hover:text-black flex items-center justify-center font-black transition-all active:scale-90"
                         >
                           +
                         </button>
                       </div>
-                    </div>
 
+                      <button 
+                        onClick={() => handleRemoveProduct(item.dbIds)}
+                        className="flex items-center gap-2 text-red-500 hover:text-white hover:bg-red-500/10 px-4 py-2 rounded-xl transition-all border border-red-500/20 text-xs font-bold uppercase"
+                        aria-label="Retirer le produit"
+                      >
+                        <RiDeleteBinLine className="text-lg" />
+                        <span>Retirer</span>
+                      </button>
+                    </div>
                   </div>
-                  <button 
-                    onClick={() => handleRemoveProduct(item.dbIds)}
-                    className="text-red-500 hover:text-white hover:bg-red-500 transition-colors border border-red-500 rounded ml-4 flex items-center justify-center p-2 md:px-3 md:py-1 text-sm"
-                    aria-label="Retirer le produit"
-                  >
-                    <RiDeleteBinLine className="text-lg md:mr-2" />
-                    <span className="hidden md:inline">Retirer</span>
-                  </button>
                 </div>
               ))}
             </div>

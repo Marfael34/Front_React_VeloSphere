@@ -166,7 +166,7 @@ const ProductDetail = () => {
     return (
         <div className="bg-dark-nigth-blue min-h-screen pb-10 text-white relative">
             <div className="max-w-6xl mx-auto px-4 py-8">
-                <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-400 hover:text-orange mb-8 transition-colors">
+                <button onClick={() => navigate('/market')} className="flex items-center gap-2 text-gray-400 hover:text-orange mb-8 transition-colors">
                     <FaChevronLeft /> Retour au catalogue
                 </button>
 
@@ -185,7 +185,7 @@ const ProductDetail = () => {
                         <div className="flex justify-between items-start">
                             <h1 className="text-4xl font-bold mb-4">{product.title}</h1>
                             {isAdmin && (
-                                <Link to={`/admin/edit-product/${product.id}`} className="bg-orange text-black p-3 rounded-full hover:scale-110 transition shadow-lg">
+                                <Link to={`/product/edit/${product.id}`} className="bg-orange text-black p-3 rounded-full hover:scale-110 transition shadow-lg">
                                     <FaEdit size={20} />
                                 </Link>
                             )}

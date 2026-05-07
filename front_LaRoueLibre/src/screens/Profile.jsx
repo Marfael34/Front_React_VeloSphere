@@ -4,7 +4,7 @@ import { API_ROOT, IMAGE_URL } from '../constants/apiConstant';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom'; 
 import ButtonLoader from '../components/Loader/ButtonLoader';
-import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake, FaBoxOpen, FaEdit, FaPhone, FaHeart, FaFileInvoice, FaTrophy } from 'react-icons/fa';
+import { FaUser, FaShoppingBag, FaHistory, FaMapMarkerAlt, FaBirthdayCake, FaBoxOpen, FaEdit, FaPhone, FaHeart, FaFileInvoice, FaTrophy, FaIdCard } from 'react-icons/fa';
 import CustomButton from '../components/UI/CustomButton';
 import EditProfileForm from '../components/Market/EditProfileForm';
 import LocationCard from '../components/Card/LocationCard'; 
@@ -262,9 +262,9 @@ const Profile = () => {
 
                                             return (
                                                 <div key={lic.id || idx} className={`p-5 rounded-xl border transition-all ${idx === 0 ? 'bg-black/40 border-white/10' : 'bg-black/20 border-white/5 opacity-60 hover:opacity-100'}`}>
-                                                    <div className="flex justify-between items-start mb-4">
+                                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                                                         <div>
-                                                            <div className="flex items-center gap-2">
+                                                            <div className="flex items-center gap-2 flex-wrap">
                                                                  <h3 className="font-bold text-lg text-white">Licence #{lic.id}</h3>
                                                                 {idx === 0 && <span className="text-[8px] bg-orange text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">Dernière demande</span>}
                                                             </div>
@@ -274,21 +274,21 @@ const Profile = () => {
                                                             {currentStatus}
                                                         </span>
                                                     </div>
-                                                    <div className="grid grid-cols-2 gap-4 text-sm mb-6">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm mb-6">
                                                         <div>
                                                             <p className="text-gray-500 uppercase text-[10px] font-bold">Nationalité</p>
                                                             <p className="text-white font-medium">{lic.nationaly}</p>
                                                         </div>
                                                         <div>
                                                             <p className="text-gray-500 uppercase text-[10px] font-bold">Formule / Validité</p>
-                                                            <p className="text-orange font-black italic">
-                                                                {lic.price_licence?.label}
+                                                            <div className="flex flex-col">
+                                                                <span className="text-orange font-black italic">{lic.price_licence?.label}</span>
                                                                 {lic.validUntil && (
-                                                                    <span className="text-white font-normal ml-2 opacity-60">
-                                                                        (jusqu'au {formatDate(lic.validUntil)})
+                                                                    <span className="text-white font-normal text-[10px] opacity-60">
+                                                                        Jusqu'au {formatDate(lic.validUntil)}
                                                                     </span>
                                                                 )}
-                                                            </p>
+                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -330,14 +330,12 @@ const Profile = () => {
                                                                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                                                                 {isActive ? "Permis Officiel Actif" : "Permis Disponible"}
                                                             </div>
-                                                            <a 
-                                                                href={`${API_ROOT}${lic.pdfPath}`} 
-                                                                target="_blank" 
-                                                                rel="noopener noreferrer"
+                                                            <Link 
+                                                                to={`/profile/licence/${lic.id}`} 
                                                                 className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white py-2 rounded-lg border border-white/10 transition-all text-xs font-bold"
                                                             >
-                                                                <FaFileInvoice /> Télécharger mon permis (PDF)
-                                                            </a>
+                                                                <FaIdCard /> Voir & Télécharger mon permis
+                                                            </Link>
                                                         </div>
                                                     )}
 

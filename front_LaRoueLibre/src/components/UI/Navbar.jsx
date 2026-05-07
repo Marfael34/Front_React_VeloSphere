@@ -104,8 +104,8 @@ const Navbar = ({ user, onLogout }) => {
 
       {/* MENU MOBILE (S'ouvre vers le bas) */}
       <div 
-        className={`md:hidden absolute w-full bg-dark-nigth-blue border-t border-white_01 transition-all duration-300 ease-in-out overflow-hidden ${
-          mobileMenu ? "max-h-100 opacity-100" : "max-h-0 opacity-0"
+        className={`md:hidden absolute w-full bg-dark-nigth-blue border-t border-white_01 transition-all duration-300 ease-in-out overflow-y-auto custom-scrollbar ${
+          mobileMenu ? "max-h-[calc(100vh-64px)] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <div className="px-4 pt-2 pb-6 space-y-4 flex flex-col">

@@ -22,7 +22,7 @@ const ProductSuggestion = ({ Product }) => {
     
   return (
     // On ajoute "relative" ici pour pouvoir positionner nos flèches par dessus
-    <div className='w-full px-4 sm:px-6 lg:px-8 pb-16 relative group'>
+    <div className='w-full px-4 sm:px-6 lg:px-8 pb-10 relative group'>
         
         <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-white">
@@ -36,7 +36,6 @@ const ProductSuggestion = ({ Product }) => {
                     className="w-10 h-10 flex items-center justify-center bg-slate-grey_08 hover:bg-orange text-white rounded-full transition-colors duration-300"
                     aria-label="Défiler à gauche"
                 >
-                    {/* Icône de flèche gauche (SVG) */}
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
@@ -46,7 +45,6 @@ const ProductSuggestion = ({ Product }) => {
                     className="w-10 h-10 flex items-center justify-center bg-slate-grey_08 hover:bg-orange text-white rounded-full transition-colors duration-300"
                     aria-label="Défiler à droite"
                 >
-                    {/* Icône de flèche droite (SVG) */}
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
@@ -54,16 +52,31 @@ const ProductSuggestion = ({ Product }) => {
             </div>
         </div>
 
-        {/* 3. On attache le "ref" à notre conteneur déroulant */}
-        {/* J'ai caché la scrollbar classique pour un look plus épuré */}
+        {/* Conteneur déroulant avec barre de swipe personnalisée */}
         <div 
             ref={carouselRef}
-            className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-8 pt-4 scroll-smooth"
-            style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
+            className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 pt-4 scroll-smooth custom-scrollbar"
         >
-            {/* Astuce CSS interne pour cacher la scrollbar sur Chrome/Safari */}
             <style>{`
-                div::-webkit-scrollbar { display: none; }
+                .custom-scrollbar::-webkit-scrollbar {
+                    height: 4px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: rgba(255, 255, 255, 0.05);
+                    border-radius: 10px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: #f39c12; /* Couleur orange */
+                    border-radius: 10px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: #e67e22;
+                }
+                /* Pour Firefox */
+                .custom-scrollbar {
+                    scrollbar-width: thin;
+                    scrollbar-color: #f39c12 rgba(255, 255, 255, 0.05);
+                }
             `}</style>
 
             {limitedProducts.map((product, index) => (
@@ -72,6 +85,11 @@ const ProductSuggestion = ({ Product }) => {
                 </div>
             ))}
         </div>
+        
+        {/* Petit texte d'aide pour le mobile */}
+        <p className="text-center text-slate-grey_06 text-xs mt-2 md:hidden italic">
+          Faites glisser pour voir plus
+        </p>
     </div>
   )
 }

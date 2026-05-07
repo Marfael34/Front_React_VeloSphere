@@ -26,7 +26,8 @@ const EditProduct = () => {
                 const response = await axios.get(`${API_ROOT}/api/products/${id}`);
                 const p = response.data;
                 setTitle(p.title || "");
-                setPrice(p.price || "");
+                // Affichage du prix en Euros (conversion depuis les centimes)
+                setPrice(p.price ? (p.price / 100).toString() : "");
                 setBrand(p.brand || "");
                 setDescription(p.description || "");
             } catch (error) {
@@ -44,9 +45,17 @@ const EditProduct = () => {
         setError("");
 
         try {
+            // Reconversion du prix en centimes avant l'envoi en base de données
+            const priceInCents = Math.round(parseFloat(price) * 100);
+
             await axios.patch(
                 `${API_ROOT}/api/products/${id}`,
-                { title, price: parseFloat(price), brand, description },
+                { 
+                    title, 
+                    price: priceInCents, 
+                    brand, 
+                    description 
+                },
                 {
                     headers: {
                         'Content-Type': 'application/merge-patch+json',
@@ -86,6 +95,7 @@ const EditProduct = () => {
                         label="Prix (€)" 
                         state={price} 
                         type="number" 
+                        step="0.01"
                         callable={(e) => setPrice(e.target.value)} 
                     />
                     

@@ -26,6 +26,7 @@ import LicenceForm from "../screens/LicenceForm";
 import LicenceManagement from "../screens/admin/LicenceManagement";
 import Competitions from "../screens/Competitions";
 import CompetitionManagement from "../screens/admin/CompetitionManagement";
+import LicenceViewer from "../screens/LicenceViewer";
 
 
 const Router = createBrowserRouter([
@@ -96,6 +97,10 @@ const Router = createBrowserRouter([
             {
                 path: "/profile/registration/:id",
                 element: <ParticipationTracking/>
+            },
+            {
+                path: "/profile/licence/:id",
+                element: <LicenceViewer/>
             },
             {
                 path: "/location/:id",

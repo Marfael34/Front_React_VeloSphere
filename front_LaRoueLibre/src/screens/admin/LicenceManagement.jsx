@@ -67,7 +67,7 @@ const LicenceManagement = () => {
             );
 
             if (type === 'approve') {
-                await axios.post(`${API_ROOT}/api/licences/${id}/notify-validation`, {}, { 
+                await axios.post(`${API_ROOT}/api/licences/${id}/notify-success`, {}, { 
                     headers: { Authorization: `Bearer ${user.token}` } 
                 });
             }
@@ -137,32 +137,47 @@ const LicenceManagement = () => {
                         {/* Pièces Jointes */}
                         <div className="flex gap-4">
                             <button 
-                                onClick={() => setSelectedFiles({ title: "Pièce d'Identité", path: lic.identityCardPath })}
-                                className="flex flex-col items-center gap-2 p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-orange/20 transition-all"
+                                onClick={() => setSelectedFiles({ title: "Pièce d'Identité", path: lic.identityCardPath || lic.identity_card_path })}
+                                className={`flex flex-col items-center gap-2 p-3 border rounded-xl transition-all relative ${
+                                    (lic.identityCardPath || lic.identity_card_path) ? 'bg-white/5 border-white/10 hover:bg-orange/20' : 'bg-red-500/5 border-red-500/20 opacity-40'
+                                }`}
                             >
-                                <FaFileAlt className="text-xl text-gray-400" />
+                                <FaFileAlt className={`text-xl ${(lic.identityCardPath || lic.identity_card_path) ? 'text-gray-400' : 'text-red-500/50'}`} />
                                 <span className="text-[10px] font-bold uppercase">ID</span>
+                                {!(lic.identityCardPath || lic.identity_card_path) && <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>}
                             </button>
+                            
                             <button 
-                                onClick={() => setSelectedFiles({ title: "Certificat Médical", path: lic.medicalCertificatePath })}
-                                className="flex flex-col items-center gap-2 p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-orange/20 transition-all"
+                                onClick={() => setSelectedFiles({ title: "Certificat Médical", path: lic.medicalCertificatePath || lic.medical_certificate_path })}
+                                className={`flex flex-col items-center gap-2 p-3 border rounded-xl transition-all relative ${
+                                    (lic.medicalCertificatePath || lic.medical_certificate_path) ? 'bg-white/5 border-white/10 hover:bg-orange/20' : 'bg-red-500/5 border-red-500/20 opacity-40'
+                                }`}
                             >
-                                <FaFileAlt className="text-xl text-gray-400" />
+                                <FaFileAlt className={`text-xl ${(lic.medicalCertificatePath || lic.medical_certificate_path) ? 'text-gray-400' : 'text-red-500/50'}`} />
                                 <span className="text-[10px] font-bold uppercase">Santé</span>
+                                {!(lic.medicalCertificatePath || lic.medical_certificate_path) && <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>}
                             </button>
+                            
                             <button 
-                                onClick={() => setSelectedFiles({ title: "Photo d'identité", path: lic.photoPath })}
-                                className="flex flex-col items-center gap-2 p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-orange/20 transition-all"
+                                onClick={() => setSelectedFiles({ title: "Photo d'identité", path: lic.photoPath || lic.photo_path })}
+                                className={`flex flex-col items-center gap-2 p-3 border rounded-xl transition-all relative ${
+                                    (lic.photoPath || lic.photo_path) ? 'bg-white/5 border-white/10 hover:bg-orange/20' : 'bg-red-500/5 border-red-500/20 opacity-40'
+                                }`}
                             >
                                 <div className="text-xl">📸</div>
                                 <span className="text-[10px] font-bold uppercase">Photo</span>
+                                {!(lic.photoPath || lic.photo_path) && <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>}
                             </button>
+                            
                             <button 
-                                onClick={() => setSelectedFiles({ title: "Signature Digitale", path: lic.signaturePath })}
-                                className="flex flex-col items-center gap-2 p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-orange/20 transition-all"
+                                onClick={() => setSelectedFiles({ title: "Signature Digitale", path: lic.signaturePath || lic.signature_path })}
+                                className={`flex flex-col items-center gap-2 p-3 border rounded-xl transition-all relative ${
+                                    (lic.signaturePath || lic.signature_path) ? 'bg-white/5 border-white/10 hover:bg-orange/20' : 'bg-red-500/5 border-red-500/20 opacity-40'
+                                }`}
                             >
                                 <div className="text-xl">✍️</div>
                                 <span className="text-[10px] font-bold uppercase">Signature</span>
+                                {!(lic.signaturePath || lic.signature_path) && <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>}
                             </button>
                         </div>
 

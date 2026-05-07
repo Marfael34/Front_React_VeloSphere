@@ -36,10 +36,10 @@ const Home = () => {
       <div className="flex flex-col items-center min-h-screen bg-opacity-50">
         <div className="flex flex-col gap-5 justify-center items-center p-5 w-full bg-dark-nigth-blue">
           
-            <h2 className="text-xl md:text-5xl lg:text-6xl text-white font-bold text-center ">
+            <h2 className="text-3xl md:text-5xl lg:text-6xl text-white font-bold text-center ">
               Bienvenue sur LaRoueLibre
             </h2>
-            <h3 className="text-lg md:text-xl text-white font-bold text-center mt-4">
+            <h3 className="text-xl md:text-xl text-white font-bold text-center mt-4">
               A quoi sert LaRoueLibre ?
             </h3>
             <p className="text-center text-md text-gray-300 max-w-2xl pt-5">
@@ -63,12 +63,12 @@ const Home = () => {
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-5 justify-center items-center p-5 w-full  bg-dark-nigth-blue_09">
+          <div className="flex flex-col gap-5 justify-center items-center p-2 md:p-5 w-full bg-dark-nigth-blue_09">
 
-          <h2 className="text-xl md:text-5xl lg:text-6xl text-white font-bold text-center">
+          <h2 className="text-2xl md:text-5xl lg:text-6xl text-white font-bold text-center mt-8">
             Market Place - Nouveautés
           </h2>
-          <div className="flex flex-col gap-5 justify-center items-center p-5 w-380">
+          <div className="flex flex-col gap-5 justify-center items-center w-full max-w-screen-xl">
             {isLoading ? (
               <div className="flex justify-center py-10">
                 <ButtonLoader size={60} />

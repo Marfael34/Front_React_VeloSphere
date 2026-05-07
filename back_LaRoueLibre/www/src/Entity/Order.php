@@ -60,6 +60,10 @@ class Order
     #[Groups(['order:read'])]
     private ?string $path = null;
 
+    // #[ORM\Column(nullable: true)]
+    // #[Groups(['order:read', 'order:write'])]
+    // private ?int $totalPrice = null;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
@@ -156,4 +160,18 @@ class Order
 
         return $this;
     }
+
+/*
+    public function getTotalPrice(): ?int
+    {
+        return $this->totalPrice;
+    }
+
+    public function setTotalPrice(?int $totalPrice): static
+    {
+        $this->totalPrice = $totalPrice;
+
+        return $this;
+    }
+*/
 }
